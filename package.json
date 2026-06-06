@@ -43,5 +43,13 @@
   "private": true,
   "devDependencies": {
     "babel-plugin-transform-inline-environment-variables": "^0.4.4"
+  },
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "listUnknownPackages": false,
+        "exclude": ["react-native-fs", "@notifee/react-native"]
+      }
+    }
   }
 }
