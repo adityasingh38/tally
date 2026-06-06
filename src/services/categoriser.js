@@ -1,5 +1,6 @@
 import { ruleBasedCategory } from './smsParser';
 import { CATEGORIES } from '../constants';
+import { supabase } from './supabase';
 
 const CATEGORY_IDS = CATEGORIES.map(c => c.id).join(', ');
 
@@ -14,23 +15,12 @@ Rules:
 - Be decisive — pick best match, never null`;
 
 async function callAnthropic(systemPrompt, userContent) {
-  const apiKey = process.env.ANTHROPIC_API_KEY || '';
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 512,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userContent }],
-    }),
+  const { data, error } = await supabase.functions.invoke('anthropic-proxy', {
+    body: { system: systemPrompt, content: userContent },
   });
-  const data = await response.json();
-  return data.content[0].text.trim();
+  if (error) throw error;
+  if (!data?.text) throw new Error('Empty response from anthropic-proxy');
+  return data.text;
 }
 
 export async function categoriseTransactions(transactions) {

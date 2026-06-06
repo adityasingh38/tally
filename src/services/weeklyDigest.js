@@ -1,4 +1,4 @@
-import notifee, { AndroidImportance, TriggerType } from '@notifee/react-native';
+import notifee, { AndroidImportance, TriggerType, RepeatFrequency } from '@notifee/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DIGEST_CHANNEL = 'weekly_digest';
@@ -13,6 +13,9 @@ export async function setupWeeklyDigestChannel() {
 }
 
 export async function scheduleWeeklyDigest() {
+  // Channel must exist before a trigger notification targets it
+  await setupWeeklyDigestChannel();
+
   // Cancel existing trigger first
   const existingId = await AsyncStorage.getItem(DIGEST_TRIGGER_KEY);
   if (existingId) {
@@ -28,7 +31,7 @@ export async function scheduleWeeklyDigest() {
   const trigger = {
     type: TriggerType.TIMESTAMP,
     timestamp: nextSunday.getTime(),
-    repeatFrequency: 1, // weekly
+    repeatFrequency: RepeatFrequency.WEEKLY,
   };
 
   const id = await notifee.createTriggerNotification(

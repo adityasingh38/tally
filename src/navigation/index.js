@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Text } from 'react-native';
+import { Text, Platform } from 'react-native';
 import { COLORS } from '../constants';
+import { startSMSListener } from '../services/smsSync';
 
 import DashboardScreen from '../screens/DashboardScreen';
 import TransactionsScreen from '../screens/TransactionsScreen';
@@ -28,6 +29,14 @@ const TAB_ICONS = {
 };
 
 function MainTabs() {
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (Platform.OS !== 'android' || !user?.id) return;
+    const stop = startSMSListener(user.id);
+    return stop;
+  }, [user?.id]);
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({

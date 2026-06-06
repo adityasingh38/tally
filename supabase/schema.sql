@@ -57,3 +57,21 @@ select
 from transactions
 where type = 'debit'
 group by user_id, month, category;
+
+-- Server-side category aggregation for an arbitrary date range.
+-- Replaces client-side summing, which silently capped at Supabase's 1000-row
+-- default and undercounted heavy users. security invoker => RLS still applies.
+create or replace function spending_by_category(p_from timestamptz, p_to timestamptz)
+returns table (category text, amount numeric)
+language sql
+stable
+security invoker
+as $$
+  select category, sum(amount)::numeric as amount
+  from transactions
+  where user_id = auth.uid()
+    and type = 'debit'
+    and txn_date >= p_from
+    and txn_date <= p_to
+  group by category;
+$$;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, TextInput,
   ScrollView, Alert, ActivityIndicator,
@@ -21,10 +21,9 @@ export default function BudgetScreen() {
   const [inputVal, setInputVal] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const { spending } = useSpendingByCategory(user?.id, {
-    fromDate: startOfMonth(),
-    toDate: new Date(),
-  });
+  const fromDate = useMemo(() => startOfMonth(), []);
+  const toDate = useMemo(() => new Date(), []);
+  const { spending } = useSpendingByCategory(user?.id, { fromDate, toDate });
 
   useEffect(() => {
     if (!user) return;

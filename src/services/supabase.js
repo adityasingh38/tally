@@ -36,14 +36,13 @@ export async function insertTransactions(txList) {
   return supabase.from('transactions').insert(txList);
 }
 
-export async function getSpendingByCategory({ userId, fromDate, toDate }) {
-  return supabase
-    .from('transactions')
-    .select('category, amount')
-    .eq('user_id', userId)
-    .eq('type', 'debit')
-    .gte('txn_date', fromDate.toISOString())
-    .lte('txn_date', toDate.toISOString());
+export async function getSpendingByCategory({ fromDate, toDate }) {
+  // Aggregated server-side (see spending_by_category in schema.sql) so the
+  // 1000-row default page limit can't undercount the totals.
+  return supabase.rpc('spending_by_category', {
+    p_from: fromDate.toISOString(),
+    p_to: toDate.toISOString(),
+  });
 }
 
 export async function checkDuplicate({ userId, amount, txnDate, merchantTail }) {
