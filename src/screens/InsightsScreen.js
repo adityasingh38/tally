@@ -153,10 +153,6 @@ export default function InsightsScreen() {
   );
 }
 
-function formatINR(n) {
-  return `₹${n.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
-}
-
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.background },
   container: { flex: 1 },
