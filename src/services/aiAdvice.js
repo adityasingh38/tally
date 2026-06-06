@@ -1,7 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY || '' });
 
 const ADVICE_CACHE_KEY = 'tally_ai_advice';
 const ADVICE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -11,6 +8,26 @@ Analyze spending data and give exactly 3 specific, actionable tips.
 Each tip must reference actual numbers from the data.
 Tone: encouraging, concrete, never preachy.
 Format: JSON array of { "tip": string, "saving": string, "icon": emoji }`;
+
+async function callAnthropic(systemPrompt, userContent) {
+  const apiKey = process.env.ANTHROPIC_API_KEY || '';
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 512,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userContent }],
+    }),
+  });
+  const data = await response.json();
+  return data.content[0].text.trim();
+}
 
 export async function getAIAdvice(spendingData, userGoal) {
   // Check cache — don't call API more than once per week
@@ -23,14 +40,7 @@ export async function getAIAdvice(spendingData, userGoal) {
   const input = formatSpendingForPrompt(spendingData, userGoal);
 
   try {
-    const response = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 512,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: input }],
-    });
-
-    const text = response.content[0].text.trim();
+    const text = await callAnthropic(SYSTEM_PROMPT, input);
     const advice = JSON.parse(text);
 
     await AsyncStorage.setItem(ADVICE_CACHE_KEY, JSON.stringify({

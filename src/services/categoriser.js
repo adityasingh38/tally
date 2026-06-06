@@ -1,8 +1,5 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { ruleBasedCategory } from './smsParser';
 import { CATEGORIES } from '../constants';
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY || '' });
 
 const CATEGORY_IDS = CATEGORIES.map(c => c.id).join(', ');
 
@@ -15,6 +12,26 @@ Rules:
 - Each item: { "index": number, "category": string, "confidence": number (0-1) }
 - confidence < 0.5 → use "other"
 - Be decisive — pick best match, never null`;
+
+async function callAnthropic(systemPrompt, userContent) {
+  const apiKey = process.env.ANTHROPIC_API_KEY || '';
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 512,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userContent }],
+    }),
+  });
+  const data = await response.json();
+  return data.content[0].text.trim();
+}
 
 export async function categoriseTransactions(transactions) {
   // Apply rule-based first
@@ -35,14 +52,7 @@ export async function categoriseTransactions(transactions) {
   }).join('\n');
 
   try {
-    const response = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 512,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: aiInput }],
-    });
-
-    const text = response.content[0].text.trim();
+    const text = await callAnthropic(SYSTEM_PROMPT, aiInput);
     const aiResults = JSON.parse(text);
 
     aiResults.forEach(({ index, category, confidence }) => {
