@@ -2,6 +2,11 @@
   "expo": {
     "name": "tally",
     "slug": "tally",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "extra": {
+      "eas": {
+        "projectId": "6d5141af-cb22-4e25-b1db-5a9f83a0c262"
+      }
+    }
   }
 }
