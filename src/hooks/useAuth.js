@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../services/supabase';
 
-export function useAuth() {
+const AuthContext = createContext(null);
+
+export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [hasOnboarded, setHasOnboarded] = useState(false);
@@ -35,5 +37,12 @@ export function useAuth() {
     setHasOnboarded(true);
   };
 
-  return { user, loading, hasOnboarded, signOut, completeOnboarding };
+  const value = { user, loading, hasOnboarded, signOut, completeOnboarding };
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within an AuthProvider');
+  return ctx;
 }

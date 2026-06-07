@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Navigation from './src/navigation';
+import { AuthProvider } from './src/hooks/useAuth';
 import { setupNotificationChannel } from './src/services/budgetAlerts';
 
 export default function App() {
@@ -13,7 +14,9 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar style="light" />
-      <Navigation />
+      <AuthProvider>
+        <Navigation />
+      </AuthProvider>
     </GestureHandlerRootView>
   );
 }
