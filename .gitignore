@@ -42,3 +42,5 @@ supabase/.branches/
 
 # scratch / local test bundles
 .tmp/
+src.zip
+*.zip
