@@ -11,8 +11,8 @@ import com.facebook.react.jstasks.HeadlessJsTaskConfig
  * allowedInForeground=true so it also works while the app is open.
  */
 class HeadlessSmsService : HeadlessJsTaskService() {
-  override fun getTaskConfig(intent: Intent): HeadlessJsTaskConfig? {
-    val extras = intent.extras ?: return null
+  override fun getTaskConfig(intent: Intent?): HeadlessJsTaskConfig? {
+    val extras = intent?.extras ?: return null
     return HeadlessJsTaskConfig(
       "TallySmsTask",
       Arguments.fromBundle(extras),
