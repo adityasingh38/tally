@@ -10,10 +10,13 @@ create table if not exists transactions (
   merchant_tail text,
   category text not null default 'other',
   source text,
-  raw_sms text,
   txn_date timestamptz not null,
   created_at timestamptz default now()
 );
+
+-- Privacy: raw SMS bodies are never persisted. Used only in-memory at parse/
+-- categorise time. Drop the column if an older schema created it.
+alter table transactions drop column if exists raw_sms;
 
 -- Index for fast per-user queries
 create index if not exists idx_transactions_user_date on transactions(user_id, txn_date desc);

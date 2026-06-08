@@ -62,11 +62,6 @@ export default function TransactionDetailScreen({ route }) {
           <DetailRow label="Type" value={tx.type === 'debit' ? 'Debit' : 'Credit'} />
           <DetailRow label="Source" value={tx.source} />
         </View>
-
-        <View style={styles.smsBox}>
-          <Text style={styles.smsLabel}>Original SMS</Text>
-          <Text style={styles.smsText}>{tx.raw_sms}</Text>
-        </View>
       </ScrollView>
 
       <Modal visible={picking} transparent animationType="slide" onRequestClose={() => setPicking(false)}>

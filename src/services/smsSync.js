@@ -61,7 +61,6 @@ export async function syncHistoricalSMS(userId, onProgress) {
             merchant_tail: tx.merchant_tail,
             category: tx.category,
             source: tx.source,
-            raw_sms: tx.raw_sms,
             txn_date: tx.txn_date,
           }));
 
@@ -110,7 +109,6 @@ export function startSMSListener(userId, onNewTransaction) {
       merchant_tail: categorised.merchant_tail,
       category: categorised.category,
       source: categorised.source,
-      raw_sms: categorised.raw_sms,
       txn_date: categorised.txn_date,
     }]);
 
