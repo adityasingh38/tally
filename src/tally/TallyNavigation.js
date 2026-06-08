@@ -17,6 +17,7 @@ import DamageScreen from './screens/DamageScreen';
 import BudgetScreen from './screens/BudgetScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
+import AuthScreen from './screens/AuthScreen';
 import AddSheet from './screens/AddSheet';
 import Paywall from './screens/Paywall';
 
@@ -101,7 +102,9 @@ function Inner() {
   return (
     <NavigationContainer ref={navigationRef}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {!hasOnboarded ? (
+        {!user ? (
+          <Stack.Screen name="Auth" component={AuthScreen} />
+        ) : !hasOnboarded ? (
           <Stack.Screen name="Onboarding">
             {() => <OnboardingScreen onDone={completeOnboarding} />}
           </Stack.Screen>
