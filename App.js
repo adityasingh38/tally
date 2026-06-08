@@ -1,34 +1,60 @@
+// App.js — root. Loads fonts, then renders Tally.
+// If you already have an App.js, just merge the font-loading + <TallyNavigation/>.
 import 'react-native-gesture-handler';
-import React, { useEffect } from 'react';
+import React, { useCallback } from 'react';
+import { View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import notifee, { EventType } from '@notifee/react-native';
-import Navigation, { routeFromPressAction } from './src/navigation';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as SplashScreen from 'expo-splash-screen';
+import { useFonts } from 'expo-font';
 import { AuthProvider } from './src/hooks/useAuth';
-import { setupNotificationChannel } from './src/services/budgetAlerts';
+
+import {
+  BricolageGrotesque_700Bold,
+  BricolageGrotesque_800ExtraBold,
+} from '@expo-google-fonts/bricolage-grotesque';
+import {
+  SpaceGrotesk_400Regular,
+  SpaceGrotesk_500Medium,
+  SpaceGrotesk_600SemiBold,
+  SpaceGrotesk_700Bold,
+} from '@expo-google-fonts/space-grotesk';
+import {
+  SpaceMono_400Regular,
+  SpaceMono_700Bold,
+} from '@expo-google-fonts/space-mono';
+
+import TallyNavigation from './src/tally/TallyNavigation';
+
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function App() {
-  useEffect(() => {
-    setupNotificationChannel();
+  const [loaded] = useFonts({
+    BricolageGrotesque_700Bold,
+    BricolageGrotesque_800ExtraBold,
+    SpaceGrotesk_400Regular,
+    SpaceGrotesk_500Medium,
+    SpaceGrotesk_600SemiBold,
+    SpaceGrotesk_700Bold,
+    SpaceMono_400Regular,
+    SpaceMono_700Bold,
+  });
 
-    // App opened from a notification while killed.
-    notifee.getInitialNotification().then(initial => {
-      if (initial?.pressAction) routeFromPressAction(initial.pressAction.id);
-    });
+  const onReady = useCallback(() => {
+    if (loaded) SplashScreen.hideAsync().catch(() => {});
+  }, [loaded]);
 
-    // App in foreground/background when the notification is tapped.
-    const unsub = notifee.onForegroundEvent(({ type, detail }) => {
-      if (type === EventType.PRESS) routeFromPressAction(detail.pressAction?.id);
-    });
-    return unsub;
-  }, []);
+  if (!loaded) return <View style={{ flex: 1, backgroundColor: '#0E0F0C' }} />;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <StatusBar style="light" />
-      <AuthProvider>
-        <Navigation />
-      </AuthProvider>
+      <SafeAreaProvider onLayout={onReady}>
+        <StatusBar style="light" />
+        <AuthProvider>
+          <TallyNavigation />
+        </AuthProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

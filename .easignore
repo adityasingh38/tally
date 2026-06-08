@@ -1,0 +1,35 @@
+# .easignore — files NOT uploaded to EAS Build.
+# EAS installs deps from the lockfile and compiles native code on its servers,
+# so local dependencies and build outputs are dead weight in the upload tarball.
+
+# Dependencies (EAS runs install from package-lock.json)
+node_modules/
+
+# Android native build outputs
+android/build/
+android/app/build/
+android/.gradle/
+android/.cxx/
+android/.kotlin/
+
+# iOS native build outputs
+ios/build/
+ios/Pods/
+ios/DerivedData/
+
+# Any other Gradle/CMake build dirs nested in modules
+**/build/
+**/.cxx/
+
+# Expo / Metro local caches
+.expo/
+.metro-health-check*
+
+# Logs, scratch, archives
+*.log
+gradle-*.log
+*.zip
+.tmp/
+
+# Local unpacked prototype reference (not needed for the app build)
+tally-unpacked/
