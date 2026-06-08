@@ -2,8 +2,8 @@ import React from 'react';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Text } from 'react-native';
-import { COLORS } from '../constants';
+import { Text, View } from 'react-native';
+import { COLORS, RADII } from '../constants';
 
 import DashboardScreen from '../screens/DashboardScreen';
 import TransactionsScreen from '../screens/TransactionsScreen';
@@ -44,19 +44,30 @@ function MainTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
+        tabBarHideOnKeyboard: true,
         tabBarStyle: {
           backgroundColor: COLORS.surface,
           borderTopColor: COLORS.border,
-          paddingBottom: 8,
-          paddingTop: 8,
-          height: 60,
+          borderTopLeftRadius: RADII.lg,
+          borderTopRightRadius: RADII.lg,
+          paddingBottom: 10,
+          paddingTop: 10,
+          height: 66,
         },
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: COLORS.textMuted,
         tabBarIcon: ({ focused }) => (
-          <Text style={{ fontSize: focused ? 22 : 20 }}>{TAB_ICONS[route.name]}</Text>
+          <View style={[
+            {
+              width: 46, height: 32, borderRadius: RADII.pill,
+              alignItems: 'center', justifyContent: 'center',
+            },
+            focused && { backgroundColor: COLORS.primary + '26' },
+          ]}>
+            <Text style={{ fontSize: focused ? 21 : 19 }}>{TAB_ICONS[route.name]}</Text>
+          </View>
         ),
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '700' },
       })}
     >
       <Tab.Screen name="Dashboard" component={DashboardScreen} />

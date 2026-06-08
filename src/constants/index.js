@@ -15,6 +15,28 @@ export const COLORS = {
   credit: '#22C55E',
 };
 
+// Playful-pop design tokens.
+export const RADII = { sm: 12, md: 18, lg: 24, xl: 32, pill: 999 };
+
+export const SPACING = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 };
+
+// Soft, colored elevation. Spread a category/accent color for a glow.
+export const shadow = (color = '#000', elevation = 8, opacity = 0.35) => ({
+  shadowColor: color,
+  shadowOffset: { width: 0, height: elevation / 2 },
+  shadowOpacity: opacity,
+  shadowRadius: elevation,
+  elevation,
+});
+
+// Gradient stops (use with expo-linear-gradient).
+export const GRADIENTS = {
+  hero: ['#7C6CFF', '#A855F7', '#EC4899'], // violet -> purple -> pink
+  heroSoft: ['#6C63FF', '#8B5CF6'],
+  success: ['#22C55E', '#16A34A'],
+  card: ['#1E1E2A', '#16161F'],
+};
+
 export const CATEGORIES = [
   { id: 'food', label: 'Food & Dining', icon: '🍔', color: '#F59E0B' },
   { id: 'transport', label: 'Transport', icon: '🚗', color: '#6C63FF' },

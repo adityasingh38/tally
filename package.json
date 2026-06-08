@@ -13,6 +13,7 @@
     "expo": "~56.0.9",
     "expo-dev-client": "~56.0.19",
     "expo-file-system": "~56.0.7",
+    "expo-haptics": "~56.0.3",
     "expo-linear-gradient": "~56.0.4",
     "expo-sharing": "~56.0.16",
     "expo-status-bar": "~56.0.4",
