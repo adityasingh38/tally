@@ -1,7 +1,12 @@
 // src/tally/screens/SettingsScreen.js  → your "Settings" tab
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import { View, Text, ScrollView, Pressable, Alert, PermissionsAndroid, ActivityIndicator } from 'react-native';
 import { useTally } from '../TallyContext';
+import { useAuth } from '../../hooks/useAuth';
+import { syncHistoricalSMS } from '../../services/smsSync';
+import { getTransactions, deleteAccount } from '../../services/supabase';
+import { exportToCSV } from '../../services/export';
+import { requestNotificationPermission } from '../../services/budgetAlerts';
 import { FONTS } from '../theme';
 import { MonoLabel, Rule, ScreenHeader, Brand } from '../ui';
 
@@ -29,23 +34,83 @@ function Seg({ T, accent, accentInk, options, value, onChange }) {
     </View>
   );
 }
-function Row({ T, label, sub, control }) {
+function Row({ T, label, sub, control, onPress }) {
+  const Wrap = onPress ? Pressable : View;
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 14, paddingVertical: 15 }}>
+    <Wrap onPress={onPress} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 14, paddingVertical: 15 }}>
       <View style={{ flex: 1 }}>
         <Text style={{ fontFamily: FONTS.sansSemi, fontSize: 15, color: T.text, lineHeight: 19 }}>{label}</Text>
         {sub ? <Text style={{ fontFamily: FONTS.sans, fontSize: 12, color: T.dim, marginTop: 3, lineHeight: 16 }}>{sub}</Text> : null}
       </View>
       <View>{control}</View>
-    </View>
+    </Wrap>
   );
 }
 
-export default function SettingsScreen({ navigation }) {
+export default function SettingsScreen() {
   const { T, accent, accentInk, prefs, setPref, openPaywall } = useTally();
-  const [sms, setSms] = useState(true);
-  const [notif, setNotif] = useState(true);
-  const NIHIL = [[1, 'mild'], [2, 'medium'], [3, 'feral']];
+  const { user, signOut } = useAuth();
+  const [notif, setNotif] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  async function handleSync() {
+    try {
+      const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_SMS);
+      if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+        Alert.alert('Permission required', 'Enable SMS permission in device Settings.');
+        return;
+      }
+      setSyncing(true);
+      const result = await syncHistoricalSMS(user.id, null);
+      Alert.alert('Sync complete', `Imported ${result?.inserted || 0} new transactions.`);
+    } catch (e) {
+      Alert.alert('Sync failed', e.message);
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  async function handleExport() {
+    setExporting(true);
+    try {
+      const { data } = await getTransactions({ userId: user.id, limit: 5000, fromDate: new Date(0) });
+      if (!data?.length) { Alert.alert('No data', 'No transactions to export yet.'); return; }
+      await exportToCSV(data);
+    } catch (e) {
+      Alert.alert('Export failed', e.message);
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  async function handleNotifications(next) {
+    if (!next) { setNotif(false); return; }
+    const granted = await requestNotificationPermission();
+    setNotif(granted);
+    Alert.alert(granted ? 'Notifications on ✓' : 'Denied', granted ? "You'll get the weekly damage report." : 'Enable in device Settings.');
+  }
+
+  function handleLogout() {
+    Alert.alert('Log out', 'Sign out of Tally?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Log out', style: 'destructive', onPress: signOut },
+    ]);
+  }
+
+  function handleDelete() {
+    Alert.alert('Delete account', 'Permanently deletes your account and all transactions. Cannot be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: async () => {
+        const { error } = await deleteAccount();
+        if (error) { Alert.alert('Delete failed', error.message); return; }
+        await signOut();
+      } },
+    ]);
+  }
+
+  const handle = (user?.email || 'you').split('@')[0];
+  const initial = handle[0]?.toLowerCase() || 'b';
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: T.bg }}
@@ -55,11 +120,11 @@ export default function SettingsScreen({ navigation }) {
       {/* profile */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, marginTop: 6 }}>
         <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: accent, alignItems: 'center', justifyContent: 'center' }}>
-          <Text style={{ fontFamily: FONTS.display, fontSize: 24, color: accentInk }}>b</Text>
+          <Text style={{ fontFamily: FONTS.display, fontSize: 24, color: accentInk }}>{initial}</Text>
         </View>
-        <View>
-          <Text style={{ fontFamily: FONTS.display, fontSize: 22, color: T.text }}>@brokeboi</Text>
-          <MonoLabel T={T} color={T.dim} size={10.5} style={{ marginTop: 3 }}>tally free · since jun 2026</MonoLabel>
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text numberOfLines={1} style={{ fontFamily: FONTS.display, fontSize: 22, color: T.text }}>@{handle}</Text>
+          <MonoLabel T={T} color={T.dim} size={10.5} style={{ marginTop: 3 }}>tally free</MonoLabel>
         </View>
       </View>
 
@@ -86,23 +151,28 @@ export default function SettingsScreen({ navigation }) {
         options={[['dry', 'dry'], ['unhinged', 'unhinged']]} value={prefs.tone} onChange={(v) => setPref('tone', v)} />} />
       <Rule T={T} />
       <Row T={T} label="Nihilism" sub="how dark it goes" control={<Seg T={T} accent={accent} accentInk={accentInk}
-        options={NIHIL} value={prefs.nihil} onChange={(v) => setPref('nihil', v)} />} />
+        options={[[1, 'mild'], [2, 'medium'], [3, 'feral']]} value={prefs.nihil} onChange={(v) => setPref('nihil', v)} />} />
 
       {/* data */}
       <MonoLabel T={T} color={T.faint} style={{ marginTop: 28, marginBottom: 4 }}>data</MonoLabel>
       <Rule T={T} />
-      <Row T={T} label="SMS auto-capture" sub="reads bank texts · logs spends" control={<Toggle T={T} accent={accent} on={sms} onChange={setSms} />} />
+      <Row T={T} label={syncing ? 'Syncing…' : 'Sync SMS history'} sub="re-scan bank texts for missed spends"
+        onPress={syncing ? undefined : handleSync}
+        control={syncing ? <ActivityIndicator color={accent} /> : <MonoLabel T={T} color={accent} size={11}>sync →</MonoLabel>} />
       <Rule T={T} />
-      <Row T={T} label="Connected banks" sub="HDFC · ICICI · GPay · PhonePe" control={<MonoLabel T={T} color={T.dim} size={11}>4 →</MonoLabel>} />
-      <Rule T={T} />
-      <Row T={T} label="Export the damage" sub="csv · pdf receipt" control={<MonoLabel T={T} color={T.dim} size={11}>↗</MonoLabel>} />
+      <Row T={T} label={exporting ? 'Exporting…' : 'Export the damage'} sub="csv of every transaction"
+        onPress={exporting ? undefined : handleExport}
+        control={exporting ? <ActivityIndicator color={accent} /> : <MonoLabel T={T} color={T.dim} size={11}>↗</MonoLabel>} />
 
       {/* account */}
       <MonoLabel T={T} color={T.faint} style={{ marginTop: 28, marginBottom: 4 }}>account</MonoLabel>
       <Rule T={T} />
-      <Row T={T} label="Notifications" sub="weekly damage report" control={<Toggle T={T} accent={accent} on={notif} onChange={setNotif} />} />
+      <Row T={T} label="Notifications" sub="weekly damage report" control={<Toggle T={T} accent={accent} on={notif} onChange={handleNotifications} />} />
       <Rule T={T} />
-      <Row T={T} label="Log out" control={<MonoLabel T={T} color={accent} size={11}>bye →</MonoLabel>} />
+      <Row T={T} label="Log out" onPress={handleLogout} control={<MonoLabel T={T} color={accent} size={11}>bye →</MonoLabel>} />
+      <Rule T={T} />
+      <Row T={T} label="Delete account" sub="permanent · cannot be undone" onPress={handleDelete}
+        control={<MonoLabel T={T} color={T.red} size={11}>✕</MonoLabel>} />
 
       <View style={{ alignItems: 'center', marginTop: 34, gap: 10 }}>
         <Brand T={T} color={T.faint} size={20} />

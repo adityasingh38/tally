@@ -1,7 +1,10 @@
 // src/tally/screens/OnboardingScreen.js
-import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, ActivityIndicator, PermissionsAndroid, Alert, Linking } from 'react-native';
 import { useTally } from '../TallyContext';
+import { useAuth } from '../../hooks/useAuth';
+import { syncHistoricalSMS } from '../../services/smsSync';
+import { scheduleWeeklyDigest } from '../../services/weeklyDigest';
 import { FONTS } from '../theme';
 import { MonoLabel, Btn, Brand } from '../ui';
 
@@ -11,9 +14,50 @@ const FEATURES = [
   ['RECEIPT', 'a shareable receipt of the monthly carnage.'],
 ];
 
-// onDone() should mark onboarding complete in YOUR auth flow (see README).
 export default function OnboardingScreen({ onDone }) {
   const { T, accent, accentInk } = useTally();
+  const { user } = useAuth();
+  const [syncing, setSyncing] = useState(false);
+  const [progress, setProgress] = useState(null);
+
+  async function requestSMS() {
+    try {
+      const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_SMS, {
+        title: 'Tally needs SMS access',
+        message: 'To auto-log your bank transactions, Tally reads SMS from your bank.',
+        buttonPositive: 'Allow',
+        buttonNegative: 'Skip',
+      });
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } catch {
+      return false;
+    }
+  }
+
+  async function handleAllow() {
+    const granted = await requestSMS();
+    if (!granted) {
+      Alert.alert(
+        'SMS access needed',
+        'Tally auto-logs transactions by reading bank SMS. Enable it to continue, or skip for now.',
+        [
+          { text: 'Open Settings', onPress: () => Linking.openSettings() },
+          { text: 'Skip for now', style: 'cancel', onPress: () => onDone && onDone() },
+        ]
+      );
+      return;
+    }
+    setSyncing(true);
+    try {
+      if (user?.id) await syncHistoricalSMS(user.id, (p) => setProgress(p));
+      scheduleWeeklyDigest().catch(() => {});
+    } catch (e) {
+      console.error('SMS sync failed:', e);
+    }
+    setSyncing(false);
+    onDone && onDone();
+  }
+
   return (
     <ScrollView style={{ flex: 1, backgroundColor: T.bg }}
       contentContainerStyle={{ paddingHorizontal: 26, paddingTop: 84, paddingBottom: 40, flexGrow: 1 }}>
@@ -41,11 +85,22 @@ export default function OnboardingScreen({ onDone }) {
       </View>
 
       <View style={{ gap: 10, marginTop: 24 }}>
-        <Btn T={T} accent={accent} accentInk={accentInk} onPress={onDone}>allow SMS access</Btn>
-        <Btn T={T} accent={accent} accentInk={accentInk} variant="ghost" onPress={onDone}>i'll log it manually</Btn>
-        <MonoLabel T={T} color={T.faint} size={9.5} style={{ textAlign: 'center', marginTop: 8 }}>
-          we never store your texts. we just judge them.
-        </MonoLabel>
+        {syncing ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, paddingVertical: 16 }}>
+            <ActivityIndicator color={accent} />
+            <MonoLabel T={T} color={T.dim} size={11}>
+              {progress ? `importing ${progress.inserted || 0} spends…` : 'reading SMS history…'}
+            </MonoLabel>
+          </View>
+        ) : (
+          <>
+            <Btn T={T} accent={accent} accentInk={accentInk} onPress={handleAllow}>allow SMS access</Btn>
+            <Btn T={T} accent={accent} accentInk={accentInk} variant="ghost" onPress={() => onDone && onDone()}>i'll log it manually</Btn>
+            <MonoLabel T={T} color={T.faint} size={9.5} style={{ textAlign: 'center', marginTop: 8 }}>
+              we never store your texts. we just judge them.
+            </MonoLabel>
+          </>
+        )}
       </View>
     </ScrollView>
   );
