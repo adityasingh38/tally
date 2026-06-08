@@ -1,7 +1,7 @@
 import SmsAndroid from 'react-native-get-sms-android';
 import { parseSMS, isBankSMS, looksLikeBankSMS } from './smsParser';
 import { categoriseTransactions } from './categoriser';
-import { insertTransactions, checkDuplicate } from './supabase';
+import { supabase, insertTransactions, checkDuplicate } from './supabase';
 import { checkBudgetAlerts } from './budgetAlerts';
 
 const BATCH_SIZE = 20;
@@ -78,43 +78,43 @@ export async function syncHistoricalSMS(userId, onProgress) {
   });
 }
 
-export function startSMSListener(userId, onNewTransaction) {
-  // React Native background SMS — handled via AndroidManifest receiver
-  // This sets up the JS-side handler for the native event
-  const { DeviceEventEmitter } = require('react-native');
+/**
+ * Headless JS entry point for an incoming SMS (registered as "TallySmsTask" in
+ * index.js, started by the native HeadlessSmsService). Runs whether the app is
+ * foreground, background, or killed. Reads the user from the persisted Supabase
+ * session, so no userId needs to be passed in.
+ */
+export async function handleHeadlessSms({ originatingAddress, messageBody }) {
+  if (!isBankSMS(originatingAddress) && !looksLikeBankSMS(messageBody)) return;
 
-  const subscription = DeviceEventEmitter.addListener('onSMSReceived', async (event) => {
-    const { originatingAddress, messageBody } = event;
-    if (!isBankSMS(originatingAddress) && !looksLikeBankSMS(messageBody)) return;
+  const parsed = parseSMS(messageBody, originatingAddress);
+  if (!parsed) return;
 
-    const parsed = parseSMS(messageBody, originatingAddress);
-    if (!parsed) return;
+  const { data: { session } } = await supabase.auth.getSession();
+  const userId = session?.user?.id;
+  if (!userId) return; // not signed in — nothing to attribute the txn to
 
-    const txn = { ...parsed, user_id: userId, txn_date: new Date().toISOString() };
-    const isDup = await checkDuplicate({
-      userId,
-      amount: txn.amount,
-      type: txn.type,
-      txnDate: new Date(),
-      merchantTail: txn.merchant_tail,
-    });
-    if (isDup) return;
-
-    const [categorised] = await categoriseTransactions([txn]);
-    await insertTransactions([{
-      user_id: categorised.user_id,
-      amount: categorised.amount,
-      type: categorised.type,
-      merchant: categorised.merchant,
-      merchant_tail: categorised.merchant_tail,
-      category: categorised.category,
-      source: categorised.source,
-      txn_date: categorised.txn_date,
-    }]);
-
-    onNewTransaction?.(categorised);
-    checkBudgetAlerts(userId).catch(() => {});
+  const txn = { ...parsed, user_id: userId, txn_date: new Date().toISOString() };
+  const isDup = await checkDuplicate({
+    userId,
+    amount: txn.amount,
+    type: txn.type,
+    txnDate: new Date(),
+    merchantTail: txn.merchant_tail,
   });
+  if (isDup) return;
 
-  return () => subscription.remove();
+  const [categorised] = await categoriseTransactions([txn]);
+  await insertTransactions([{
+    user_id: userId,
+    amount: categorised.amount,
+    type: categorised.type,
+    merchant: categorised.merchant,
+    merchant_tail: categorised.merchant_tail,
+    category: categorised.category,
+    source: categorised.source,
+    txn_date: categorised.txn_date,
+  }]);
+
+  await checkBudgetAlerts(userId).catch(() => {});
 }
