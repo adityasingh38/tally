@@ -1,5 +1,5 @@
 import SmsAndroid from 'react-native-get-sms-android';
-import { parseSMS, isBankSMS } from './smsParser';
+import { parseSMS, isBankSMS, looksLikeBankSMS } from './smsParser';
 import { categoriseTransactions } from './categoriser';
 import { insertTransactions, checkDuplicate } from './supabase';
 import { checkBudgetAlerts } from './budgetAlerts';
@@ -13,7 +13,10 @@ export async function syncHistoricalSMS(userId, onProgress) {
       reject,
       async (count, smsList) => {
         const messages = JSON.parse(smsList);
-        const bankMessages = messages.filter(sms => isBankSMS(sms.address));
+        // Match by known sender ID, or fall back to content for unlisted banks.
+        const bankMessages = messages.filter(
+          sms => isBankSMS(sms.address) || looksLikeBankSMS(sms.body)
+        );
 
         onProgress?.({ total: bankMessages.length, processed: 0 });
 
@@ -82,7 +85,7 @@ export function startSMSListener(userId, onNewTransaction) {
 
   const subscription = DeviceEventEmitter.addListener('onSMSReceived', async (event) => {
     const { originatingAddress, messageBody } = event;
-    if (!isBankSMS(originatingAddress)) return;
+    if (!isBankSMS(originatingAddress) && !looksLikeBankSMS(messageBody)) return;
 
     const parsed = parseSMS(messageBody, originatingAddress);
     if (!parsed) return;

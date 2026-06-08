@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  PermissionsAndroid, Alert, ScrollView,
+  PermissionsAndroid, Alert, ScrollView, Linking,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS } from '../constants';
@@ -46,10 +46,13 @@ export default function OnboardingScreen() {
     const granted = await requestSMSPermission();
     if (!granted) {
       Alert.alert(
-        'Permission skipped',
-        'You can enable SMS access later in Settings. Transactions won\'t be auto-logged until then.'
+        'SMS access needed',
+        'Tally auto-logs transactions by reading bank SMS. Enable the SMS permission to continue, or skip for now.',
+        [
+          { text: 'Open Settings', onPress: () => Linking.openSettings() },
+          { text: 'Skip for now', style: 'cancel', onPress: () => { completeOnboarding(); } },
+        ]
       );
-      await completeOnboarding();
       return;
     }
 

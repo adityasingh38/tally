@@ -39,3 +39,6 @@ yarn-error.*
 # Supabase CLI local artifacts
 supabase/.temp/
 supabase/.branches/
+
+# scratch / local test bundles
+.tmp/
