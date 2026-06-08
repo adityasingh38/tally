@@ -16,8 +16,8 @@ class HeadlessSmsService : HeadlessJsTaskService() {
     return HeadlessJsTaskConfig(
       "TallySmsTask",
       Arguments.fromBundle(extras),
-      30000, // timeout ms
-      true   // allowed in foreground
+      30000L, // timeout ms (Long required)
+      true    // allowed in foreground
     )
   }
 }
