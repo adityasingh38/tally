@@ -7,7 +7,7 @@ import { COLORS } from '../constants';
 import { useAuth } from '../hooks/useAuth';
 import { usePremium } from '../hooks/usePremium';
 import { syncHistoricalSMS } from '../services/smsSync';
-import { getTransactions } from '../services/supabase';
+import { getTransactions, deleteAccount } from '../services/supabase';
 import { exportToCSV } from '../services/export';
 import { requestNotificationPermission } from '../services/budgetAlerts';
 
@@ -84,6 +84,25 @@ export default function SettingsScreen() {
       { text: 'Cancel', style: 'cancel' },
       { text: 'Sign out', style: 'destructive', onPress: signOut },
     ]);
+  }
+
+  function handleDeleteAccount() {
+    Alert.alert(
+      'Delete account',
+      'This permanently deletes your account and all transactions. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            const { error } = await deleteAccount();
+            if (error) { Alert.alert('Delete failed', error.message); return; }
+            await signOut();
+          },
+        },
+      ]
+    );
   }
 
   return (
@@ -174,6 +193,10 @@ export default function SettingsScreen() {
         <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
           <Text style={styles.signOutText}>Sign out</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity style={styles.deleteBtn} onPress={handleDeleteAccount}>
+          <Text style={styles.deleteText}>Delete account</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -206,4 +229,6 @@ const styles = StyleSheet.create({
   proSub: { fontSize: 13, color: COLORS.textSecondary, marginTop: 2 },
   signOutBtn: { margin: 8, padding: 16, alignItems: 'center' },
   signOutText: { color: COLORS.danger, fontSize: 15, fontWeight: '600' },
+  deleteBtn: { marginHorizontal: 8, marginBottom: 24, padding: 12, alignItems: 'center' },
+  deleteText: { color: COLORS.textMuted, fontSize: 13, fontWeight: '500', textDecorationLine: 'underline' },
 });

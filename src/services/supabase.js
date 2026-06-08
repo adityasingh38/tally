@@ -62,6 +62,10 @@ export async function checkDuplicate({ userId, amount, type, txnDate, merchantTa
   return data && data.length > 0;
 }
 
+export async function deleteAccount() {
+  return supabase.functions.invoke('delete-account', { body: {} });
+}
+
 export async function updateTransactionCategory(id, category) {
   return supabase.from('transactions').update({ category }).eq('id', id);
 }
