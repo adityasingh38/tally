@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Text, Platform } from 'react-native';
@@ -19,6 +19,18 @@ import { useAuth } from '../hooks/useAuth';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
+
+export const navigationRef = createNavigationContainerRef();
+
+// Route a tapped notification to the right screen (called from notifee events).
+export function routeFromPressAction(pressActionId) {
+  if (!navigationRef.isReady()) return;
+  if (pressActionId === 'open_insights') {
+    navigationRef.navigate('Main', { screen: 'Insights' });
+  } else {
+    navigationRef.navigate('Main');
+  }
+}
 
 const TAB_ICONS = {
   Dashboard: '🏠',
@@ -71,7 +83,7 @@ export default function Navigation() {
   if (loading) return null;
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!user ? (
           <Stack.Screen name="Auth" component={AuthScreen} />

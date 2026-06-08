@@ -9,7 +9,7 @@ export function useTransactions(userId, { fromDate, limit = 50 } = {}) {
   const [error, setError] = useState(null);
 
   const fetch = useCallback(async () => {
-    if (!userId) return;
+    if (!userId) { setLoading(false); return; }
     setLoading(true);
     const { data, error } = await getTransactions({ userId, limit, fromDate });
     if (error) setError(error.message);
@@ -30,7 +30,7 @@ export function useSpendingByCategory(userId, { fromDate, toDate }) {
   const [loading, setLoading] = useState(true);
 
   const fetch = useCallback(async () => {
-    if (!userId || !fromDate || !toDate) return;
+    if (!userId || !fromDate || !toDate) { setLoading(false); return; }
     setLoading(true);
     const { data } = await getSpendingByCategory({ userId, fromDate, toDate });
     if (!data) { setLoading(false); return; }
