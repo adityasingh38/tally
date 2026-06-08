@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -121,12 +121,15 @@ export default function DashboardScreen() {
 }
 
 function CategoryRow({ cat, total, index }) {
-  const pct = total > 0 ? (cat.amount / total) * 100 : 0;
+  const frac = total > 0 ? cat.amount / total : 0;
+  const [trackW, setTrackW] = useState(0);
   const w = useSharedValue(0);
   useEffect(() => {
-    w.value = withDelay(250 + index * 80, withSpring(pct, { damping: 14, stiffness: 110 }));
-  }, [pct]);
-  const barStyle = useAnimatedStyle(() => ({ width: `${w.value}%` }));
+    if (trackW > 0) {
+      w.value = withDelay(250 + index * 80, withSpring(trackW * frac, { damping: 14, stiffness: 110 }));
+    }
+  }, [trackW, frac]);
+  const barStyle = useAnimatedStyle(() => ({ width: w.value }));
 
   return (
     <View style={styles.catRow}>
@@ -138,7 +141,7 @@ function CategoryRow({ cat, total, index }) {
           <Text style={styles.catLabel}>{cat.label}</Text>
           <Text style={styles.catAmount}>{fmtINR(cat.amount)}</Text>
         </View>
-        <View style={styles.barBg}>
+        <View style={styles.barBg} onLayout={e => setTrackW(e.nativeEvent.layout.width)}>
           <Animated.View style={[styles.barFill, { backgroundColor: cat.color }, barStyle]} />
         </View>
       </View>

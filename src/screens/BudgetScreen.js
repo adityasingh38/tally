@@ -115,15 +115,18 @@ export default function BudgetScreen() {
 }
 
 function ProgressBar({ ratio, color, index }) {
-  const pct = Math.min(ratio * 100, 100);
+  const frac = Math.min(ratio, 1);
   const fillColor = ratio >= 1 ? COLORS.danger : ratio >= 0.8 ? COLORS.warning : color;
+  const [trackW, setTrackW] = useState(0);
   const w = useSharedValue(0);
   useEffect(() => {
-    w.value = withDelay(200 + index * 50, withSpring(pct, { damping: 14, stiffness: 110 }));
-  }, [pct]);
-  const barStyle = useAnimatedStyle(() => ({ width: `${w.value}%` }));
+    if (trackW > 0) {
+      w.value = withDelay(200 + index * 50, withSpring(trackW * frac, { damping: 14, stiffness: 110 }));
+    }
+  }, [trackW, frac]);
+  const barStyle = useAnimatedStyle(() => ({ width: w.value }));
   return (
-    <View style={styles.progressBg}>
+    <View style={styles.progressBg} onLayout={e => setTrackW(e.nativeEvent.layout.width)}>
       <Animated.View style={[styles.progressFill, { backgroundColor: fillColor }, barStyle]} />
     </View>
   );
