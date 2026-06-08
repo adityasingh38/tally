@@ -49,14 +49,34 @@ function MainTabs() {
   );
 }
 
-// OPTIONAL real-data bridge. Mounted INSIDE the navigator (so useFocusEffect is
-// legal) — it pushes your Supabase transactions into the Tally store. Until you
-// pass a userId / wire this, the app shows demo seed data automatically.
+// Real-data bridge. Mounted INSIDE the navigator (so useFocusEffect is legal) —
+// pushes your Supabase transactions into the Tally store. When there are no real
+// transactions the store falls back to demo seed data automatically.
+const fromDate90 = (() => {
+  const d = new Date();
+  d.setDate(d.getDate() - 90);
+  return d;
+})();
+
+// Map a Supabase row onto the shape the Tally screens expect:
+// they read tx.when (date label) and tx.sms (source flag), which the DB lacks.
+function toTallyTx(tx) {
+  return {
+    ...tx,
+    when: tx.txn_date
+      ? new Date(tx.txn_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+      : '',
+    sms: tx.source ? tx.source === 'sms' : true,
+  };
+}
+
 function TxBridge({ userId }) {
   const { setRealTransactions } = useTally();
-  const { transactions } = useTransactions(userId);
+  const { transactions } = useTransactions(userId, { fromDate: fromDate90, limit: 200 });
   React.useEffect(() => {
-    if (transactions && transactions.length) setRealTransactions(transactions);
+    if (transactions && transactions.length) {
+      setRealTransactions(transactions.map(toTallyTx));
+    }
   }, [transactions, setRealTransactions]);
   return null;
 }
@@ -89,8 +109,9 @@ function Inner() {
           <Stack.Screen name="Main" component={MainTabs} />
         )}
       </Stack.Navigator>
-      {/* Real-data bridge (safe inside the navigator). Uncomment + pass userId:
-          {user ? <TxBridge userId={user.id} /> : null} */}
+      {/* Real-data bridge: feeds your Supabase transactions into the store.
+          Falls back to demo seed data when there are none. */}
+      {user ? <TxBridge userId={user.id} /> : null}
       <GlobalModals />
     </NavigationContainer>
   );
