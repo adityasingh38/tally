@@ -45,18 +45,25 @@ export async function getSpendingByCategory({ fromDate, toDate }) {
   });
 }
 
-export async function checkDuplicate({ userId, amount, txnDate, merchantTail }) {
-  const { data } = await supabase
+export async function checkDuplicate({ userId, amount, type, txnDate, merchantTail }) {
+  let query = supabase
     .from('transactions')
     .select('id')
     .eq('user_id', userId)
     .eq('amount', amount)
-    .eq('merchant_tail', merchantTail)
     .gte('txn_date', new Date(txnDate.getTime() - 60000).toISOString())
     .lte('txn_date', new Date(txnDate.getTime() + 60000).toISOString())
     .limit(1);
 
+  if (type) query = query.eq('type', type);
+  if (merchantTail) query = query.eq('merchant_tail', merchantTail);
+
+  const { data } = await query;
   return data && data.length > 0;
+}
+
+export async function updateTransactionCategory(id, category) {
+  return supabase.from('transactions').update({ category }).eq('id', id);
 }
 
 export async function getBudgets(userId) {

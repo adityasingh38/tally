@@ -12,11 +12,12 @@
     "babel-preset-expo": "~56.0.0",
     "expo": "~56.0.9",
     "expo-dev-client": "~56.0.19",
+    "expo-file-system": "~56.0.7",
     "expo-linear-gradient": "~56.0.4",
+    "expo-sharing": "~56.0.16",
     "expo-status-bar": "~56.0.4",
     "react": "19.2.3",
     "react-native": "0.85.3",
-    "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "~2.31.1",
     "react-native-get-sms-android": "^2.1.0",
     "react-native-gifted-charts": "^1.4.77",
@@ -48,7 +49,9 @@
     "doctor": {
       "reactNativeDirectoryCheck": {
         "listUnknownPackages": false,
-        "exclude": ["react-native-fs", "@notifee/react-native"]
+        "exclude": [
+          "@notifee/react-native"
+        ]
       }
     }
   }

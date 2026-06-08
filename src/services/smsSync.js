@@ -43,6 +43,7 @@ export async function syncHistoricalSMS(userId, onProgress) {
             const isDup = await checkDuplicate({
               userId,
               amount: tx.amount,
+              type: tx.type,
               txnDate: new Date(tx.txn_date),
               merchantTail: tx.merchant_tail,
             });
@@ -94,6 +95,7 @@ export function startSMSListener(userId, onNewTransaction) {
     const isDup = await checkDuplicate({
       userId,
       amount: txn.amount,
+      type: txn.type,
       txnDate: new Date(),
       merchantTail: txn.merchant_tail,
     });

@@ -1,28 +1,23 @@
-import { Share, Platform } from 'react-native';
-import RNFS from 'react-native-fs';
+import { File, Paths } from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 
 /**
- * Export transactions to CSV and share via Android share sheet.
- * react-native-fs needed: npm install react-native-fs
+ * Export transactions to CSV and open the native share sheet.
+ * Uses expo-file-system (New Architecture safe) + expo-sharing.
  */
 export async function exportToCSV(transactions) {
-  const header = 'Date,Merchant,Category,Type,Amount (INR)\n';
-  const rows = transactions.map(tx => {
-    const date = new Date(tx.txn_date).toLocaleDateString('en-IN');
-    const merchant = `"${tx.merchant.replace(/"/g, '""')}"`;
-    return `${date},${merchant},${tx.category},${tx.type},${tx.amount}`;
-  }).join('\n');
+  const csv = generateCSVString(transactions);
+  const file = new File(Paths.cache, `tally_export_${Date.now()}.csv`);
+  if (file.exists) file.delete();
+  file.write(csv);
 
-  const csv = header + rows;
-  const filename = `tally_export_${Date.now()}.csv`;
-  const path = `${RNFS.CachesDirectoryPath}/${filename}`;
-
-  await RNFS.writeFile(path, csv, 'utf8');
-
-  await Share.share({
-    title: 'Tally Export',
-    url: Platform.OS === 'android' ? `file://${path}` : path,
-    message: `Tally transaction export — ${transactions.length} transactions`,
+  if (!(await Sharing.isAvailableAsync())) {
+    throw new Error('Sharing is not available on this device.');
+  }
+  await Sharing.shareAsync(file.uri, {
+    mimeType: 'text/csv',
+    dialogTitle: 'Tally Export',
+    UTI: 'public.comma-separated-values-text',
   });
 }
 
@@ -30,7 +25,7 @@ export function generateCSVString(transactions) {
   const header = 'Date,Merchant,Category,Type,Amount (INR)\n';
   const rows = transactions.map(tx => {
     const date = new Date(tx.txn_date).toLocaleDateString('en-IN');
-    const merchant = `"${tx.merchant.replace(/"/g, '""')}"`;
+    const merchant = `"${(tx.merchant || '').replace(/"/g, '""')}"`;
     return `${date},${merchant},${tx.category},${tx.type},${tx.amount}`;
   }).join('\n');
   return header + rows;
