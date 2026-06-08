@@ -17,7 +17,8 @@
       "android": { "buildType": "apk" },
       "env": {
         "SUPABASE_URL": "https://gjrmpiauvreudygyvdhx.supabase.co",
-        "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqcm1waWF1dnJldWR5Z3l2ZGh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3MjcyNDUsImV4cCI6MjA5NjMwMzI0NX0.6kq_QrPkmIAQz4xpvwxem6pFQALnAKATmhTBNskUWhc"
+        "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqcm1waWF1dnJldWR5Z3l2ZGh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3MjcyNDUsImV4cCI6MjA5NjMwMzI0NX0.6kq_QrPkmIAQz4xpvwxem6pFQALnAKATmhTBNskUWhc",
+        "FORCE_PREMIUM": "1"
       }
     },
     "production": {

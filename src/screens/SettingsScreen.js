@@ -57,16 +57,29 @@ export default function SettingsScreen() {
     }
   }
 
-  async function handlePurchase() {
+  async function doPurchase(pkg) {
+    const { success, cancelled, error } = await purchase(pkg);
+    if (success) Alert.alert('Welcome to Pro! 🎉', 'All premium features unlocked.');
+    else if (!cancelled) Alert.alert('Purchase failed', error || 'Please try again.');
+  }
+
+  function handlePurchase() {
     if (!offerings?.availablePackages?.length) {
       Alert.alert('Not available', 'In-app purchase not set up yet. Check back soon.');
       return;
     }
     const monthly = offerings.availablePackages.find(p => p.packageType === 'MONTHLY');
-    if (!monthly) return;
-    const { success, cancelled, error } = await purchase(monthly);
-    if (success) Alert.alert('Welcome to Pro! 🎉', 'All premium features unlocked.');
-    else if (!cancelled) Alert.alert('Purchase failed', error);
+    const annual = offerings.availablePackages.find(p => p.packageType === 'ANNUAL');
+    const buttons = [];
+    if (monthly) buttons.push({ text: monthly.product.priceString + ' / month', onPress: () => doPurchase(monthly) });
+    if (annual) buttons.push({ text: annual.product.priceString + ' / year', onPress: () => doPurchase(annual) });
+    if (buttons.length === 0) {
+      // Fallback: just buy the first available package.
+      doPurchase(offerings.availablePackages[0]);
+      return;
+    }
+    buttons.push({ text: 'Cancel', style: 'cancel' });
+    Alert.alert('Upgrade to Tally Pro', 'Choose a plan', buttons);
   }
 
   async function handleRestore() {

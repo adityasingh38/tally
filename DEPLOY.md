@@ -54,12 +54,28 @@ needed client-side.
 6. Settings → Export CSV → share sheet opens.
 7. Settings → Delete account → data gone, signed out.
 
+## Payments (RevenueCat)
+
+Premium is gated by a RevenueCat entitlement named `premium`.
+
+- **No key set:** Pro is unlocked in dev and in any build with `FORCE_PREMIUM=1`
+  (preview profile sets this for testing). Real releases (production) keep Pro
+  **locked** so it's never given away by accident.
+- **To enable real purchases:**
+  1. RevenueCat dashboard → create project → add the Android app (Play package
+     `com.tally`).
+  2. Create products in Play Console (monthly ₹199, annual ₹1499) and import
+     them into a RevenueCat Offering.
+  3. Create an entitlement `premium` and attach the products.
+  4. Set the **public SDK key**: add `REVENUECAT_API_KEY` to the production `env`
+     in [eas.json](eas.json) (or via `eas env`), then rebuild.
+  5. Remove `FORCE_PREMIUM` from any profile you want to actually charge in.
+
 ## Known limitations
 
 - **Android only.** iOS cannot read SMS (Apple).
-- **Live SMS** captures only while app is open (no background service yet).
-- **Premium is free-for-all** until a RevenueCat key is set in
-  [src/constants/index.js](src/constants/index.js).
+- **SMS capture (live + background)** is built but unverified — needs a
+  bank-linked Android device to confirm.
 
 ## Play Store prep (before public release)
 

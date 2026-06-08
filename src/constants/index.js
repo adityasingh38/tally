@@ -54,5 +54,8 @@ export const FREEMIUM = {
   FREE_HISTORY_DAYS: 30,
   PREMIUM_MONTHLY_PRICE_INR: 199,
   PREMIUM_YEARLY_PRICE_INR: 1499,
-  REVENUE_CAT_API_KEY: '',
+  // RevenueCat public SDK key (Android). Set via EAS/.env REVENUECAT_API_KEY.
+  REVENUE_CAT_API_KEY: process.env.REVENUECAT_API_KEY || '',
+  // RevenueCat entitlement identifier that grants Pro.
+  ENTITLEMENT_ID: 'premium',
 };
