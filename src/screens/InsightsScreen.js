@@ -2,8 +2,9 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BarChart } from 'react-native-gifted-charts';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { COLORS, CATEGORIES } from '../constants';
+import { COLORS, RADII } from '../constants';
 import { useAuth } from '../hooks/useAuth';
 import { useSpendingByCategory } from '../hooks/useTransactions';
 import { getAIAdvice } from '../services/aiAdvice';
@@ -14,23 +15,15 @@ function monthRange(monthOffset = 0) {
   const to = new Date(d.getFullYear(), d.getMonth() + monthOffset + 1, 0);
   return { from, to };
 }
-
-function formatINR(n) {
-  return `₹${n.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
-}
-
-const MONTH_LABELS = ['3 mo ago', '2 mo ago', 'Last mo', 'This mo'];
+const fmtINR = (n) => `₹${Math.round(n).toLocaleString('en-IN')}`;
+const MONTH_LABELS = ['3 mo', '2 mo', 'Last', 'This'];
 
 export default function InsightsScreen() {
   const { user } = useAuth();
-
   const [aiAdvice, setAiAdvice] = useState(null);
   const [adviceLoading, setAdviceLoading] = useState(false);
 
-  const months = useMemo(() => [
-    monthRange(-3), monthRange(-2), monthRange(-1), monthRange(0),
-  ], []);
-
+  const months = useMemo(() => [monthRange(-3), monthRange(-2), monthRange(-1), monthRange(0)], []);
   const m0 = useSpendingByCategory(user?.id, { fromDate: months[0].from, toDate: months[0].to });
   const m1 = useSpendingByCategory(user?.id, { fromDate: months[1].from, toDate: months[1].to });
   const m2 = useSpendingByCategory(user?.id, { fromDate: months[2].from, toDate: months[2].to });
@@ -55,26 +48,24 @@ export default function InsightsScreen() {
     });
   }, [thisMonth.spending.length]);
 
-  const delta = lastMonth.total > 0
-    ? ((thisMonth.total - lastMonth.total) / lastMonth.total) * 100
-    : 0;
+  const delta = lastMonth.total > 0 ? ((thisMonth.total - lastMonth.total) / lastMonth.total) * 100 : 0;
   const trend = delta < 0 ? 'down' : 'up';
 
   const barData = monthTotals.map((val, i) => ({
     value: val,
     label: MONTH_LABELS[i],
-    frontColor: i === 3 ? COLORS.primary : COLORS.border,
+    frontColor: i === 3 ? COLORS.primary : COLORS.surfaceElevated,
   }));
 
   const topCats = thisMonth.spending.slice(0, 3);
 
   return (
     <SafeAreaView style={styles.safe}>
-      <ScrollView style={styles.container}>
-        <Text style={styles.title}>Insights</Text>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
+        <Animated.Text entering={FadeInDown.springify()} style={styles.title}>Insights 📊</Animated.Text>
 
-        {/* Trend summary */}
-        <View style={[styles.trendCard, { borderColor: trend === 'down' ? COLORS.success : COLORS.warning }]}>
+        <Animated.View entering={FadeInDown.delay(80).springify()}
+          style={[styles.trendCard, { borderColor: trend === 'down' ? COLORS.success : COLORS.warning }]}>
           <Text style={styles.trendEmoji}>{trend === 'down' ? '📉' : '📈'}</Text>
           <View style={styles.trendInfo}>
             <Text style={styles.trendTitle}>
@@ -82,39 +73,39 @@ export default function InsightsScreen() {
                 ? `You spent ${Math.abs(delta).toFixed(0)}% less than last month`
                 : `You spent ${delta.toFixed(0)}% more than last month`}
             </Text>
-            <Text style={styles.trendSub}>
-              {formatINR(thisMonth.total)} this month vs {formatINR(lastMonth.total)} last month
-            </Text>
+            <Text style={styles.trendSub}>{fmtINR(thisMonth.total)} this month vs {fmtINR(lastMonth.total)} last</Text>
           </View>
-        </View>
+        </Animated.View>
 
-        {/* Bar chart */}
-        <View style={styles.section}>
+        <Animated.View entering={FadeInDown.delay(140).springify()} style={styles.section}>
           <Text style={styles.sectionTitle}>Monthly spend</Text>
-          <BarChart
-            data={barData}
-            width={300}
-            height={160}
-            barWidth={50}
-            barBorderRadius={6}
-            hideRules
-            hideYAxisText
-            xAxisColor={COLORS.border}
-            yAxisColor="transparent"
-            labelWidth={60}
-            xAxisLabelTextStyle={{ color: COLORS.textMuted, fontSize: 11 }}
-          />
-        </View>
+          <View style={styles.chartCard}>
+            <BarChart
+              data={barData}
+              width={290}
+              height={150}
+              barWidth={44}
+              barBorderRadius={10}
+              hideRules
+              hideYAxisText
+              xAxisColor={COLORS.border}
+              yAxisColor="transparent"
+              labelWidth={56}
+              xAxisLabelTextStyle={{ color: COLORS.textMuted, fontSize: 11, fontWeight: '600' }}
+            />
+          </View>
+        </Animated.View>
 
-        {/* Top categories */}
-        <View style={styles.section}>
+        <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.section}>
           <Text style={styles.sectionTitle}>Top categories this month</Text>
           {topCats.map(cat => (
             <View key={cat.id} style={styles.catCard}>
-              <Text style={styles.catIcon}>{cat.icon}</Text>
+              <View style={[styles.catIconWrap, { backgroundColor: cat.color + '22' }]}>
+                <Text style={styles.catIcon}>{cat.icon}</Text>
+              </View>
               <View style={styles.catInfo}>
                 <Text style={styles.catLabel}>{cat.label}</Text>
-                <Text style={styles.catAmount}>{formatINR(cat.amount)}</Text>
+                <Text style={styles.catAmount}>{fmtINR(cat.amount)}</Text>
               </View>
               <View style={[styles.catBadge, { backgroundColor: cat.color + '22' }]}>
                 <Text style={[styles.catPct, { color: cat.color }]}>
@@ -123,11 +114,10 @@ export default function InsightsScreen() {
               </View>
             </View>
           ))}
-        </View>
+        </Animated.View>
 
-        {/* AI-powered advice */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick wins</Text>
+        <Animated.View entering={FadeInDown.delay(260).springify()} style={styles.section}>
+          <Text style={styles.sectionTitle}>Quick wins ✨</Text>
           {adviceLoading ? (
             <ActivityIndicator color={COLORS.primary} style={{ padding: 20 }} />
           ) : aiAdvice ? (
@@ -137,9 +127,7 @@ export default function InsightsScreen() {
                   <Text style={styles.tipIcon}>{item.icon}</Text>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.tipText}>{item.tip}</Text>
-                    {item.saving ? (
-                      <Text style={styles.tipSaving}>Potential saving: {item.saving}</Text>
-                    ) : null}
+                    {item.saving ? <Text style={styles.tipSaving}>💸 Potential saving: {item.saving}</Text> : null}
                   </View>
                 </View>
               ))}
@@ -147,7 +135,7 @@ export default function InsightsScreen() {
           ) : (
             <Text style={styles.emptyTip}>Add more transactions to unlock insights.</Text>
           )}
-        </View>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -156,35 +144,35 @@ export default function InsightsScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.background },
   container: { flex: 1 },
-  title: { fontSize: 26, fontWeight: '800', color: COLORS.text, padding: 24, paddingBottom: 16 },
+  title: { fontSize: 28, fontWeight: '900', color: COLORS.text, padding: 24, paddingBottom: 16, letterSpacing: -0.5 },
   trendCard: {
-    flexDirection: 'row', alignItems: 'center', gap: 14,
-    margin: 16, marginTop: 0, backgroundColor: COLORS.surface,
-    borderRadius: 16, padding: 16, borderWidth: 1,
+    flexDirection: 'row', alignItems: 'center', gap: 14, marginHorizontal: 16,
+    backgroundColor: COLORS.surface, borderRadius: RADII.lg, padding: 18, borderWidth: 1.5,
   },
   trendEmoji: { fontSize: 32 },
   trendInfo: { flex: 1 },
-  trendTitle: { fontSize: 15, color: COLORS.text, fontWeight: '700', lineHeight: 22 },
+  trendTitle: { fontSize: 15, color: COLORS.text, fontWeight: '800', lineHeight: 22 },
   trendSub: { fontSize: 13, color: COLORS.textSecondary, marginTop: 4 },
-  section: { margin: 16, marginTop: 0, marginBottom: 8 },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text, marginBottom: 14 },
+  section: { marginHorizontal: 16, marginTop: 22 },
+  sectionTitle: { fontSize: 18, fontWeight: '800', color: COLORS.text, marginBottom: 14 },
+  chartCard: { backgroundColor: COLORS.surface, borderRadius: RADII.lg, padding: 16, borderWidth: 1, borderColor: COLORS.border, alignItems: 'center' },
   catCard: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: COLORS.surface, borderRadius: 14, padding: 14,
-    borderWidth: 1, borderColor: COLORS.border, marginBottom: 8,
+    flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: COLORS.surface,
+    borderRadius: RADII.md, padding: 14, borderWidth: 1, borderColor: COLORS.border, marginBottom: 10,
   },
-  catIcon: { fontSize: 24 },
+  catIconWrap: { width: 42, height: 42, borderRadius: RADII.md, alignItems: 'center', justifyContent: 'center' },
+  catIcon: { fontSize: 20 },
   catInfo: { flex: 1 },
-  catLabel: { fontSize: 14, color: COLORS.text, fontWeight: '600' },
+  catLabel: { fontSize: 14, color: COLORS.text, fontWeight: '700' },
   catAmount: { fontSize: 13, color: COLORS.textSecondary, marginTop: 2 },
-  catBadge: { borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
-  catPct: { fontSize: 14, fontWeight: '700' },
+  catBadge: { borderRadius: RADII.pill, paddingHorizontal: 12, paddingVertical: 5 },
+  catPct: { fontSize: 14, fontWeight: '800' },
   tip: {
-    flexDirection: 'row', gap: 12, backgroundColor: COLORS.surface,
-    borderRadius: 14, padding: 14, borderWidth: 1, borderColor: COLORS.border,
+    flexDirection: 'row', gap: 12, backgroundColor: COLORS.surface, borderRadius: RADII.md,
+    padding: 16, borderWidth: 1, borderColor: COLORS.border,
   },
-  tipIcon: { fontSize: 20 },
+  tipIcon: { fontSize: 22 },
   tipText: { color: COLORS.textSecondary, fontSize: 14, lineHeight: 20 },
-  tipSaving: { color: COLORS.success, fontSize: 12, fontWeight: '700', marginTop: 4 },
+  tipSaving: { color: COLORS.success, fontSize: 12, fontWeight: '800', marginTop: 4 },
   emptyTip: { color: COLORS.textMuted, fontSize: 14, textAlign: 'center', padding: 20 },
 });

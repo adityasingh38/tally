@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  View, Text, StyleSheet, TouchableOpacity, TextInput,
-  ScrollView, Alert, ActivityIndicator,
-} from 'react-native';
+import { View, Text, StyleSheet, TextInput, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { COLORS, CATEGORIES } from '../constants';
+import Animated, { FadeInDown, useSharedValue, useAnimatedStyle, withSpring, withDelay } from 'react-native-reanimated';
+import { COLORS, CATEGORIES, RADII } from '../constants';
 import { useAuth } from '../hooks/useAuth';
 import { getBudgets, upsertBudget } from '../services/supabase';
 import { useSpendingByCategory } from '../hooks/useTransactions';
+import Bouncy from '../components/Bouncy';
 
 function startOfMonth() {
   const d = new Date();
   return new Date(d.getFullYear(), d.getMonth(), 1);
 }
+const fmtINR = (n) => `₹${Math.round(n).toLocaleString('en-IN')}`;
 
 export default function BudgetScreen() {
   const { user } = useAuth();
@@ -42,16 +42,8 @@ export default function BudgetScreen() {
       return;
     }
     setSaving(true);
-    await upsertBudget({
-      user_id: user.id,
-      category: categoryId,
-      monthly_limit: limit,
-      alert_threshold: 0.8,
-    });
-    setBudgets(prev => ({
-      ...prev,
-      [categoryId]: { category: categoryId, monthly_limit: limit, alert_threshold: 0.8 },
-    }));
+    await upsertBudget({ user_id: user.id, category: categoryId, monthly_limit: limit, alert_threshold: 0.8 });
+    setBudgets(prev => ({ ...prev, [categoryId]: { category: categoryId, monthly_limit: limit, alert_threshold: 0.8 } }));
     setEditing(null);
     setInputVal('');
     setSaving(false);
@@ -62,49 +54,39 @@ export default function BudgetScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <Text style={styles.title}>Budgets</Text>
-      <Text style={styles.subtitle}>Set monthly limits. Get alerted at 80%.</Text>
+      <Animated.View entering={FadeInDown.springify()}>
+        <Text style={styles.title}>Budgets 🎯</Text>
+        <Text style={styles.subtitle}>Set monthly limits. Get nudged at 80%.</Text>
+      </Animated.View>
 
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 10 }}>
-        {CATEGORIES.filter(c => c.id !== 'transfer').map(cat => {
+      <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }} showsVerticalScrollIndicator={false}>
+        {CATEGORIES.filter(c => c.id !== 'transfer').map((cat, i) => {
           const budget = budgets[cat.id];
           const spent = spentMap[cat.id] || 0;
           const ratio = budget ? spent / budget.monthly_limit : 0;
           const isEditing = editing === cat.id;
 
           return (
-            <View key={cat.id} style={styles.card}>
+            <Animated.View key={cat.id} entering={FadeInDown.delay(i * 50).springify().damping(16)} style={styles.card}>
               <View style={styles.cardHeader}>
-                <Text style={styles.catIcon}>{cat.icon}</Text>
+                <View style={[styles.iconWrap, { backgroundColor: cat.color + '22' }]}>
+                  <Text style={styles.catIcon}>{cat.icon}</Text>
+                </View>
                 <View style={styles.catInfo}>
                   <Text style={styles.catLabel}>{cat.label}</Text>
                   {budget && (
-                    <Text style={styles.catSub}>
-                      ₹{spent.toLocaleString('en-IN', { maximumFractionDigits: 0 })} of ₹{budget.monthly_limit.toLocaleString('en-IN')}
-                    </Text>
+                    <Text style={styles.catSub}>{fmtINR(spent)} of {fmtINR(budget.monthly_limit)}</Text>
                   )}
                 </View>
-                <TouchableOpacity
-                  onPress={() => {
-                    setEditing(isEditing ? null : cat.id);
-                    setInputVal(budget?.monthly_limit?.toString() || '');
-                  }}
-                  style={styles.editBtn}
-                >
+                <Bouncy scaleTo={0.93}
+                  onPress={() => { setEditing(isEditing ? null : cat.id); setInputVal(budget?.monthly_limit?.toString() || ''); }}
+                  style={styles.editBtn}>
                   <Text style={styles.editBtnText}>{budget ? 'Edit' : 'Set'}</Text>
-                </TouchableOpacity>
+                </Bouncy>
               </View>
 
               {budget && !isEditing && (
-                <View style={styles.progressBg}>
-                  <View style={[
-                    styles.progressFill,
-                    {
-                      width: `${Math.min(ratio * 100, 100)}%`,
-                      backgroundColor: ratio >= 1 ? COLORS.danger : ratio >= 0.8 ? COLORS.warning : cat.color,
-                    },
-                  ]} />
-                </View>
+                <ProgressBar ratio={ratio} color={cat.color} index={i} />
               )}
 
               {isEditing && (
@@ -119,16 +101,12 @@ export default function BudgetScreen() {
                     placeholderTextColor={COLORS.textMuted}
                     autoFocus
                   />
-                  <TouchableOpacity
-                    style={styles.saveBtn}
-                    onPress={() => saveBudget(cat.id)}
-                    disabled={saving}
-                  >
+                  <Bouncy scaleTo={0.93} style={styles.saveBtn} onPress={() => saveBudget(cat.id)} disabled={saving}>
                     {saving ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.saveBtnText}>Save</Text>}
-                  </TouchableOpacity>
+                  </Bouncy>
                 </View>
               )}
-            </View>
+            </Animated.View>
           );
         })}
       </ScrollView>
@@ -136,29 +114,39 @@ export default function BudgetScreen() {
   );
 }
 
+function ProgressBar({ ratio, color, index }) {
+  const pct = Math.min(ratio * 100, 100);
+  const fillColor = ratio >= 1 ? COLORS.danger : ratio >= 0.8 ? COLORS.warning : color;
+  const w = useSharedValue(0);
+  useEffect(() => {
+    w.value = withDelay(200 + index * 50, withSpring(pct, { damping: 14, stiffness: 110 }));
+  }, [pct]);
+  const barStyle = useAnimatedStyle(() => ({ width: `${w.value}%` }));
+  return (
+    <View style={styles.progressBg}>
+      <Animated.View style={[styles.progressFill, { backgroundColor: fillColor }, barStyle]} />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.background },
-  title: { fontSize: 26, fontWeight: '800', color: COLORS.text, padding: 24, paddingBottom: 4 },
-  subtitle: { fontSize: 14, color: COLORS.textMuted, paddingHorizontal: 24, marginBottom: 8 },
-  card: {
-    backgroundColor: COLORS.surface, borderRadius: 14,
-    padding: 14, borderWidth: 1, borderColor: COLORS.border,
-  },
+  title: { fontSize: 28, fontWeight: '900', color: COLORS.text, paddingHorizontal: 24, paddingTop: 24, letterSpacing: -0.5 },
+  subtitle: { fontSize: 14, color: COLORS.textMuted, paddingHorizontal: 24, marginTop: 4, marginBottom: 8 },
+  card: { backgroundColor: COLORS.surface, borderRadius: RADII.lg, padding: 16, borderWidth: 1, borderColor: COLORS.border },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  catIcon: { fontSize: 22 },
+  iconWrap: { width: 40, height: 40, borderRadius: RADII.md, alignItems: 'center', justifyContent: 'center' },
+  catIcon: { fontSize: 20 },
   catInfo: { flex: 1 },
-  catLabel: { fontSize: 15, color: COLORS.text, fontWeight: '600' },
+  catLabel: { fontSize: 15, color: COLORS.text, fontWeight: '700' },
   catSub: { fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
-  editBtn: { backgroundColor: COLORS.surfaceElevated, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
-  editBtnText: { color: COLORS.primary, fontSize: 13, fontWeight: '700' },
-  progressBg: { height: 4, backgroundColor: COLORS.border, borderRadius: 2, marginTop: 12 },
-  progressFill: { height: 4, borderRadius: 2 },
-  inputRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 },
-  rupee: { color: COLORS.textSecondary, fontSize: 18, fontWeight: '600' },
-  input: {
-    flex: 1, backgroundColor: COLORS.surfaceElevated, borderRadius: 10,
-    padding: 10, color: COLORS.text, fontSize: 16, borderWidth: 1, borderColor: COLORS.border,
-  },
-  saveBtn: { backgroundColor: COLORS.primary, borderRadius: 10, paddingHorizontal: 16, paddingVertical: 10 },
-  saveBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  editBtn: { backgroundColor: COLORS.surfaceElevated, borderRadius: RADII.pill, paddingHorizontal: 16, paddingVertical: 8 },
+  editBtnText: { color: COLORS.primary, fontSize: 13, fontWeight: '800' },
+  progressBg: { height: 8, backgroundColor: COLORS.surfaceElevated, borderRadius: RADII.pill, marginTop: 14, overflow: 'hidden' },
+  progressFill: { height: 8, borderRadius: RADII.pill },
+  inputRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 14 },
+  rupee: { color: COLORS.textSecondary, fontSize: 18, fontWeight: '700' },
+  input: { flex: 1, backgroundColor: COLORS.surfaceElevated, borderRadius: RADII.md, padding: 12, color: COLORS.text, fontSize: 16, borderWidth: 1, borderColor: COLORS.border },
+  saveBtn: { backgroundColor: COLORS.primary, borderRadius: RADII.md, paddingHorizontal: 18, paddingVertical: 12 },
+  saveBtnText: { color: '#fff', fontWeight: '800', fontSize: 14 },
 });
