@@ -2,14 +2,12 @@
 // Branded intro: 4 tally bars count in one-by-one, the slash strikes through,
 // the wordmark fades up, then the overlay fades out → onDone().
 //
-// Uses ONLY the core reanimated API (useSharedValue / useAnimatedStyle /
-// withTiming / withDelay) — no layout `entering` animations, which have been a
-// source of crashes on this RN/Fabric + reanimated setup.
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import Animated, {
-  useSharedValue, useAnimatedStyle, withDelay, withTiming, withSpring, runOnJS, Easing,
-} from 'react-native-reanimated';
+// Uses React Native's built-in Animated API (NOT reanimated). The reanimated
+// worklet runtime crashes on this build (mapper "Object is not a function"),
+// and the rest of the app doesn't use animated styles — so the splash stays on
+// the bulletproof core Animated API with the native driver.
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import { FONTS } from './theme';
 
 const INK = '#0E0F0C';
@@ -20,57 +18,56 @@ const DIM = '#63655A';
 const H = 92;
 const SW = 13;
 const GAP = 17;
-const ROW_W = 4 * SW + 3 * GAP;   // 103 — explicit so the slash can centre in px
+const ROW_W = 4 * SW + 3 * GAP;
 const ROW_H = H * 1.34;
 const SLASH_H = H * 1.36;
 
-// One animated bar — pops + fades in at `delay` ms.
-function Bar({ delay, progress }) {
-  const style = useAnimatedStyle(() => ({
-    opacity: progress.value,
-    transform: [{ scale: 0.6 + progress.value * 0.4 }],
-  }));
-  return <Animated.View style={[styles.bar, { marginLeft: delay ? GAP : 0 }, style]} />;
-}
-
 export default function AnimatedSplash({ onDone }) {
-  const wrap = useSharedValue(1);
-  const b = [useSharedValue(0), useSharedValue(0), useSharedValue(0), useSharedValue(0)];
-  const slash = useSharedValue(0);
-  const word = useSharedValue(0);
+  const bars = useRef([0, 0, 0, 0].map(() => new Animated.Value(0))).current;
+  const slash = useRef(new Animated.Value(0)).current;
+  const word = useRef(new Animated.Value(0)).current;
+  const wrap = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    const spring = { damping: 13, stiffness: 150 };
-    b.forEach((v, i) => { v.value = withDelay(i * 130, withSpring(1, spring)); });
-    slash.value = withDelay(600, withSpring(1, { damping: 15, stiffness: 140 }));
-    word.value = withDelay(820, withTiming(1, { duration: 420, easing: Easing.out(Easing.cubic) }));
-    wrap.value = withDelay(1650, withTiming(0, { duration: 380 }, (finished) => {
-      if (finished) runOnJS(onDone)();
-    }));
+    const cfg = { duration: 260, easing: Easing.out(Easing.back(1.5)), useNativeDriver: true };
+    Animated.sequence([
+      Animated.stagger(120, bars.map((v) => Animated.timing(v, { toValue: 1, ...cfg }))),
+      Animated.timing(slash, { toValue: 1, duration: 300, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      Animated.timing(word, { toValue: 1, duration: 380, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      Animated.delay(550),
+      Animated.timing(wrap, { toValue: 0, duration: 360, useNativeDriver: true }),
+    ]).start(({ finished }) => {
+      if (finished && onDone) onDone();
+    });
   }, []);
 
-  const wrapStyle = useAnimatedStyle(() => ({ opacity: wrap.value }));
-  const slashStyle = useAnimatedStyle(() => ({
-    opacity: slash.value,
-    transform: [
-      { rotate: '60deg' },
-      { scaleY: 0.4 + slash.value * 0.6 },
-    ],
-  }));
-  const wordStyle = useAnimatedStyle(() => ({
-    opacity: word.value,
-    transform: [{ translateY: (1 - word.value) * 10 }],
-  }));
-
   return (
-    <Animated.View style={[StyleSheet.absoluteFill, styles.fill, wrapStyle]}>
+    <Animated.View style={[StyleSheet.absoluteFill, styles.fill, { opacity: wrap }]}>
       <View style={styles.markRow}>
-        {b.map((v, i) => <Bar key={i} delay={i} progress={v} />)}
-        <Animated.View style={[styles.slash, slashStyle]} pointerEvents="none" />
+        {bars.map((v, i) => (
+          <Animated.View
+            key={i}
+            style={[
+              styles.bar,
+              { marginLeft: i ? GAP : 0, opacity: v, transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) }] },
+            ]}
+          />
+        ))}
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.slash,
+            { opacity: slash, transform: [{ rotate: '60deg' }, { scaleY: slash.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) }] },
+          ]}
+        />
       </View>
 
-      <Animated.Text style={[styles.word, wordStyle]}>tally</Animated.Text>
-      <Animated.Text style={[styles.tag, wordStyle]}>track the damage</Animated.Text>
+      <Animated.Text
+        style={[styles.word, { opacity: word, transform: [{ translateY: word.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) }] }]}
+      >
+        tally
+      </Animated.Text>
+      <Animated.Text style={[styles.tag, { opacity: word }]}>track the damage</Animated.Text>
     </Animated.View>
   );
 }
