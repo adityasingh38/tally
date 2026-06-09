@@ -1,6 +1,7 @@
 // src/tally/screens/OnboardingScreen.js
 import React, { useState } from 'react';
 import { View, Text, ScrollView, ActivityIndicator, PermissionsAndroid, Alert, Linking, TextInput } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { useAuth } from '../../hooks/useAuth';
 import { syncHistoricalSMS } from '../../services/smsSync';
@@ -17,6 +18,7 @@ const FEATURES = [
 export default function OnboardingScreen({ onDone }) {
   const { T, accent, accentInk, setIncome } = useTally();
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
   const [syncing, setSyncing] = useState(false);
   const [progress, setProgress] = useState(null);
   const [incomeInput, setIncomeInput] = useState('');
@@ -68,7 +70,7 @@ export default function OnboardingScreen({ onDone }) {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: T.bg }}
-      contentContainerStyle={{ paddingHorizontal: 26, paddingTop: 84, paddingBottom: 40, flexGrow: 1 }}>
+      contentContainerStyle={{ paddingHorizontal: 26, paddingTop: insets.top + 40, paddingBottom: 40, flexGrow: 1 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
         <Brand T={T} color={accent} size={24} />
         <MonoLabel T={T} color={T.dim} size={12}>tally</MonoLabel>

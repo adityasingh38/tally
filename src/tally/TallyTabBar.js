@@ -2,6 +2,7 @@
 // Used via Tab.Navigator's `tabBar` prop.
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from './TallyContext';
 import { FONTS } from './theme';
@@ -33,7 +34,10 @@ export default function TallyTabBar({ state, navigation }) {
         const color = on ? T.text : T.faint;
         const onPress = () => {
           const e = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
-          if (!on && !e.defaultPrevented) navigation.navigate(route.name);
+          if (!on && !e.defaultPrevented) {
+            try { Haptics.selectionAsync(); } catch (err) {}
+            navigation.navigate(route.name);
+          }
         };
         return (
           <Pressable key={route.key} onPress={onPress}

@@ -1,6 +1,7 @@
 // src/tally/screens/SettingsScreen.js  → your "Settings" tab
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Pressable, Alert, PermissionsAndroid, ActivityIndicator, TextInput } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { useAuth } from '../../hooks/useAuth';
 import { syncHistoricalSMS } from '../../services/smsSync';
@@ -50,6 +51,7 @@ function Row({ T, label, sub, control, onPress }) {
 export default function SettingsScreen() {
   const { T, accent, accentInk, prefs, setPref, openPaywall, income, setIncome } = useTally();
   const { user, signOut } = useAuth();
+  const insets = useSafeAreaInsets();
   const [notif, setNotif] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -123,7 +125,7 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: T.bg }}
-      contentContainerStyle={{ paddingHorizontal: 18, paddingTop: 54, paddingBottom: 120 }}>
+      contentContainerStyle={{ paddingHorizontal: 18, paddingTop: insets.top + 14, paddingBottom: 120 }}>
       <ScreenHeader T={T} accent={accent} title="you" />
 
       {/* profile */}

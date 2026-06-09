@@ -1,13 +1,15 @@
 // src/tally/screens/FeedScreen.js  → your "Transactions" tab
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import { View, Text, ScrollView, Pressable, RefreshControl } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { FONTS, fmtINR } from '../theme';
 import { MonoLabel, ScreenHeader } from '../ui';
 import { catMeta, REACTIONS } from '../data';
 
 export default function FeedScreen({ navigation }) {
-  const { T, accent, accentInk, store } = useTally();
+  const { T, accent, accentInk, store, refreshing, refreshTxs, openTx } = useTally();
+  const insets = useSafeAreaInsets();
   const [filter, setFilter] = useState('all');
   const txs = store.txs.filter((tx) =>
     filter === 'all' ? true : filter === 'spent' ? tx.type !== 'credit' : tx.type === 'credit');
@@ -15,7 +17,8 @@ export default function FeedScreen({ navigation }) {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: T.bg }}
-      contentContainerStyle={{ paddingHorizontal: 18, paddingTop: 54, paddingBottom: 120 }}>
+      contentContainerStyle={{ paddingHorizontal: 18, paddingTop: insets.top + 14, paddingBottom: 120 }}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshTxs} tintColor={accent} colors={[accent]} />}>
       <ScreenHeader T={T} accent={accent} title="the feed"
         right={<MonoLabel T={T} color={T.faint}>{store.txs.length} hits</MonoLabel>} />
 
@@ -34,13 +37,23 @@ export default function FeedScreen({ navigation }) {
         })}
       </View>
 
+      {txs.length === 0 && (
+        <View style={{ alignItems: 'center', paddingVertical: 60 }}>
+          <Text style={{ fontFamily: FONTS.display, fontSize: 28, color: T.faint }}>₹0</Text>
+          <MonoLabel T={T} color={T.faint} size={11} style={{ marginTop: 10, textAlign: 'center' }}>
+            {filter === 'credit' ? 'no money in. shocking.' : 'no spends here. quiet month? doubt it.'}
+          </MonoLabel>
+        </View>
+      )}
+
       <View style={{ gap: 12 }}>
         {txs.map((tx) => {
           const m = catMeta(tx.category);
           const credit = tx.type === 'credit';
           const picked = store.reactions[tx.id];
           return (
-            <View key={tx.id} style={{ backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 16, padding: 16 }}>
+            <Pressable key={tx.id} onPress={() => openTx(tx)}
+              style={({ pressed }) => [{ backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 16, padding: 16, opacity: pressed ? 0.7 : 1 }]}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <MonoLabel T={T} color={T.faint} size={10}>{m.tag}{tx.sms ? ' · sms' : ' · manual'}</MonoLabel>
                 <MonoLabel T={T} color={T.faint} size={10}>{tx.when || ''}</MonoLabel>
@@ -67,7 +80,7 @@ export default function FeedScreen({ navigation }) {
                   );
                 })}
               </View>
-            </View>
+            </Pressable>
           );
         })}
       </View>

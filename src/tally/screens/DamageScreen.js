@@ -1,6 +1,7 @@
 // src/tally/screens/DamageScreen.js  → your "Insights" tab
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { FONTS, fmtINR } from '../theme';
 import { MonoLabel, Rule, Leader, ReceiptShell, Btn, Tag, Brand } from '../ui';
@@ -8,6 +9,7 @@ import { totalSpent, groupByCat, copeZone } from '../data';
 
 export default function DamageScreen() {
   const { T, accent, accentInk, income, store } = useTally();
+  const insets = useSafeAreaInsets();
   const txs = store.txs;
   const total = totalSpent(txs);
   const cats = groupByCat(txs);
@@ -25,7 +27,7 @@ export default function DamageScreen() {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: T.bg }}
-      contentContainerStyle={{ paddingHorizontal: 18, paddingTop: 54, paddingBottom: 120 }}>
+      contentContainerStyle={{ paddingHorizontal: 18, paddingTop: insets.top + 14, paddingBottom: 120 }}>
       <ReceiptShell T={T}>
         {/* header */}
         <View style={{ alignItems: 'center', borderBottomWidth: 1.5, borderStyle: 'dashed',
@@ -51,7 +53,9 @@ export default function DamageScreen() {
         {/* itemized */}
         <View style={{ paddingVertical: 16, borderBottomWidth: 1.5, borderStyle: 'dashed',
           borderBottomColor: T.lineStrong, gap: 11 }}>
-          {cats.map((c) => <Leader key={c.id} T={T} label={c.tag} value={fmtINR(c.amount)} />)}
+          {cats.length === 0
+            ? <MonoLabel T={T} color={T.faint} size={11}>nothing logged yet — suspiciously clean.</MonoLabel>
+            : cats.map((c) => <Leader key={c.id} T={T} label={c.tag} value={fmtINR(c.amount)} />)}
         </View>
 
         {/* cope meter */}
@@ -74,6 +78,9 @@ export default function DamageScreen() {
         {/* verdict */}
         <View style={{ paddingTop: 16 }}>
           <MonoLabel T={T} color={T.dim} size={10.5} style={{ letterSpacing: 2, marginBottom: 12 }}>* THE VERDICT *</MonoLabel>
+          {vs.length === 0 && (
+            <MonoLabel T={T} color={T.faint} size={11}>log a spend and we'll judge it.</MonoLabel>
+          )}
           <View style={{ gap: 16 }}>
             {vs.map((v, i) => (
               <View key={i} style={{ flexDirection: 'row', gap: 12 }}>

@@ -2,9 +2,12 @@
 // Shared receipt-language atoms for the Tally screens (React Native).
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import TallyMark from './TallyMark';
 import { FONTS, fmtINR } from './theme';
 import { catMeta } from './data';
+
+const tap = () => { try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (e) {} };
 
 export function MonoLabel({ T, children, color, size = 11, style }) {
   return (
@@ -40,9 +43,9 @@ export function Btn({ T, accent, accentInk, children, onPress, variant = 'solid'
     : { backgroundColor: accent };
   const txtColor = variant === 'ink' ? T.bg : variant === 'ghost' ? T.text : accentInk;
   return (
-    <Pressable onPress={onPress} disabled={disabled}
-      style={[{ width: '100%', borderRadius: 4, paddingVertical: 16, alignItems: 'center',
-        opacity: disabled ? 0.45 : 1 }, v, style]}>
+    <Pressable onPress={onPress ? (e) => { tap(); onPress(e); } : undefined} disabled={disabled}
+      style={({ pressed }) => [{ width: '100%', borderRadius: 4, paddingVertical: 16, alignItems: 'center',
+        opacity: disabled ? 0.45 : pressed ? 0.82 : 1 }, v, style]}>
       <Text style={{ fontFamily: FONTS.monoBold, fontSize: 13, letterSpacing: 1.2,
         textTransform: 'uppercase', color: txtColor }}>{children}</Text>
     </Pressable>

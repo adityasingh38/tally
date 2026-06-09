@@ -1,7 +1,7 @@
 // src/tally/TallyContext.js
 // Provides theme + prefs + a live transaction store to all Tally screens.
 // Prefs (dark/accent/tone/nihilism) persist via AsyncStorage.
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { THEMES, resolveAccent } from './theme';
 import { SEED_TXS } from './data';
@@ -17,10 +17,14 @@ export const useTally = () => useContext(Ctx);
 export function TallyProvider({ children }) {
   const [prefs, setPrefs] = useState(DEFAULT_PREFS);
   const [reactions, setReactions] = useState({});
-  const [realTxs, setRealTxs] = useState([]);     // fed by TxBridge (optional)
+  const [realTxs, setRealTxs] = useState([]);     // fed by TxBridge
+  const [txsLoaded, setTxsLoaded] = useState(false); // TxBridge has reported (even if empty)
+  const [refreshing, setRefreshing] = useState(false);
   const [localTxs, setLocalTxs] = useState(null);  // manual adds layer on top
-  const [modal, setModal] = useState(null); // 'add' | 'paywall' | null
+  const [modal, setModal] = useState(null); // 'add' | 'paywall' | 'txDetail' | null
+  const [selectedTx, setSelectedTx] = useState(null);
   const [income, setIncomeState] = useState(null); // monthly income (₹), user-set
+  const refetchRef = useRef(null);                  // TxBridge registers its refetch here
 
   // hydrate persisted prefs + reactions + income
   useEffect(() => {
@@ -58,16 +62,31 @@ export function TallyProvider({ children }) {
     });
   }, []);
 
-  const setRealTransactions = useCallback((list) => setRealTxs(list || []), []);
+  const setRealTransactions = useCallback((list) => {
+    setRealTxs(list || []);
+    setTxsLoaded(true);
+    setRefreshing(false);
+  }, []);
+
+  // TxBridge hands us its refetch so pull-to-refresh can re-pull from Supabase.
+  const registerRefetch = useCallback((fn) => { refetchRef.current = fn; }, []);
+  const refreshTxs = useCallback(() => {
+    if (refetchRef.current) {
+      setRefreshing(true);
+      Promise.resolve(refetchRef.current()).catch(() => setRefreshing(false));
+    }
+  }, []);
 
   const addTx = useCallback((tx) => {
     setLocalTxs((prev) => {
-      const base = prev || (realTxs.length ? realTxs : SEED_TXS);
+      const base = prev || (txsLoaded ? realTxs : SEED_TXS);
       return [{ id: 'u' + Date.now(), when: 'just now', sms: false, type: 'debit', ...tx }, ...base];
     });
-  }, [realTxs]);
+  }, [realTxs, txsLoaded]);
 
-  const txs = localTxs || (realTxs.length ? realTxs : SEED_TXS);
+  // Seed is only a pre-load placeholder; once your data loads we show YOURS
+  // (even if empty → honest empty states, not fake demo spends).
+  const txs = localTxs || (txsLoaded ? realTxs : SEED_TXS);
 
   const theme = THEMES[prefs.dark ? 'dark' : 'light'];
   const { accent, accentInk } = resolveAccent(theme, prefs.accent);
@@ -78,9 +97,14 @@ export function TallyProvider({ children }) {
     income, setIncome,
     store: { txs, addTx, reactions, react },
     setRealTransactions,
+    registerRefetch,
+    refreshing,
+    refreshTxs,
     modal,
+    selectedTx,
     openAdd: () => setModal('add'),
     openPaywall: () => setModal('paywall'),
+    openTx: (tx) => { setSelectedTx(tx); setModal('txDetail'); },
     closeModal: () => setModal(null),
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

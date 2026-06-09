@@ -20,6 +20,7 @@ import OnboardingScreen from './screens/OnboardingScreen';
 import AuthScreen from './screens/AuthScreen';
 import AddSheet from './screens/AddSheet';
 import Paywall from './screens/Paywall';
+import TxDetailSheet from './screens/TxDetailSheet';
 
 // keep your existing real auth hook
 import { useAuth } from '../hooks/useAuth';
@@ -72,23 +73,28 @@ function toTallyTx(tx) {
 }
 
 function TxBridge({ userId }) {
-  const { setRealTransactions } = useTally();
-  const { transactions } = useTransactions(userId, { fromDate: fromDate90, limit: 200 });
+  const { setRealTransactions, registerRefetch } = useTally();
+  const { transactions, loading, refetch } = useTransactions(userId, { fromDate: fromDate90, limit: 200 });
+
+  React.useEffect(() => { registerRefetch(refetch); }, [refetch, registerRefetch]);
+
   React.useEffect(() => {
-    if (transactions && transactions.length) {
-      setRealTransactions(transactions.map(toTallyTx));
-    }
-  }, [transactions, setRealTransactions]);
+    // Report once loaded — even an empty result, so the UI shows honest empty
+    // states instead of falling back to demo seed forever.
+    if (!loading) setRealTransactions((transactions || []).map(toTallyTx));
+  }, [transactions, loading, setRealTransactions]);
+
   return null;
 }
 
 // renders the globally-available modals, reading visibility from the context
 function GlobalModals() {
-  const { modal, closeModal } = useTally();
+  const { modal, closeModal, selectedTx } = useTally();
   return (
     <>
       <AddSheet visible={modal === 'add'} onClose={closeModal} />
       <Paywall visible={modal === 'paywall'} onClose={closeModal} />
+      <TxDetailSheet visible={modal === 'txDetail'} tx={selectedTx} onClose={closeModal} />
     </>
   );
 }

@@ -29,13 +29,13 @@ export default function AnimatedSplash({ onDone }) {
   const wrap = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    const cfg = { duration: 260, easing: Easing.out(Easing.back(1.5)), useNativeDriver: true };
+    const cfg = { duration: 240, easing: Easing.out(Easing.back(1.6)), useNativeDriver: true };
     Animated.sequence([
-      Animated.stagger(120, bars.map((v) => Animated.timing(v, { toValue: 1, ...cfg }))),
-      Animated.timing(slash, { toValue: 1, duration: 300, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
-      Animated.timing(word, { toValue: 1, duration: 380, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
-      Animated.delay(550),
-      Animated.timing(wrap, { toValue: 0, duration: 360, useNativeDriver: true }),
+      Animated.stagger(100, bars.map((v) => Animated.timing(v, { toValue: 1, ...cfg }))),
+      Animated.timing(slash, { toValue: 1, duration: 230, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      Animated.timing(word, { toValue: 1, duration: 360, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
+      Animated.delay(500),
+      Animated.timing(wrap, { toValue: 0, duration: 340, useNativeDriver: true }),
     ]).start(({ finished }) => {
       if (finished && onDone) onDone();
     });
@@ -49,15 +49,28 @@ export default function AnimatedSplash({ onDone }) {
             key={i}
             style={[
               styles.bar,
-              { marginLeft: i ? GAP : 0, opacity: v, transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) }] },
+              {
+                marginLeft: i ? GAP : 0,
+                opacity: v,
+                transformOrigin: 'center bottom',
+                transform: [
+                  { translateY: v.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) },
+                  { scaleY: v.interpolate({ inputRange: [0, 1], outputRange: [0.82, 1] }) },
+                ],
+              },
             ]}
           />
         ))}
+        {/* slash draws diagonally from the lower-left, like a pen stroke */}
         <Animated.View
           pointerEvents="none"
           style={[
             styles.slash,
-            { opacity: slash, transform: [{ rotate: '60deg' }, { scaleY: slash.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) }] },
+            {
+              opacity: slash.interpolate({ inputRange: [0, 0.15, 1], outputRange: [0, 1, 1] }),
+              transformOrigin: 'center bottom',
+              transform: [{ rotate: '60deg' }, { scaleY: slash.interpolate({ inputRange: [0, 1], outputRange: [0, 1] }) }],
+            },
           ]}
         />
       </View>

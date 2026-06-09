@@ -1,6 +1,7 @@
 // src/tally/screens/HomeScreen.js  → your "Dashboard" tab
 import React from 'react';
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import { View, Text, ScrollView, Pressable, RefreshControl } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { FONTS, fmtINR } from '../theme';
 import { MonoLabel, Rule, Btn, TxRow, Brand } from '../ui';
@@ -20,7 +21,8 @@ function todayLabel() {
 }
 
 export default function HomeScreen({ navigation }) {
-  const { T, accent, accentInk, income, store, openAdd } = useTally();
+  const { T, accent, accentInk, income, store, openAdd, refreshing, refreshTxs, openTx } = useTally();
+  const insets = useSafeAreaInsets();
 
   const txs = store.txs;
   const total = totalSpent(txs);
@@ -38,7 +40,8 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: T.bg }}
-      contentContainerStyle={{ paddingHorizontal: 18, paddingTop: 54, paddingBottom: 120 }}>
+      contentContainerStyle={{ paddingHorizontal: 18, paddingTop: insets.top + 14, paddingBottom: 120 }}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshTxs} tintColor={accent} colors={[accent]} />}>
       {/* header */}
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 6 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9 }}>
@@ -109,7 +112,7 @@ export default function HomeScreen({ navigation }) {
         <Rule T={T} />
         {recent.map((tx) => (
           <View key={tx.id}>
-            <TxRow T={T} tx={tx} onPress={() => navigation && navigation.navigate('Transactions')} />
+            <TxRow T={T} tx={tx} onPress={() => openTx(tx)} />
             <Rule T={T} />
           </View>
         ))}

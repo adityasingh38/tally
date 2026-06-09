@@ -1,6 +1,7 @@
 // src/tally/screens/BudgetScreen.js  → your "Budget" tab ("delusions")
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, Pressable, TextInput, Alert, ActivityIndicator } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { useAuth } from '../../hooks/useAuth';
 import { getBudgets, upsertBudget } from '../../services/supabase';
@@ -14,6 +15,7 @@ const BUDGETABLE = ['rent', 'food', 'shopping', 'entertainment', 'utilities', 't
 export default function BudgetScreen() {
   const { T, accent, accentInk, store } = useTally();
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
   const [budgets, setBudgets] = useState({});   // { category: monthly_limit }
   const [editing, setEditing] = useState(null);
   const [inputVal, setInputVal] = useState('');
@@ -51,7 +53,7 @@ export default function BudgetScreen() {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: T.bg }}
-      contentContainerStyle={{ paddingHorizontal: 18, paddingTop: 54, paddingBottom: 120 }}>
+      contentContainerStyle={{ paddingHorizontal: 18, paddingTop: insets.top + 14, paddingBottom: 120 }}>
       <ScreenHeader T={T} accent={accent} title="delusions" sub="the limits you set · vs reality" />
 
       {/* summary — only when at least one budget is set */}
