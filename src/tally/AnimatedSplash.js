@@ -74,12 +74,13 @@ export default function AnimatedSplash({ onDone }) {
 
 const styles = StyleSheet.create({
   fill: { backgroundColor: INK, alignItems: 'center', justifyContent: 'center' },
-  markRow: { flexDirection: 'row', alignItems: 'flex-end', width: ROW_W, height: ROW_H, position: 'relative' },
+  // height == bar height so the slash centres on the bars, not on empty space.
+  markRow: { flexDirection: 'row', alignItems: 'flex-end', width: ROW_W, height: H, position: 'relative' },
   bar: { width: SW, height: H, backgroundColor: RED, borderRadius: 3 },
   slash: {
     position: 'absolute',
-    left: (ROW_W - SW) / 2,
-    top: (ROW_H - SLASH_H) / 2,
+    left: (ROW_W - SW) / 2,   // horizontally centred on the bar group
+    top: (H - SLASH_H) / 2,   // vertically centred on the bars (overshoots top/bottom)
     width: SW,
     height: SLASH_H,
     backgroundColor: RED,
