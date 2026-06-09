@@ -8,6 +8,7 @@ import { SEED_TXS } from './data';
 
 const PREFS_KEY = 'tally_prefs_v1';
 const REACT_KEY = 'tally_reactions_v1';
+const INCOME_KEY = 'tally_income';
 const DEFAULT_PREFS = { dark: true, accent: 'red', tone: 'unhinged', nihil: 2 };
 
 const Ctx = createContext(null);
@@ -19,8 +20,9 @@ export function TallyProvider({ children }) {
   const [realTxs, setRealTxs] = useState([]);     // fed by TxBridge (optional)
   const [localTxs, setLocalTxs] = useState(null);  // manual adds layer on top
   const [modal, setModal] = useState(null); // 'add' | 'paywall' | null
+  const [income, setIncomeState] = useState(null); // monthly income (₹), user-set
 
-  // hydrate persisted prefs + reactions
+  // hydrate persisted prefs + reactions + income
   useEffect(() => {
     (async () => {
       try {
@@ -28,8 +30,16 @@ export function TallyProvider({ children }) {
         if (p) setPrefs({ ...DEFAULT_PREFS, ...JSON.parse(p) });
         const r = await AsyncStorage.getItem(REACT_KEY);
         if (r) setReactions(JSON.parse(r));
+        const inc = await AsyncStorage.getItem(INCOME_KEY);
+        if (inc) setIncomeState(Number(inc) || null);
       } catch (e) {}
     })();
+  }, []);
+
+  const setIncome = useCallback((v) => {
+    const n = Number(v) || 0;
+    setIncomeState(n || null);
+    AsyncStorage.setItem(INCOME_KEY, String(n)).catch(() => {});
   }, []);
 
   const setPref = useCallback((k, v) => {
@@ -65,6 +75,7 @@ export function TallyProvider({ children }) {
   const value = {
     T: theme, accent, accentInk,
     prefs, setPref,
+    income, setIncome,
     store: { txs, addTx, reactions, react },
     setRealTransactions,
     modal,

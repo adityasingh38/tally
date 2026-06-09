@@ -1,13 +1,13 @@
 // src/tally/screens/SettingsScreen.js  → your "Settings" tab
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Pressable, Alert, PermissionsAndroid, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Pressable, Alert, PermissionsAndroid, ActivityIndicator, TextInput } from 'react-native';
 import { useTally } from '../TallyContext';
 import { useAuth } from '../../hooks/useAuth';
 import { syncHistoricalSMS } from '../../services/smsSync';
 import { getTransactions, deleteAccount } from '../../services/supabase';
 import { exportToCSV } from '../../services/export';
 import { requestNotificationPermission } from '../../services/budgetAlerts';
-import { FONTS } from '../theme';
+import { FONTS, fmtINR } from '../theme';
 import { MonoLabel, Rule, ScreenHeader, Brand } from '../ui';
 
 function Toggle({ T, accent, on, onChange }) {
@@ -48,11 +48,20 @@ function Row({ T, label, sub, control, onPress }) {
 }
 
 export default function SettingsScreen() {
-  const { T, accent, accentInk, prefs, setPref, openPaywall } = useTally();
+  const { T, accent, accentInk, prefs, setPref, openPaywall, income, setIncome } = useTally();
   const { user, signOut } = useAuth();
   const [notif, setNotif] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [editIncome, setEditIncome] = useState(false);
+  const [incomeInput, setIncomeInput] = useState('');
+
+  function saveIncome() {
+    const n = Number(incomeInput.replace(/[^0-9]/g, ''));
+    if (n > 0) setIncome(n);
+    setEditIncome(false);
+    setIncomeInput('');
+  }
 
   async function handleSync() {
     try {
@@ -126,6 +135,38 @@ export default function SettingsScreen() {
           <Text numberOfLines={1} style={{ fontFamily: FONTS.display, fontSize: 22, color: T.text }}>@{handle}</Text>
           <MonoLabel T={T} color={T.dim} size={10.5} style={{ marginTop: 3 }}>tally free</MonoLabel>
         </View>
+      </View>
+
+      {/* monthly income — powers "left to burn" */}
+      <View style={{ marginTop: 20, backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 6, padding: 16 }}>
+        {editIncome ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Text style={{ color: T.dim, fontSize: 18, fontFamily: FONTS.sansBold }}>₹</Text>
+            <TextInput
+              value={incomeInput}
+              onChangeText={setIncomeInput}
+              keyboardType="numeric"
+              placeholder="monthly income"
+              placeholderTextColor={T.faint}
+              autoFocus
+              style={{ flex: 1, color: T.text, fontSize: 18, fontFamily: FONTS.mono }}
+            />
+            <Pressable onPress={saveIncome} style={{ backgroundColor: accent, borderRadius: 4, paddingHorizontal: 16, paddingVertical: 9 }}>
+              <Text style={{ color: accentInk, fontFamily: FONTS.monoBold, fontSize: 12, letterSpacing: 1 }}>SAVE</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <Pressable onPress={() => { setEditIncome(true); setIncomeInput(income ? String(income) : ''); }}
+            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View>
+              <MonoLabel T={T} color={T.dim} size={10}>monthly income</MonoLabel>
+              <Text style={{ fontFamily: FONTS.display, fontSize: 22, color: income ? T.text : T.faint, marginTop: 3 }}>
+                {income ? fmtINR(income) : 'not set'}
+              </Text>
+            </View>
+            <MonoLabel T={T} color={accent} size={11}>{income ? 'edit' : 'set'} →</MonoLabel>
+          </Pressable>
+        )}
       </View>
 
       {/* pro upsell */}

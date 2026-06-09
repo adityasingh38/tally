@@ -4,20 +4,23 @@ import { View, Text, ScrollView } from 'react-native';
 import { useTally } from '../TallyContext';
 import { FONTS, fmtINR } from '../theme';
 import { MonoLabel, Rule, Leader, ReceiptShell, Btn, Tag, Brand } from '../ui';
-import {
-  totalSpent, groupByCat, LAST_MONTH, INCOME,
-  copeZone, verdictsFor,
-} from '../data';
+import { totalSpent, groupByCat, copeZone } from '../data';
 
 export default function DamageScreen() {
-  const { T, accent, accentInk, prefs, store } = useTally();
+  const { T, accent, accentInk, income, store } = useTally();
   const txs = store.txs;
   const total = totalSpent(txs);
   const cats = groupByCat(txs);
-  const ratio = total / INCOME;
+  const hasIncome = !!income && income > 0;
+  const ratio = hasIncome ? total / income : 0.5;
   const zone = copeZone(ratio);
-  const delta = ((total - LAST_MONTH) / LAST_MONTH) * 100;
-  const vs = verdictsFor(prefs.tone, prefs.nihil);
+  const pctOf = (a) => (total > 0 ? Math.round((a / total) * 100) : 0);
+  // The "verdict" is now derived from the real top categories, not canned lines.
+  const vs = cats.slice(0, 3).map((c) => ({
+    big: c.tag,
+    line: `${fmtINR(c.amount)} on ${c.label.toLowerCase()}.`,
+    sub: `${pctOf(c.amount)}% of your spend`,
+  }));
   const blocks = 12, filled = Math.max(0, Math.min(blocks, Math.round(ratio * blocks)));
 
   return (
@@ -39,7 +42,9 @@ export default function DamageScreen() {
           <MonoLabel T={T} color={T.dim} size={10.5} style={{ letterSpacing: 2 }}>TOTAL DAMAGE</MonoLabel>
           <Text style={{ fontFamily: FONTS.display, fontSize: 52, color: T.text, marginTop: 6 }}>{fmtINR(total)}</Text>
           <View style={{ marginTop: 12 }}>
-            <Tag T={T} accent={accent} accentInk={accentInk} rotate={-1.5}>↘ ONLY GOING DOWN · +{delta.toFixed(0)}% MoM</Tag>
+            <Tag T={T} accent={accent} accentInk={accentInk} rotate={-1.5}>
+              {cats[0] ? `${cats[0].tag} LEADS · ${pctOf(cats[0].amount)}% OF SPEND` : 'NO DAMAGE YET'}
+            </Tag>
           </View>
         </View>
 

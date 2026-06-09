@@ -4,19 +4,37 @@ import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useTally } from '../TallyContext';
 import { FONTS, fmtINR } from '../theme';
 import { MonoLabel, Rule, Btn, TxRow, Brand } from '../ui';
-import { totalSpent, INCOME, PAYDAY_IN, copeZone, STREAK_BROKE_DAYS, VOICE } from '../data';
+import { totalSpent, groupByCat, copeZone } from '../data';
+
+// A real, data-derived "read" — no canned mock lines.
+function buildRead(top, total) {
+  if (!top || total <= 0) return "no damage logged yet. suspicious, honestly.";
+  const pct = Math.round((top.amount / total) * 100);
+  return `${fmtINR(top.amount)} on ${top.label.toLowerCase()} — ${pct}% of everything. bold strategy.`;
+}
+
+function todayLabel() {
+  return new Date()
+    .toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+    .toLowerCase();
+}
 
 export default function HomeScreen({ navigation }) {
-  const { T, accent, accentInk, prefs, store, openAdd } = useTally();
+  const { T, accent, accentInk, income, store, openAdd } = useTally();
+
   const txs = store.txs;
   const total = totalSpent(txs);
-  const left = Math.max(0, INCOME - total);
-  const perDay = Math.round(left / PAYDAY_IN);
-  const ratio = total / INCOME;
-  const zone = copeZone(ratio);
+  const cats = groupByCat(txs);
+  const top = cats[0];
+  const spends = txs.filter((t) => t.type !== 'credit');
+  const count = spends.length;
+
+  const hasIncome = !!income && income > 0;
+  const left = hasIncome ? Math.max(0, income - total) : null;
+  const ratio = hasIncome ? Math.min(total / income, 1) : 0;
+  const zone = copeZone(hasIncome ? total / income : 0.5);
+
   const recent = txs.slice(0, 5);
-  const nudge = (VOICE[prefs.tone] || VOICE.dry)[0];
-  const goInsights = () => navigation && navigation.navigate('Insights');
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: T.bg }}
@@ -27,39 +45,56 @@ export default function HomeScreen({ navigation }) {
           <Brand T={T} color={accent} size={16} />
           <MonoLabel T={T} color={T.dim}>home</MonoLabel>
         </View>
-        <MonoLabel T={T} color={T.faint}>mon · jun 24</MonoLabel>
+        <MonoLabel T={T} color={T.faint}>{todayLabel()}</MonoLabel>
       </View>
 
       {/* hero */}
-      <MonoLabel T={T} color={T.dim} style={{ marginTop: 6 }}>left to burn</MonoLabel>
-      <Text style={{ fontFamily: FONTS.display, fontSize: 60, color: T.text, marginTop: 6 }}>{fmtINR(left)}</Text>
-      <Text style={{ fontFamily: FONTS.mono, fontSize: 12, color: T.dim, marginTop: 8 }}>
-        {fmtINR(perDay)}/day till payday · jun 30
-      </Text>
-      <View style={{ marginTop: 16, height: 10, borderRadius: 999, backgroundColor: T.chip, overflow: 'hidden', flexDirection: 'row' }}>
-        <View style={{ width: `${Math.min(ratio * 100, 100)}%`, backgroundColor: accent }} />
-      </View>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
-        <MonoLabel T={T} color={T.faint} size={10}>{Math.round(ratio * 100)}% of ₹65k gone</MonoLabel>
-        <MonoLabel T={T} color={T.faint} size={10}>{zone.label}</MonoLabel>
-      </View>
+      {hasIncome ? (
+        <>
+          <MonoLabel T={T} color={T.dim} style={{ marginTop: 6 }}>left to burn</MonoLabel>
+          <Text style={{ fontFamily: FONTS.display, fontSize: 60, color: T.text, marginTop: 6 }}>{fmtINR(left)}</Text>
+          <Text style={{ fontFamily: FONTS.mono, fontSize: 12, color: T.dim, marginTop: 8 }}>
+            of {fmtINR(income)} this month
+          </Text>
+          <View style={{ marginTop: 16, height: 10, borderRadius: 999, backgroundColor: T.chip, overflow: 'hidden', flexDirection: 'row' }}>
+            <View style={{ width: `${Math.round(ratio * 100)}%`, backgroundColor: accent }} />
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
+            <MonoLabel T={T} color={T.faint} size={10}>{Math.round(ratio * 100)}% gone</MonoLabel>
+            <MonoLabel T={T} color={T.faint} size={10}>{zone.label}</MonoLabel>
+          </View>
+        </>
+      ) : (
+        <>
+          <MonoLabel T={T} color={T.dim} style={{ marginTop: 6 }}>spent this month</MonoLabel>
+          <Text style={{ fontFamily: FONTS.display, fontSize: 60, color: T.text, marginTop: 6 }}>{fmtINR(total)}</Text>
+          <Pressable onPress={() => navigation && navigation.navigate('Settings')}>
+            <MonoLabel T={T} color={accent} size={11} style={{ marginTop: 10 }}>
+              set your income in YOU → see what's left →
+            </MonoLabel>
+          </Pressable>
+        </>
+      )}
 
-      {/* mini stats */}
+      {/* mini stats — real */}
       <View style={{ flexDirection: 'row', gap: 12, marginTop: 22 }}>
         <View style={{ flex: 1, backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 14, padding: 16 }}>
-          <Text style={{ fontFamily: FONTS.display, fontSize: 26, color: T.text }}>{STREAK_BROKE_DAYS}d 🔥</Text>
-          <MonoLabel T={T} color={T.dim} size={10} style={{ marginTop: 4 }}>broke streak</MonoLabel>
+          <Text style={{ fontFamily: FONTS.display, fontSize: 26, color: T.text }}>{count}</Text>
+          <MonoLabel T={T} color={T.dim} size={10} style={{ marginTop: 4 }}>spends logged</MonoLabel>
         </View>
         <View style={{ flex: 1, backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 14, padding: 16 }}>
-          <Text style={{ fontFamily: FONTS.display, fontSize: 26, color: accent }}>+10% ↗</Text>
-          <MonoLabel T={T} color={T.dim} size={10} style={{ marginTop: 4 }}>burn rate</MonoLabel>
+          <Text style={{ fontFamily: FONTS.display, fontSize: 26, color: accent }}>{top ? top.tag : '—'}</Text>
+          <MonoLabel T={T} color={T.dim} size={10} style={{ marginTop: 4 }}>
+            {top ? `top · ${fmtINR(top.amount)}` : 'no category yet'}
+          </MonoLabel>
         </View>
       </View>
 
-      {/* today's read */}
-      <Pressable onPress={goInsights} style={{ marginTop: 22, backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 18, padding: 18 }}>
+      {/* today's read — derived from real data */}
+      <Pressable onPress={() => navigation && navigation.navigate('Insights')}
+        style={{ marginTop: 22, backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 18, padding: 18 }}>
         <MonoLabel T={T} color={accent} style={{ marginBottom: 9 }}>today's read</MonoLabel>
-        <Text style={{ fontFamily: FONTS.sansMed, fontSize: 16, lineHeight: 23, color: T.text }}>{nudge.line}</Text>
+        <Text style={{ fontFamily: FONTS.sansMed, fontSize: 16, lineHeight: 23, color: T.text }}>{buildRead(top, total)}</Text>
         <MonoLabel T={T} color={T.dim} size={10.5} style={{ marginTop: 12 }}>see the full damage →</MonoLabel>
       </Pressable>
 

@@ -1,6 +1,6 @@
 // src/tally/screens/OnboardingScreen.js
 import React, { useState } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, PermissionsAndroid, Alert, Linking } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, PermissionsAndroid, Alert, Linking, TextInput } from 'react-native';
 import { useTally } from '../TallyContext';
 import { useAuth } from '../../hooks/useAuth';
 import { syncHistoricalSMS } from '../../services/smsSync';
@@ -15,10 +15,17 @@ const FEATURES = [
 ];
 
 export default function OnboardingScreen({ onDone }) {
-  const { T, accent, accentInk } = useTally();
+  const { T, accent, accentInk, setIncome } = useTally();
   const { user } = useAuth();
   const [syncing, setSyncing] = useState(false);
   const [progress, setProgress] = useState(null);
+  const [incomeInput, setIncomeInput] = useState('');
+
+  const saveIncome = () => {
+    const n = Number(incomeInput.replace(/[^0-9]/g, ''));
+    if (n > 0) setIncome(n);
+  };
+  const finish = () => { saveIncome(); onDone && onDone(); };
 
   async function requestSMS() {
     try {
@@ -35,6 +42,7 @@ export default function OnboardingScreen({ onDone }) {
   }
 
   async function handleAllow() {
+    saveIncome();
     const granted = await requestSMS();
     if (!granted) {
       Alert.alert(
@@ -84,7 +92,26 @@ export default function OnboardingScreen({ onDone }) {
         ))}
       </View>
 
-      <View style={{ gap: 10, marginTop: 24 }}>
+      {/* monthly income — powers "left to burn" */}
+      <View style={{ marginTop: 28 }}>
+        <MonoLabel T={T} color={T.dim} style={{ marginBottom: 8 }}>monthly income (₹)</MonoLabel>
+        <TextInput
+          value={incomeInput}
+          onChangeText={setIncomeInput}
+          keyboardType="numeric"
+          placeholder="e.g. 65000"
+          placeholderTextColor={T.faint}
+          style={{
+            backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 4,
+            paddingVertical: 14, paddingHorizontal: 16, color: T.text, fontSize: 18, fontFamily: FONTS.mono,
+          }}
+        />
+        <MonoLabel T={T} color={T.faint} size={9.5} style={{ marginTop: 6 }}>
+          optional · so we can show what's left to burn
+        </MonoLabel>
+      </View>
+
+      <View style={{ gap: 10, marginTop: 22 }}>
         {syncing ? (
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, paddingVertical: 16 }}>
             <ActivityIndicator color={accent} />
@@ -95,7 +122,7 @@ export default function OnboardingScreen({ onDone }) {
         ) : (
           <>
             <Btn T={T} accent={accent} accentInk={accentInk} onPress={handleAllow}>allow SMS access</Btn>
-            <Btn T={T} accent={accent} accentInk={accentInk} variant="ghost" onPress={() => onDone && onDone()}>i'll log it manually</Btn>
+            <Btn T={T} accent={accent} accentInk={accentInk} variant="ghost" onPress={finish}>i'll log it manually</Btn>
             <MonoLabel T={T} color={T.faint} size={9.5} style={{ textAlign: 'center', marginTop: 8 }}>
               we never store your texts. we just judge them.
             </MonoLabel>
