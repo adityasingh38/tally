@@ -1,7 +1,7 @@
 // App.js — root. Loads fonts, then renders Tally.
 // If you already have an App.js, just merge the font-loading + <TallyNavigation/>.
 import 'react-native-gesture-handler';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -26,10 +26,12 @@ import {
 } from '@expo-google-fonts/space-mono';
 
 import TallyNavigation from './src/tally/TallyNavigation';
+import AnimatedSplash from './src/tally/AnimatedSplash';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function App() {
+  const [introDone, setIntroDone] = useState(false);
   const [loaded] = useFonts({
     BricolageGrotesque_700Bold,
     BricolageGrotesque_800ExtraBold,
@@ -54,6 +56,7 @@ export default function App() {
         <AuthProvider>
           <TallyNavigation />
         </AuthProvider>
+        {!introDone && <AnimatedSplash onDone={() => setIntroDone(true)} />}
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

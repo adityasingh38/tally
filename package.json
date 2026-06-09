@@ -54,6 +54,7 @@
   "private": true,
   "devDependencies": {
     "babel-plugin-transform-inline-environment-variables": "^0.4.4",
+    "sharp": "^0.34.5",
     "typescript": "~6.0.3"
   },
   "expo": {

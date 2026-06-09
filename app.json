@@ -3,6 +3,15 @@
     "name": "tally",
     "slug": "tally",
     "version": "1.0.0",
+    "icon": "./assets/icon.png",
+    "backgroundColor": "#0E0F0C",
+    "userInterfaceStyle": "dark",
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0E0F0C"
+      }
+    },
     "extra": {
       "eas": {
         "projectId": "6d5141af-cb22-4e25-b1db-5a9f83a0c262"
@@ -11,8 +20,16 @@
     "plugins": [
       "expo-asset",
       "expo-font",
-      "expo-splash-screen",
-      "expo-status-bar"
+      "expo-status-bar",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180,
+          "resizeMode": "contain",
+          "backgroundColor": "#0E0F0C"
+        }
+      ]
     ]
   }
 }
