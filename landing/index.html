@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>tally — track the damage</title>
+<meta name="description" content="A snarky AI money manager that reads your bank SMS, logs every spend, and tells you how badly you blew it. Coming soon." />
+<meta property="og:title" content="tally — track the damage. financially feral." />
+<meta property="og:description" content="The money app for people who already know it's bad and want to watch anyway." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#0E0F0C; --surface:#15160E; --card:#181A12; --line:rgba(233,255,208,0.10);
+    --line2:rgba(233,255,208,0.18); --text:#F2F3EC; --dim:#9DA08F; --faint:#63655A;
+    --acid:#D4FF2E; --red:#FF5436;
+    --display:'Bricolage Grotesque',sans-serif; --sans:'Space Grotesk',sans-serif; --mono:'Space Mono',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--ink);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.5;overflow-x:hidden}
+  .wrap{max-width:760px;margin:0 auto;padding:0 22px}
+  .mono{font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em;font-size:11px;color:var(--faint)}
+
+  header{display:flex;align-items:center;justify-content:space-between;padding:26px 0}
+  .brand{display:flex;align-items:center;gap:11px}
+  .brand svg{display:block}
+  .brand b{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.04em}
+  .pill{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);background:var(--red);padding:5px 9px;border-radius:3px}
+
+  .hero{padding:64px 0 44px;text-align:center}
+  .hero h1{font-family:var(--display);font-weight:800;font-size:clamp(40px,9vw,76px);line-height:1.02;letter-spacing:-.035em}
+  .hero h1 .red{color:var(--red)}
+  .hero p{max-width:440px;margin:22px auto 0;font-size:17px;color:var(--dim);line-height:1.5}
+
+  form{max-width:440px;margin:34px auto 0;display:flex;gap:8px}
+  input[type=email]{flex:1;background:var(--card);border:1px solid var(--line2);border-radius:4px;
+    padding:15px 16px;color:var(--text);font-size:15px;font-family:var(--sans);outline:none}
+  input[type=email]:focus{border-color:var(--red)}
+  input::placeholder{color:var(--faint)}
+  button{background:var(--red);color:#fff;border:none;border-radius:4px;padding:0 22px;cursor:pointer;
+    font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;transition:opacity .15s}
+  button:hover{opacity:.88}
+  button:disabled{opacity:.5;cursor:default}
+  .note{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--faint);text-align:center;margin-top:12px}
+  .msg{text-align:center;margin-top:14px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;display:none}
+  .msg.ok{display:block;color:var(--acid)}
+  .msg.err{display:block;color:var(--red)}
+
+  /* receipt visual */
+  .receipt{background:var(--surface);border:1px solid var(--line);max-width:340px;margin:56px auto 0;
+    padding:0;position:relative}
+  .jag{height:9px;background:repeating-linear-gradient(-45deg,var(--surface) 0 7px,transparent 7px 14px)}
+  .receipt .body{padding:22px 22px 26px}
+  .rcenter{text-align:center;border-bottom:1.5px dashed var(--line2);padding-bottom:14px}
+  .rcenter .big{font-family:var(--display);font-weight:800;font-size:40px;margin-top:6px}
+  .leader{display:flex;align-items:flex-end;gap:6px;font-family:var(--mono);font-size:13px;margin-top:13px}
+  .leader .dot{flex:1;border-bottom:1.5px dotted var(--line2);transform:translateY(-4px)}
+  .leader .v{color:var(--text)}
+  .verdict{border-top:1.5px dashed var(--line2);margin-top:16px;padding-top:14px}
+  .verdict .tag{font-family:var(--mono);font-size:10px;color:var(--red);letter-spacing:.1em}
+  .verdict p{font-size:13.5px;color:var(--text);margin-top:5px;line-height:1.45}
+
+  .features{padding:64px 0 20px;display:grid;gap:2px}
+  .feat{display:flex;gap:16px;padding:18px 0;border-bottom:1.5px dashed var(--line)}
+  .feat .t{font-family:var(--mono);font-weight:700;font-size:11px;color:var(--red);min-width:64px;letter-spacing:.08em;padding-top:3px}
+  .feat .d{font-size:15px;color:var(--text);line-height:1.45}
+  .feat .d span{color:var(--dim)}
+
+  footer{padding:48px 0 56px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
+  .foot-links{display:flex;gap:18px}
+  .foot-links a{color:var(--dim);font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-decoration:none}
+  .foot-links a:hover{color:var(--red)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <svg width="26" height="30" viewBox="0 0 100 116" aria-label="tally">
+        <g fill="#FF5436">
+          <rect x="14" y="22" width="11" height="72" rx="4"/>
+          <rect x="36" y="22" width="11" height="72" rx="4"/>
+          <rect x="58" y="22" width="11" height="72" rx="4"/>
+          <rect x="80" y="22" width="11" height="72" rx="4"/>
+          <rect x="40" y="16" width="11" height="86" rx="4" transform="rotate(26 50 58)"/>
+        </g>
+      </svg>
+      <b>tally</b>
+    </div>
+    <span class="pill">coming soon</span>
+  </header>
+
+  <section class="hero">
+    <h1>track the damage.<br><span class="red">financially feral.</span></h1>
+    <p>A snarky AI money manager that reads your bank SMS, logs every spend, and is deeply unbothered about your feelings.</p>
+
+    <form id="waitlist">
+      <input id="email" type="email" placeholder="your@email.com" required autocomplete="email" />
+      <button id="submit" type="submit">join the waitlist</button>
+    </form>
+    <div class="note">no spam. just the occasional roast.</div>
+    <div class="msg" id="msg"></div>
+  </section>
+
+  <!-- sample receipt -->
+  <div class="receipt">
+    <div class="jag" style="background-position:0 -7px"></div>
+    <div class="body">
+      <div class="rcenter">
+        <div class="mono" style="letter-spacing:.2em">the damage · this month</div>
+        <div class="big">₹51,847</div>
+      </div>
+      <div class="leader"><span>FOOD</span><span class="dot"></span><span class="v">₹12,400</span></div>
+      <div class="leader"><span>SHOP</span><span class="dot"></span><span class="v">₹13,498</span></div>
+      <div class="leader"><span>FUN</span><span class="dot"></span><span class="v">₹6,120</span></div>
+      <div class="verdict">
+        <div class="tag">* THE VERDICT *</div>
+        <p>Swiggy saw you more than your friends did this month. 31 orders. Bold.</p>
+      </div>
+    </div>
+    <div class="jag"></div>
+  </div>
+
+  <section class="features">
+    <div class="feat"><div class="t">AUTO</div><div class="d">Reads your bank SMS, logs every spend. <span>No typing, no lying to yourself.</span></div></div>
+    <div class="feat"><div class="t">VERDICT</div><div class="d">An AI that roasts your spending. <span>Deeply unbothered about your feelings.</span></div></div>
+    <div class="feat"><div class="t">RECEIPT</div><div class="d">A shareable receipt of the monthly carnage. <span>Broke, but make it a brand.</span></div></div>
+  </section>
+
+  <footer>
+    <svg width="22" height="26" viewBox="0 0 100 116"><g fill="#63655A">
+      <rect x="14" y="22" width="11" height="72" rx="4"/><rect x="36" y="22" width="11" height="72" rx="4"/>
+      <rect x="58" y="22" width="11" height="72" rx="4"/><rect x="80" y="22" width="11" height="72" rx="4"/>
+      <rect x="40" y="16" width="11" height="86" rx="4" transform="rotate(26 50 58)"/></g></svg>
+    <div class="mono">we never store your texts. we just judge them.</div>
+    <div class="foot-links">
+      <a href="#">instagram</a><a href="#">x / twitter</a><a href="./privacy.html">privacy</a>
+    </div>
+    <div class="mono" style="color:#3a3b34">© 2026 tally</div>
+  </footer>
+
+</div>
+
+<script>
+  // Waitlist → Supabase. Anon key is a public client credential (safe to ship).
+  // Requires a `waitlist` table with an anon INSERT policy — see landing/SETUP.md.
+  const SUPABASE_URL = 'https://gjrmpiauvreudygyvdhx.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqcm1waWF1dnJldWR5Z3l2ZGh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3MjcyNDUsImV4cCI6MjA5NjMwMzI0NX0.6kq_QrPkmIAQz4xpvwxem6pFQALnAKATmhTBNskUWhc';
+
+  const form = document.getElementById('waitlist');
+  const msg = document.getElementById('msg');
+  const btn = document.getElementById('submit');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    if (!email) return;
+    btn.disabled = true; btn.textContent = '...';
+    msg.className = 'msg';
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/waitlist', {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({ email }),
+      });
+      if (res.ok) {
+        form.style.display = 'none';
+        msg.textContent = "you're on the list. brace yourself.";
+        msg.className = 'msg ok';
+      } else if (res.status === 409) {
+        msg.textContent = "already on the list. eager.";
+        msg.className = 'msg ok';
+        form.style.display = 'none';
+      } else {
+        throw new Error('http ' + res.status);
+      }
+    } catch (err) {
+      msg.textContent = 'something broke. try again.';
+      msg.className = 'msg err';
+      btn.disabled = false; btn.textContent = 'join the waitlist';
+    }
+  });
+</script>
+</body>
+</html>
