@@ -1,6 +1,7 @@
 // src/tally/screens/BudgetScreen.js  → your "Budget" tab ("delusions")
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, Pressable, TextInput, Alert, ActivityIndicator } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { useAuth } from '../../hooks/useAuth';
@@ -36,6 +37,7 @@ export default function BudgetScreen() {
   groupByCat(store.txs).forEach((c) => { spentMap[c.id] = c.amount; });
 
   async function removeBudget(catId) {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     await deleteBudget(user.id, catId);
     setBudgets((prev) => { const next = { ...prev }; delete next[catId]; return next; });
     if (editing === catId) setEditing(null);
@@ -46,6 +48,7 @@ export default function BudgetScreen() {
     if (!limit || limit <= 0) { Alert.alert('Invalid', 'Enter a positive amount.'); return; }
     setSaving(true);
     await upsertBudget({ user_id: user.id, category: catId, monthly_limit: limit, alert_threshold: 0.8 });
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setBudgets((prev) => ({ ...prev, [catId]: limit }));
     setEditing(null);
     setInputVal('');

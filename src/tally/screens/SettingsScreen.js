@@ -1,6 +1,7 @@
 // src/tally/screens/SettingsScreen.js  → your "Settings" tab
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable, Alert, PermissionsAndroid, ActivityIndicator, TextInput } from 'react-native';
+import { View, Text, ScrollView, Pressable, Alert, PermissionsAndroid, ActivityIndicator, TextInput, Linking } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { useAuth } from '../../hooks/useAuth';
@@ -15,7 +16,7 @@ import { MonoLabel, Rule, ScreenHeader, Brand } from '../ui';
 
 function Toggle({ T, accent, on, onChange }) {
   return (
-    <Pressable onPress={() => onChange(!on)}
+    <Pressable onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onChange(!on); }}
       style={{ width: 48, height: 28, borderRadius: 999, backgroundColor: on ? accent : T.lineStrong, justifyContent: 'center' }}>
       <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: '#fff', marginLeft: on ? 23 : 3 }} />
     </Pressable>
@@ -250,6 +251,17 @@ export default function SettingsScreen() {
       <Rule T={T} />
       <Row T={T} label="Delete account" sub="permanent · cannot be undone" onPress={handleDelete}
         control={<MonoLabel T={T} color={T.red} size={11}>✕</MonoLabel>} />
+
+      {/* legal */}
+      <MonoLabel T={T} color={T.faint} style={{ marginTop: 28, marginBottom: 4 }}>legal</MonoLabel>
+      <Rule T={T} />
+      <Row T={T} label="Privacy policy" sub="what we collect and why"
+        onPress={() => Linking.openURL('https://tally.adityasingh.dev/privacy').catch(() => {})}
+        control={<MonoLabel T={T} color={T.dim} size={11}>↗</MonoLabel>} />
+      <Rule T={T} />
+      <Row T={T} label="Terms of use"
+        onPress={() => Linking.openURL('https://tally.adityasingh.dev/terms').catch(() => {})}
+        control={<MonoLabel T={T} color={T.dim} size={11}>↗</MonoLabel>} />
 
       <View style={{ alignItems: 'center', marginTop: 34, gap: 10 }}>
         <Brand T={T} color={T.faint} size={20} />

@@ -1,12 +1,17 @@
 // src/tally/screens/AddSheet.js — log a spend (modal). Calls store.addTx → live update.
 import React, { useState } from 'react';
 import { View, Text, Pressable, Modal, TextInput } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import * as StoreReview from 'expo-store-review';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTally } from '../TallyContext';
 import { useAuth } from '../../hooks/useAuth';
 import { FONTS } from '../theme';
 import { MonoLabel, Btn } from '../ui';
 import { CAT_META } from '../data';
 import { checkBudgetAlerts } from '../../services/budgetAlerts';
+
+const REVIEW_KEY = 'tally:review_prompted';
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '⌫'];
 const CAT_IDS = ['food', 'transport', 'shopping', 'entertainment', 'health', 'rent', 'utilities'];
@@ -27,12 +32,26 @@ export default function AddSheet({ visible, onClose }) {
     setAmount((a) => (a === '0' && k !== '.' ? k : a + k));
   };
 
-  const save = () => {
+  const save = async () => {
     if (num <= 0) return;
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     store.addTx({ merchant: merchant.trim() || 'Mystery spend', amount: num, category: cat, type: 'debit', note: note.trim() || 'logged by hand' });
     if (user?.id) checkBudgetAlerts(user.id).catch(() => {});
     setAmount(''); setMerchant(''); setNote(''); setCat('food');
     onClose();
+    // prompt for review after 5th manual add, once per install
+    try {
+      const already = await AsyncStorage.getItem(REVIEW_KEY);
+      if (!already) {
+        const countStr = await AsyncStorage.getItem('tally:manual_add_count');
+        const count = Number(countStr || 0) + 1;
+        await AsyncStorage.setItem('tally:manual_add_count', String(count));
+        if (count >= 5 && await StoreReview.hasAction()) {
+          await AsyncStorage.setItem(REVIEW_KEY, '1');
+          StoreReview.requestReview();
+        }
+      }
+    } catch {}
   };
 
   const display = num > 0 ? num.toLocaleString('en-IN') : '0';

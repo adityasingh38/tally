@@ -1,6 +1,7 @@
 // src/tally/screens/TxDetailSheet.js — transaction detail with delete + recategorize.
 import React, { useState } from 'react';
 import { View, Text, Modal, Pressable, Alert, ActivityIndicator } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useTally } from '../TallyContext';
 import { FONTS, fmtINR } from '../theme';
 import { MonoLabel, Rule, Leader } from '../ui';
@@ -26,6 +27,7 @@ export default function TxDetailSheet({ visible, tx, onClose }) {
       [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Delete', style: 'destructive', onPress: async () => {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
           await store.deleteTx(tx);
           onClose();
         }},
@@ -36,6 +38,7 @@ export default function TxDetailSheet({ visible, tx, onClose }) {
   async function handleRecategorize(newCat) {
     if (newCat === tx.category) { setEditingCat(false); return; }
     setSaving(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     await store.updateTxCategory(tx, newCat);
     setSaving(false);
     setEditingCat(false);
