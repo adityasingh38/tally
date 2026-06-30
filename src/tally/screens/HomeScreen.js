@@ -62,6 +62,7 @@ export default function HomeScreen({ navigation }) {
   const insets = useSafeAreaInsets();
 
   const txs = store.txs;
+  const isNewUser = store.txsLoaded && store.allTxs.length === 0;
   const total = totalSpent(txs);
   const cats = groupByCat(txs);
   const top = cats[0];
@@ -214,6 +215,25 @@ export default function HomeScreen({ navigation }) {
             </MonoLabel>
           </Pressable>
         </>
+      )}
+
+      {/* new user empty state */}
+      {isNewUser && (
+        <View style={{ marginTop: 28, backgroundColor: T.card, borderWidth: 1, borderColor: T.line,
+          borderRadius: 18, padding: 22, alignItems: 'center', gap: 12 }}>
+          <Text style={{ fontFamily: FONTS.display, fontSize: 26, color: T.text, textAlign: 'center' }}>
+            no damage yet.
+          </Text>
+          <Text style={{ fontFamily: FONTS.sans, fontSize: 14, lineHeight: 21, color: T.dim, textAlign: 'center' }}>
+            tally reads your bank SMS to auto-log spends. or add one manually to get started.
+          </Text>
+          <Pressable onPress={openAdd}
+            style={{ backgroundColor: accent, borderRadius: 10, paddingHorizontal: 24, paddingVertical: 12, marginTop: 4 }}>
+            <Text style={{ fontFamily: FONTS.monoBold, fontSize: 13, color: accentInk, letterSpacing: 1 }}>
+              LOG FIRST SPEND
+            </Text>
+          </Pressable>
+        </View>
       )}
 
       {/* mini stats */}

@@ -2,6 +2,7 @@
 // Provides theme + prefs + a live transaction store to all Tally screens.
 // Prefs (dark/accent/tone/nihilism) persist via AsyncStorage.
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { THEMES, resolveAccent } from './theme';
 import { SEED_TXS } from './data';
@@ -13,7 +14,8 @@ const FREE_HISTORY_DAYS = 30;
 const PREFS_KEY = 'tally_prefs_v1';
 const REACT_KEY = 'tally_reactions_v1';
 const INCOME_KEY = 'tally_income';
-const DEFAULT_PREFS = { dark: true, accent: 'red', tone: 'unhinged', nihil: 2 };
+// null = follow system; true/false = manual override
+const DEFAULT_PREFS = { dark: null, accent: 'red', tone: 'unhinged', nihil: 2 };
 
 function currentMonth() {
   const now = new Date();
@@ -138,7 +140,9 @@ export function TallyProvider({ children }) {
     return d.getFullYear() === selectedMonth.year && d.getMonth() === selectedMonth.month;
   });
 
-  const theme = THEMES[prefs.dark ? 'dark' : 'light'];
+  const systemScheme = useColorScheme();
+  const isDark = prefs.dark != null ? prefs.dark : systemScheme === 'dark';
+  const theme = THEMES[isDark ? 'dark' : 'light'];
   const { accent, accentInk } = resolveAccent(theme, prefs.accent);
 
   const value = {
@@ -146,7 +150,7 @@ export function TallyProvider({ children }) {
     isPremium,
     prefs, setPref,
     income, setIncome,
-    store: { txs, allTxs, addTx, deleteTx, updateTxCategory, updateTx, reactions, react },
+    store: { txs, allTxs, addTx, deleteTx, updateTxCategory, updateTx, reactions, react, txsLoaded },
     selectedMonth, setSelectedMonth,
     setRealTransactions,
     registerRefetch,

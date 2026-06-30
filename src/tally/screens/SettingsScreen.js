@@ -202,7 +202,11 @@ export default function SettingsScreen() {
       {/* vibe */}
       <MonoLabel T={T} color={T.faint} style={{ marginTop: 28, marginBottom: 4 }}>the vibe</MonoLabel>
       <Rule T={T} />
-      <Row T={T} label="Dark mode" sub="ink or paper" control={<Toggle T={T} accent={accent} on={prefs.dark} onChange={(v) => setPref('dark', v)} />} />
+      <Row T={T} label="Dark mode" sub="ink or paper · auto follows system"
+        control={<Seg T={T} accent={accent} accentInk={accentInk}
+          options={[[null, 'auto'], [true, 'dark'], [false, 'light']]}
+          value={prefs.dark}
+          onChange={(v) => setPref('dark', v)} />} />
       <Rule T={T} />
       <Row T={T} label="Accent" sub="the one colour" control={<Seg T={T} accent={accent} accentInk={accentInk}
         options={[['red', 'red'], ['mono', 'mono'], ['acid', 'acid']]} value={prefs.accent} onChange={(v) => setPref('accent', v)} />} />
