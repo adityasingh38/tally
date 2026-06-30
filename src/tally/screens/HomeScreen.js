@@ -135,6 +135,10 @@ export default function HomeScreen({ navigation }) {
   const ratio = hasIncome ? Math.min(total / income, 1) : 0;
   const zone = copeZone(hasIncome ? total / income : 0.5);
 
+  // credits received this month (excludes salary if income set, to avoid double-counting noise)
+  const credits = txs.filter(t => t.type === 'credit');
+  const totalCredits = credits.reduce((s, t) => s + (t.amount || 0), 0);
+
   const now2 = new Date();
   const isCurrentMonth = now2.getFullYear() === selectedMonth.year && now2.getMonth() === selectedMonth.month;
   const daysLeft = isCurrentMonth
@@ -291,6 +295,18 @@ export default function HomeScreen({ navigation }) {
             </MonoLabel>
           </Pressable>
         </>
+      )}
+
+      {/* credits received this month */}
+      {totalCredits > 0 && credits.length > 0 && (
+        <View style={{ marginTop: 10, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: T.creditText }} />
+          <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: T.faint }}>
+            received{' '}
+            <Text style={{ color: T.creditText, fontFamily: FONTS.monoBold }}>+{fmtINR(totalCredits)}</Text>
+            {' '}this month ({credits.length} credit{credits.length !== 1 ? 's' : ''})
+          </Text>
+        </View>
       )}
 
       {/* new user empty state */}
