@@ -1,8 +1,10 @@
 // src/tally/screens/HomeScreen.js  → your "Dashboard" tab
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, Pressable, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
+import { useAuth } from '../../hooks/useAuth';
+import { getBudgets } from '../../services/supabase';
 import { FONTS, fmtINR } from '../theme';
 import { MonoLabel, Rule, Btn, TxRow, Brand, MonthPicker } from '../ui';
 import { totalSpent, groupByCat, copeZone, monthlyTotals } from '../data';
@@ -56,6 +58,7 @@ function TrendBars({ T, accent, allTxs }) {
 export default function HomeScreen({ navigation }) {
   const { T, accent, accentInk, income, store, openAdd, refreshing, refreshTxs, openTx,
     selectedMonth, setSelectedMonth } = useTally();
+  const { user } = useAuth();
   const insets = useSafeAreaInsets();
 
   const txs = store.txs;
@@ -89,6 +92,53 @@ export default function HomeScreen({ navigation }) {
   const avgDailySpend = isCurrentMonth && dayOfMonth >= 3 ? total / dayOfMonth : null;
   const projectedSpend = avgDailySpend ? Math.round(avgDailySpend * daysInMonth) : null;
   const projectedOver = hasIncome && projectedSpend ? projectedSpend > income : false;
+
+  // budget warnings — categories at >= 80% of monthly limit
+  const [budgets, setBudgets] = useState({});
+  useEffect(() => {
+    if (!user) return;
+    getBudgets(user.id).then(({ data }) => {
+      if (!data) return;
+      const map = {};
+      data.forEach((b) => { map[b.category] = { limit: b.monthly_limit, threshold: b.alert_threshold ?? 0.8 }; });
+      setBudgets(map);
+    });
+  }, [user]);
+  const spentMap = {};
+  groupByCat(txs).forEach((c) => { spentMap[c.id] = c.amount; });
+  const budgetWarnings = Object.entries(budgets)
+    .map(([cat, { limit, threshold }]) => {
+      const spent = spentMap[cat] || 0;
+      const pct = spent / limit;
+      if (pct < threshold) return null;
+      return { cat, spent, limit, pct, blown: pct >= 1 };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.pct - a.pct);
+
+  // spending streak — consecutive days (going back from yesterday) under rough daily limit
+  const roughDailyLimit = hasIncome && income > 0 ? Math.round(income / daysInMonth) : null;
+  const streak = (() => {
+    if (!roughDailyLimit || !isCurrentMonth) return 0;
+    const byDay = {};
+    store.allTxs.forEach((tx) => {
+      if (!tx.txn_date || tx.type === 'credit') return;
+      const d = tx.txn_date.slice(0, 10);
+      byDay[d] = (byDay[d] || 0) + (tx.amount || 0);
+    });
+    let count = 0;
+    const cur = new Date(now2);
+    cur.setDate(cur.getDate() - 1); // start from yesterday
+    for (let i = 0; i < 60; i++) {
+      const ds = cur.toISOString().slice(0, 10);
+      const daySpent = byDay[ds] || 0;
+      if (daySpent === 0) { cur.setDate(cur.getDate() - 1); continue; } // skip zero-spend days
+      if (daySpent > roughDailyLimit) break;
+      count++;
+      cur.setDate(cur.getDate() - 1);
+    }
+    return count;
+  })();
 
   const recent = txs.slice(0, 5);
 
@@ -174,6 +224,18 @@ export default function HomeScreen({ navigation }) {
         )}
       </View>
 
+      {/* streak card */}
+      {streak >= 3 && (
+        <View style={{ marginTop: 10, backgroundColor: T.card, borderWidth: 1, borderColor: T.line,
+          borderRadius: 14, paddingVertical: 12, paddingHorizontal: 14,
+          flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <MonoLabel T={T} color={T.dim} size={10}>days under {fmtINR(roughDailyLimit)}</MonoLabel>
+          <Text style={{ fontFamily: FONTS.monoBold, fontSize: 16, color: T.creditText }}>
+            {streak} day{streak !== 1 ? 's' : ''} clean
+          </Text>
+        </View>
+      )}
+
       {/* 4-month trend bars */}
       <TrendBars T={T} accent={accent} allTxs={store.allTxs} />
 
@@ -194,6 +256,32 @@ export default function HomeScreen({ navigation }) {
           <Text style={{ fontFamily: FONTS.monoBold, fontSize: 14, color: projectedOver ? T.red : T.text }}>
             {fmtINR(projectedSpend)}
           </Text>
+        </View>
+      )}
+
+      {/* budget warnings */}
+      {isCurrentMonth && budgetWarnings.length > 0 && (
+        <View style={{ marginTop: 14, gap: 8 }}>
+          <MonoLabel T={T} color={T.dim}>budget alerts</MonoLabel>
+          {budgetWarnings.map(({ cat, spent, limit, pct, blown }) => (
+            <Pressable key={cat} onPress={() => navigation && navigation.navigate('Budget')}
+              style={{ backgroundColor: T.card, borderWidth: 1,
+                borderColor: blown ? T.red : T.line, borderRadius: 14,
+                paddingVertical: 12, paddingHorizontal: 14,
+                flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <View>
+                <Text style={{ fontFamily: FONTS.sansSemi, fontSize: 14, color: blown ? T.red : T.text }}>
+                  {cat}
+                </Text>
+                <MonoLabel T={T} color={T.faint} size={10} style={{ marginTop: 2 }}>
+                  {fmtINR(spent)} of {fmtINR(limit)} · {blown ? 'over' : `${Math.round(pct * 100)}% used`}
+                </MonoLabel>
+              </View>
+              <MonoLabel T={T} color={blown ? T.red : accent} size={11}>
+                {blown ? `+${fmtINR(Math.round(spent - limit))}` : `${fmtINR(Math.round(limit - spent))} left`}
+              </MonoLabel>
+            </Pressable>
+          ))}
         </View>
       )}
 
