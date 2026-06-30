@@ -6,7 +6,7 @@ import { useTally } from '../TallyContext';
 import { useAuth } from '../../hooks/useAuth';
 import { syncHistoricalSMS } from '../../services/smsSync';
 import { notifAccessAvailable, isNotifAccessEnabled, openNotifAccessSettings } from '../../services/notificationAccess';
-import { scheduleWeeklyDigest } from '../../services/weeklyDigest';
+import { scheduleWeeklyDigest, sendWeeklyDigestWithRealData } from '../../services/weeklyDigest';
 import { FONTS } from '../theme';
 import { MonoLabel, Btn, Brand } from '../ui';
 
@@ -77,8 +77,11 @@ export default function OnboardingScreen({ onDone }) {
     }
     setSyncing(true);
     try {
-      if (user?.id) await syncHistoricalSMS(user.id, (p) => setProgress(p));
-      scheduleWeeklyDigest().catch(() => {});
+      if (user?.id) {
+        await syncHistoricalSMS(user.id, (p) => setProgress(p));
+        scheduleWeeklyDigest().catch(() => {});
+        sendWeeklyDigestWithRealData(user.id).catch(() => {});
+      }
     } catch (e) {
       console.error('SMS sync failed:', e);
     }

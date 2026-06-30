@@ -6,6 +6,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { THEMES, resolveAccent } from './theme';
 import { SEED_TXS } from './data';
 import { deleteTransaction, updateTransactionCategory } from '../services/supabase';
+import { usePremium } from '../hooks/usePremium';
+
+const FREE_HISTORY_DAYS = 30;
 
 const PREFS_KEY = 'tally_prefs_v1';
 const REACT_KEY = 'tally_reactions_v1';
@@ -21,6 +24,7 @@ const Ctx = createContext(null);
 export const useTally = () => useContext(Ctx);
 
 export function TallyProvider({ children }) {
+  const { isPremium } = usePremium();
   const [prefs, setPrefs] = useState(DEFAULT_PREFS);
   const [reactions, setReactions] = useState({});
   const [realTxs, setRealTxs] = useState([]);     // fed by TxBridge
@@ -112,7 +116,13 @@ export function TallyProvider({ children }) {
 
   // Seed is only a pre-load placeholder; once your data loads we show YOURS
   // (even if empty → honest empty states, not fake demo spends).
-  const allTxs = localTxs || (txsLoaded ? realTxs : SEED_TXS);
+  const rawAllTxs = localTxs || (txsLoaded ? realTxs : SEED_TXS);
+  const freeFrom = isPremium ? null : (() => {
+    const d = new Date(); d.setDate(d.getDate() - FREE_HISTORY_DAYS); return d;
+  })();
+  const allTxs = freeFrom
+    ? rawAllTxs.filter(tx => !tx.txn_date || new Date(tx.txn_date) >= freeFrom)
+    : rawAllTxs;
   // Filter to selected month — txns without txn_date (old seeds) pass through.
   const txs = allTxs.filter(tx => {
     if (!tx.txn_date) return true;
@@ -125,6 +135,7 @@ export function TallyProvider({ children }) {
 
   const value = {
     T: theme, accent, accentInk,
+    isPremium,
     prefs, setPref,
     income, setIncome,
     store: { txs, allTxs, addTx, deleteTx, updateTxCategory, reactions, react },

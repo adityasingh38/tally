@@ -42,7 +42,7 @@ function groupTxsByDate(txs) {
 
 export default function FeedScreen({ navigation }) {
   const { T, accent, accentInk, store, refreshing, refreshTxs, openTx,
-    selectedMonth, setSelectedMonth } = useTally();
+    selectedMonth, setSelectedMonth, isPremium, openPaywall } = useTally();
   const insets = useSafeAreaInsets();
   const [filter, setFilter] = useState('all');
   const [query, setQuery] = useState('');
@@ -149,6 +149,15 @@ export default function FeedScreen({ navigation }) {
           </View>
         </View>
       ))}
+
+      {!isPremium && (
+        <Pressable onPress={openPaywall}
+          style={{ marginTop: 10, backgroundColor: T.card, borderWidth: 1, borderColor: T.line,
+            borderRadius: 14, padding: 16, alignItems: 'center', gap: 4 }}>
+          <MonoLabel T={T} color={T.dim} size={10}>showing last 30 days · older history locked</MonoLabel>
+          <MonoLabel T={T} color={accent} size={10}>unlock full history with Pro →</MonoLabel>
+        </Pressable>
+      )}
     </ScrollView>
   );
 }
