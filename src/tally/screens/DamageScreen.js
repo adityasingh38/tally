@@ -1,6 +1,6 @@
 // src/tally/screens/DamageScreen.js  → "Insights" tab
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, ScrollView, Modal, Pressable, RefreshControl, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Modal, Pressable, RefreshControl, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
@@ -8,7 +8,7 @@ import { useTally } from '../TallyContext';
 import { FONTS, fmtINR } from '../theme';
 import { MonoLabel, Rule, Leader, ReceiptShell, Btn, Tag, Brand, MonthPicker, TxRow } from '../ui';
 import { totalSpent, groupByCat, copeZone, fmtMonthLabel } from '../data';
-import { getAIVerdict } from '../../services/aiAdvice';
+import { getAIVerdict, askAI } from '../../services/aiAdvice';
 
 function VerdictSkeleton({ T }) {
   return (
@@ -71,6 +71,9 @@ export default function DamageScreen() {
   const [verdictLoading, setVerdictLoading] = useState(false);
   const [activeCat, setActiveCat] = useState(null);
   const fetchedRef = useRef(null);
+  const [askQuestion, setAskQuestion] = useState('');
+  const [askAnswer, setAskAnswer] = useState(null);
+  const [askLoading, setAskLoading] = useState(false);
 
   useEffect(() => {
     if (cats.length === 0) return;
@@ -91,6 +94,16 @@ export default function DamageScreen() {
   const activeTxs = activeCat
     ? txs.filter(t => t.category === activeCat && t.type !== 'credit')
     : [];
+
+  async function handleAsk() {
+    const q = askQuestion.trim();
+    if (!q || askLoading || cats.length === 0) return;
+    setAskLoading(true);
+    setAskAnswer(null);
+    const answer = await askAI({ question: q, cats, total, income });
+    setAskAnswer(answer);
+    setAskLoading(false);
+  }
 
   async function handleShare() {
     if (!receiptRef.current) return;
@@ -200,6 +213,40 @@ export default function DamageScreen() {
               </View>
             )}
           </View>
+
+          {/* ask AI */}
+          {cats.length > 0 && (
+            <View style={{ borderTopWidth: 1.5, borderStyle: 'dashed', borderTopColor: T.lineStrong,
+              paddingTop: 16, marginTop: 8 }}>
+              <MonoLabel T={T} color={T.dim} size={10.5} style={{ letterSpacing: 2, marginBottom: 10 }}>* ASK TALLY *</MonoLabel>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <TextInput
+                  value={askQuestion}
+                  onChangeText={setAskQuestion}
+                  placeholder="why am i like this?"
+                  placeholderTextColor={T.faint}
+                  onSubmitEditing={handleAsk}
+                  returnKeyType="send"
+                  style={{ flex: 1, backgroundColor: T.chip, borderRadius: 6, paddingVertical: 10,
+                    paddingHorizontal: 12, color: T.text, fontFamily: FONTS.sans, fontSize: 13,
+                    borderWidth: 1, borderColor: T.line }}
+                />
+                <Pressable onPress={handleAsk} disabled={askLoading || !askQuestion.trim()}
+                  style={{ backgroundColor: accent, borderRadius: 6, paddingHorizontal: 14,
+                    justifyContent: 'center', opacity: askLoading || !askQuestion.trim() ? 0.5 : 1 }}>
+                  {askLoading
+                    ? <ActivityIndicator color={accentInk} size="small" />
+                    : <Text style={{ fontFamily: FONTS.monoBold, fontSize: 12, color: accentInk }}>ASK</Text>}
+                </Pressable>
+              </View>
+              {askAnswer != null && (
+                <View style={{ marginTop: 12, backgroundColor: T.chip, borderRadius: 6, padding: 12,
+                  borderLeftWidth: 2, borderLeftColor: accent }}>
+                  <Text style={{ fontFamily: FONTS.sans, fontSize: 13, lineHeight: 19, color: T.text }}>{askAnswer}</Text>
+                </View>
+              )}
+            </View>
+          )}
 
           {/* barcode + footer */}
           <View style={{ borderTopWidth: 1.5, borderStyle: 'dashed', borderTopColor: T.lineStrong, marginTop: 16,

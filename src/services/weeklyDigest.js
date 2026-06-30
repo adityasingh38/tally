@@ -55,6 +55,35 @@ export async function sendInstantDigest({ total, topCategory, txnCount }) {
   });
 }
 
+const MONTH_END_KEY = 'tally_month_end_trigger_id';
+
+export async function scheduleMonthEndSummary() {
+  await setupWeeklyDigestChannel();
+
+  // cancel any existing month-end trigger
+  const existingId = await AsyncStorage.getItem(MONTH_END_KEY);
+  if (existingId) await notifee.cancelTriggerNotification(existingId).catch(() => {});
+
+  // last day of this month at 20:00; if that's past, use next month
+  const now = new Date();
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0, 20, 0, 0, 0);
+  if (lastDay.getTime() <= now.getTime() + 60_000) {
+    lastDay.setMonth(lastDay.getMonth() + 2, 0); // last day of next month
+    lastDay.setHours(20, 0, 0, 0);
+  }
+
+  const id = await notifee.createTriggerNotification(
+    {
+      title: 'Month-end damage report',
+      body: "The month's over. Open Tally and face the music.",
+      android: { channelId: DIGEST_CHANNEL, pressAction: { id: 'open_insights' } },
+    },
+    { type: TriggerType.TIMESTAMP, timestamp: lastDay.getTime() }
+  );
+
+  await AsyncStorage.setItem(MONTH_END_KEY, id);
+}
+
 export async function sendWeeklyDigestWithRealData(userId) {
   if (!userId) return;
 

@@ -6,7 +6,7 @@ import { useTally } from '../TallyContext';
 import { useAuth } from '../../hooks/useAuth';
 import { syncHistoricalSMS } from '../../services/smsSync';
 import { notifAccessAvailable, isNotifAccessEnabled, openNotifAccessSettings } from '../../services/notificationAccess';
-import { scheduleWeeklyDigest, sendWeeklyDigestWithRealData } from '../../services/weeklyDigest';
+import { scheduleWeeklyDigest, scheduleMonthEndSummary, sendWeeklyDigestWithRealData } from '../../services/weeklyDigest';
 import { FONTS } from '../theme';
 import { MonoLabel, Btn, Brand } from '../ui';
 
@@ -80,6 +80,7 @@ export default function OnboardingScreen({ onDone }) {
       if (user?.id) {
         await syncHistoricalSMS(user.id, (p) => setProgress(p));
         scheduleWeeklyDigest().catch(() => {});
+        scheduleMonthEndSummary().catch(() => {});
         sendWeeklyDigestWithRealData(user.id).catch(() => {});
       }
     } catch (e) {

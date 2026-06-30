@@ -44,6 +44,20 @@ Examples for unhinged tone:
 Output ONLY the JSON array. No markdown fences, no explanation.`;
 }
 
+export async function askAI({ question, cats, total, income }) {
+  const incomeCtx = income
+    ? `Monthly income: ₹${income.toLocaleString('en-IN')}. Spent: ₹${Math.round(total).toLocaleString('en-IN')} (${Math.round(total / income * 100)}%).`
+    : `Total spent: ₹${Math.round(total).toLocaleString('en-IN')}.`;
+  const catCtx = cats.slice(0, 5).map(c => `${c.label}: ₹${Math.round(c.amount).toLocaleString('en-IN')}`).join(', ');
+  const system = 'You are Tally, a personal finance AI for Indian users. Answer concisely in 2–3 sentences. Reference specific rupee amounts from the spending data. No markdown, no bullet points, no emoji.';
+  const content = `Spending data: ${incomeCtx} Categories: ${catCtx}.\n\nQuestion: ${question}`;
+  try {
+    return await callAnthropic(system, content);
+  } catch {
+    return "couldn't reach tally AI right now. try again in a moment.";
+  }
+}
+
 async function callAnthropic(system, content) {
   const { data, error } = await supabase.functions.invoke('anthropic-proxy', {
     body: { system, content },

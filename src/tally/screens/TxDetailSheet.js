@@ -1,6 +1,6 @@
 // src/tally/screens/TxDetailSheet.js — transaction detail with delete + recategorize.
 import React, { useState } from 'react';
-import { View, Text, Modal, Pressable, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, Modal, Pressable, Alert, ActivityIndicator, ScrollView } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useTally } from '../TallyContext';
 import { FONTS, fmtINR } from '../theme';
@@ -19,6 +19,14 @@ export default function TxDetailSheet({ visible, tx, onClose }) {
   const m = catMeta(tx.category);
   const credit = tx.type === 'credit';
   const picked = store.reactions[tx.id];
+
+  const merchantKey = (tx.merchant || '').toLowerCase().trim();
+  const merchantHistory = merchantKey
+    ? store.allTxs
+        .filter(t => t.id !== tx.id && (t.merchant || '').toLowerCase().trim() === merchantKey && t.type !== 'credit')
+        .sort((a, b) => new Date(b.txn_date || 0) - new Date(a.txn_date || 0))
+        .slice(0, 5)
+    : [];
 
   function handleDelete() {
     Alert.alert(
@@ -107,6 +115,27 @@ export default function TxDetailSheet({ visible, tx, onClose }) {
             <View style={{ paddingVertical: 13 }}><Leader T={T} label="when" value={tx.when || '—'} /></View>
             <Rule T={T} />
           </View>
+
+          {/* merchant history */}
+          {merchantHistory.length > 0 && (
+            <View style={{ marginTop: 4 }}>
+              <MonoLabel T={T} color={T.faint} size={9} style={{ marginBottom: 6 }}>
+                more from {tx.merchant?.toLowerCase()}
+              </MonoLabel>
+              <ScrollView style={{ maxHeight: 150 }} showsVerticalScrollIndicator={false}>
+                {merchantHistory.map((t, i) => (
+                  <View key={t.id}>
+                    {i > 0 && <Rule T={T} />}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 9 }}>
+                      <MonoLabel T={T} color={T.dim} size={10.5}>{t.when || t.txn_date?.slice(0, 10) || '—'}</MonoLabel>
+                      <Text style={{ fontFamily: FONTS.monoBold, fontSize: 13, color: T.text }}>−{fmtINR(t.amount)}</Text>
+                    </View>
+                  </View>
+                ))}
+              </ScrollView>
+              <Rule T={T} />
+            </View>
+          )}
 
           {/* reactions */}
           <View style={{ flexDirection: 'row', gap: 8, marginTop: 16, justifyContent: 'center' }}>
