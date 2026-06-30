@@ -75,6 +75,23 @@ export default function AddSheet({ visible, onClose }) {
 
   const display = num > 0 ? num.toLocaleString('en-IN') : '0';
 
+  // top 3 frequent merchants for quick-fill
+  const frequents = React.useMemo(() => {
+    const map = {};
+    store.allTxs.filter(t => t.type !== 'credit' && t.merchant && t.merchant !== 'Unknown').forEach(t => {
+      const key = t.merchant.trim();
+      if (!map[key]) map[key] = { merchant: key, count: 0, amount: t.amount, category: t.category };
+      map[key].count++;
+      // keep the latest amount + category
+      if (!map[key].latest || new Date(t.txn_date) > new Date(map[key].latest)) {
+        map[key].amount = t.amount;
+        map[key].category = t.category;
+        map[key].latest = t.txn_date;
+      }
+    });
+    return Object.values(map).sort((a, b) => b.count - a.count).slice(0, 4);
+  }, [store.allTxs]);
+
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
@@ -99,6 +116,23 @@ export default function AddSheet({ visible, onClose }) {
             placeholderTextColor={T.faint}
             style={{ textAlign: 'center', color: T.dim, fontFamily: FONTS.sans, fontStyle: 'italic',
               fontSize: 13, paddingVertical: 4, marginBottom: 4 }} />
+
+          {frequents.length > 0 && (
+            <View style={{ flexDirection: 'row', gap: 6, justifyContent: 'center', marginBottom: 8, flexWrap: 'wrap' }}>
+              {frequents.map((f) => (
+                <Pressable key={f.merchant} onPress={() => {
+                  setMerchant(f.merchant);
+                  setAmount(String(f.amount));
+                  setCat(f.category);
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }}
+                  style={{ paddingVertical: 5, paddingHorizontal: 10, borderRadius: 999,
+                    borderWidth: 1, borderColor: T.line, backgroundColor: T.chip }}>
+                  <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: T.dim }}>{f.merchant.length > 12 ? f.merchant.slice(0, 12) + '…' : f.merchant}</Text>
+                </Pressable>
+              ))}
+            </View>
+          )}
 
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, justifyContent: 'center', marginVertical: 12 }}>
             {CAT_IDS.map((id) => {

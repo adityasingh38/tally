@@ -9,6 +9,8 @@ import { FONTS, fmtINR } from '../theme';
 import { MonoLabel, Rule, Leader, ReceiptShell, Btn, Tag, Brand, MonthPicker, TxRow } from '../ui';
 import { totalSpent, groupByCat, copeZone, fmtMonthLabel } from '../data';
 import { getAIVerdict, askAI } from '../../services/aiAdvice';
+import { getBudgets } from '../../services/supabase';
+import { useAuth } from '../../hooks/useAuth';
 
 function VerdictSkeleton({ T }) {
   return (
@@ -29,9 +31,20 @@ function VerdictSkeleton({ T }) {
 
 export default function DamageScreen() {
   const { T, accent, accentInk, income, store, prefs, selectedMonth, setSelectedMonth, openTx, refreshing, refreshTxs } = useTally();
+  const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const receiptRef = useRef(null);
   const [sharing, setSharing] = useState(false);
+  const [budgets, setBudgets] = useState({});
+  useEffect(() => {
+    if (!user) return;
+    getBudgets(user.id).then(({ data }) => {
+      if (!data) return;
+      const map = {};
+      data.forEach((b) => { map[b.category] = b.monthly_limit; });
+      setBudgets(map);
+    });
+  }, [user]);
   const txs = store.txs;
   const total = totalSpent(txs);
   const rawCats = groupByCat(txs);
@@ -166,14 +179,30 @@ export default function DamageScreen() {
                 const delta = prev > 0 ? Math.round((c.amount - prev) / prev * 100) : null;
                 const deltaColor = delta == null ? T.faint : delta > 0 ? accent : T.creditText;
                 const deltaLabel = delta == null ? 'new' : delta > 0 ? `+${delta}%` : `${delta}%`;
+                const budgetLimit = budgets[c.id];
+                const budgetPct = budgetLimit ? Math.min(c.amount / budgetLimit, 1) : null;
+                const budgetOver = budgetLimit ? c.amount > budgetLimit : false;
                 return (
                   <Pressable key={c.id} onPress={() => setActiveCat(c.id)}
-                    style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, flexDirection: 'row', alignItems: 'center', gap: 8 }]}>
-                    <View style={{ flex: 1 }}>
-                      <Leader T={T} label={c.tag} value={fmtINR(c.amount)} />
+                    style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, gap: 4 }]}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <View style={{ flex: 1 }}>
+                        <Leader T={T} label={c.tag} value={fmtINR(c.amount)} />
+                      </View>
+                      <Text style={{ fontFamily: FONTS.mono, fontSize: 9, color: deltaColor, minWidth: 28, textAlign: 'right' }}>{deltaLabel}</Text>
+                      <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: T.faint }}>›</Text>
                     </View>
-                    <Text style={{ fontFamily: FONTS.mono, fontSize: 9, color: deltaColor, minWidth: 28, textAlign: 'right' }}>{deltaLabel}</Text>
-                    <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: T.faint }}>›</Text>
+                    {budgetLimit != null && (
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <View style={{ flex: 1, height: 3, borderRadius: 2, backgroundColor: T.chip }}>
+                          <View style={{ width: `${Math.round(budgetPct * 100)}%`, height: 3, borderRadius: 2,
+                            backgroundColor: budgetOver ? T.red || '#ef4444' : accent }} />
+                        </View>
+                        <Text style={{ fontFamily: FONTS.mono, fontSize: 8, color: budgetOver ? T.red || '#ef4444' : T.faint }}>
+                          {budgetOver ? `+${fmtINR(Math.round(c.amount - budgetLimit))}` : `${fmtINR(Math.round(budgetLimit - c.amount))} left`}
+                        </Text>
+                      </View>
+                    )}
                   </Pressable>
                 );
               })}
