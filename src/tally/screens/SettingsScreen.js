@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { useAuth } from '../../hooks/useAuth';
 import { syncHistoricalSMS } from '../../services/smsSync';
+import { usePremium } from '../../hooks/usePremium';
 import { notifAccessAvailable, isNotifAccessEnabled, openNotifAccessSettings } from '../../services/notificationAccess';
 import { getTransactions, deleteAccount } from '../../services/supabase';
 import { exportToCSV } from '../../services/export';
@@ -50,8 +51,9 @@ function Row({ T, label, sub, control, onPress }) {
 }
 
 export default function SettingsScreen() {
-  const { T, accent, accentInk, prefs, setPref, openPaywall, income, setIncome } = useTally();
+  const { T, accent, accentInk, prefs, setPref, openPaywall, income, setIncome, isPremium } = useTally();
   const { user, signOut } = useAuth();
+  const { restore } = usePremium();
   const insets = useSafeAreaInsets();
   const [notif, setNotif] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -59,6 +61,7 @@ export default function SettingsScreen() {
   const [editIncome, setEditIncome] = useState(false);
   const [incomeInput, setIncomeInput] = useState('');
   const [notifAccess, setNotifAccess] = useState(false);
+  const [restoring, setRestoring] = useState(false);
 
   // Reflect the live notification-access grant (user may toggle it in system
   // Settings and return). Re-checked on mount; openSettings sets it optimistic.
@@ -108,6 +111,13 @@ export default function SettingsScreen() {
     Alert.alert(granted ? 'Notifications on ✓' : 'Denied', granted ? "You'll get the weekly damage report." : 'Enable in device Settings.');
   }
 
+  async function handleRestore() {
+    setRestoring(true);
+    const ok = await restore();
+    setRestoring(false);
+    Alert.alert(ok ? 'Restored' : 'Nothing found', ok ? 'Pro access unlocked.' : 'No active subscription on this account.');
+  }
+
   function handleLogout() {
     Alert.alert('Log out', 'Sign out of Tally?', [
       { text: 'Cancel', style: 'cancel' },
@@ -141,7 +151,7 @@ export default function SettingsScreen() {
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text numberOfLines={1} style={{ fontFamily: FONTS.display, fontSize: 22, color: T.text }}>@{handle}</Text>
-          <MonoLabel T={T} color={T.dim} size={10.5} style={{ marginTop: 3 }}>tally free</MonoLabel>
+          <MonoLabel T={T} color={T.dim} size={10.5} style={{ marginTop: 3 }}>{isPremium ? 'tally pro' : 'tally free'}</MonoLabel>
         </View>
       </View>
 
@@ -177,8 +187,8 @@ export default function SettingsScreen() {
         )}
       </View>
 
-      {/* pro upsell */}
-      <Pressable onPress={openPaywall} style={{ marginTop: 20, backgroundColor: T.text, borderRadius: 16, padding: 18 }}>
+      {/* pro upsell — hidden if already pro */}
+      {!isPremium && <Pressable onPress={openPaywall} style={{ marginTop: 20, backgroundColor: T.text, borderRadius: 16, padding: 18 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
           <View style={{ flex: 1 }}>
             <Text style={{ fontFamily: FONTS.display, fontSize: 19, color: T.bg, lineHeight: 23 }}>go Pro → unlock the carnage</Text>
@@ -186,7 +196,7 @@ export default function SettingsScreen() {
           </View>
           <Text style={{ fontSize: 20, color: T.bg }}>↗</Text>
         </View>
-      </Pressable>
+      </Pressable>}
 
       {/* vibe */}
       <MonoLabel T={T} color={T.faint} style={{ marginTop: 28, marginBottom: 4 }}>the vibe</MonoLabel>
@@ -227,6 +237,14 @@ export default function SettingsScreen() {
       <MonoLabel T={T} color={T.faint} style={{ marginTop: 28, marginBottom: 4 }}>account</MonoLabel>
       <Rule T={T} />
       <Row T={T} label="Notifications" sub="weekly damage report" control={<Toggle T={T} accent={accent} on={notif} onChange={handleNotifications} />} />
+      {!isPremium && (
+        <>
+          <Rule T={T} />
+          <Row T={T} label={restoring ? 'Restoring…' : 'Restore purchase'} sub="already subscribed? get your Pro back"
+            onPress={restoring ? undefined : handleRestore}
+            control={restoring ? <ActivityIndicator color={accent} /> : <MonoLabel T={T} color={accent} size={11}>restore →</MonoLabel>} />
+        </>
+      )}
       <Rule T={T} />
       <Row T={T} label="Log out" onPress={handleLogout} control={<MonoLabel T={T} color={accent} size={11}>bye →</MonoLabel>} />
       <Rule T={T} />

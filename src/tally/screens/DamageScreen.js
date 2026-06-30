@@ -1,6 +1,6 @@
 // src/tally/screens/DamageScreen.js  → "Insights" tab
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, ScrollView, Share, Modal, Pressable } from 'react-native';
+import { View, Text, ScrollView, Share, Modal, Pressable, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { FONTS, fmtINR } from '../theme';
@@ -68,7 +68,7 @@ function buildReceiptText(cats, total, income, zone, selectedMonth) {
 }
 
 export default function DamageScreen() {
-  const { T, accent, accentInk, income, store, prefs, selectedMonth, setSelectedMonth, openTx } = useTally();
+  const { T, accent, accentInk, income, store, prefs, selectedMonth, setSelectedMonth, openTx, refreshing, refreshTxs } = useTally();
   const insets = useSafeAreaInsets();
   const txs = store.txs;
   const total = totalSpent(txs);
@@ -124,7 +124,8 @@ export default function DamageScreen() {
   return (
     <>
       <ScrollView style={{ flex: 1, backgroundColor: T.bg }}
-        contentContainerStyle={{ paddingHorizontal: 18, paddingTop: insets.top + 14, paddingBottom: 120 }}>
+        contentContainerStyle={{ paddingHorizontal: 18, paddingTop: insets.top + 14, paddingBottom: 120 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshTxs} tintColor={accent} colors={[accent]} />}>
         <ReceiptShell T={T}>
           {/* header */}
           <View style={{ alignItems: 'center', borderBottomWidth: 1.5, borderStyle: 'dashed',

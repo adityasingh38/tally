@@ -1,7 +1,8 @@
 // src/tally/screens/Paywall.js — modal sheet (Tally Pro)
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Pressable, Modal } from 'react-native';
+import { View, Text, ScrollView, Pressable, Modal, Alert, ActivityIndicator } from 'react-native';
 import { useTally } from '../TallyContext';
+import { usePremium } from '../../hooks/usePremium';
 import { FONTS } from '../theme';
 import { MonoLabel, Btn, Tag, Brand } from '../ui';
 
@@ -19,7 +20,35 @@ const PLANS = [
 
 export default function Paywall({ visible, onClose }) {
   const { T, accent, accentInk } = useTally();
+  const { offerings, purchase, restore, loading: rcLoading } = usePremium();
   const [plan, setPlan] = useState('yearly');
+  const [busy, setBusy] = useState(false);
+
+  async function handlePurchase() {
+    if (!offerings) {
+      // RevenueCat not configured — dev / preview build
+      Alert.alert('Not configured', 'RevenueCat API key not set. Set REVENUE_CAT_API_KEY in constants to enable billing.');
+      return;
+    }
+    const pkg = plan === 'yearly'
+      ? offerings.annual
+      : offerings.monthly;
+    if (!pkg) { Alert.alert('Unavailable', 'Plan not available. Try again later.'); return; }
+    setBusy(true);
+    const result = await purchase(pkg);
+    setBusy(false);
+    if (result.success) { onClose(); return; }
+    if (!result.cancelled) Alert.alert('Purchase failed', result.error || 'Something went wrong. Try again.');
+  }
+
+  async function handleRestore() {
+    setBusy(true);
+    const ok = await restore();
+    setBusy(false);
+    Alert.alert(ok ? 'Restored' : 'Nothing to restore', ok ? 'Pro access unlocked.' : 'No active subscription found on this account.');
+    if (ok) onClose();
+  }
+
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.55)' }}>
@@ -68,11 +97,18 @@ export default function Paywall({ visible, onClose }) {
             </View>
 
             <View style={{ marginTop: 18 }}>
-              <Btn T={T} accent={accent} accentInk={accentInk} onPress={onClose}>start — first 7 days free</Btn>
+              <Btn T={T} accent={accent} accentInk={accentInk} onPress={handlePurchase} disabled={busy || rcLoading}>
+                {busy ? <ActivityIndicator color={accentInk} size="small" /> : 'start — first 7 days free'}
+              </Btn>
             </View>
-            <MonoLabel T={T} color={T.faint} size={9.5} style={{ textAlign: 'center', marginTop: 12 }}>
-              cancel anytime · same as your gym membership (you won't)
-            </MonoLabel>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 18, marginTop: 14 }}>
+              <Pressable onPress={handleRestore} disabled={busy}>
+                <MonoLabel T={T} color={T.dim} size={9.5}>restore purchase</MonoLabel>
+              </Pressable>
+              <MonoLabel T={T} color={T.faint} size={9.5}>·</MonoLabel>
+              <MonoLabel T={T} color={T.faint} size={9.5}>cancel anytime</MonoLabel>
+            </View>
           </ScrollView>
         </View>
       </View>
