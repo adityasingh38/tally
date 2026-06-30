@@ -52,6 +52,14 @@ export default function DamageScreen() {
   const zone = copeZone(ratio);
   const blocks = 12, filled = Math.max(0, Math.min(blocks, Math.round(ratio * blocks)));
 
+  // day-of-week spend breakdown
+  const DOW_LABELS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+  const dowTotals = [0, 0, 0, 0, 0, 0, 0];
+  txs.filter(t => t.type !== 'credit' && t.txn_date).forEach(tx => {
+    dowTotals[new Date(tx.txn_date).getDay()] += tx.amount || 0;
+  });
+  const dowMax = Math.max(...dowTotals, 1);
+
   // recurring spend suspects — merchants appearing 3+ times this month
   const merchantCounts = {};
   const merchantTotals = {};
@@ -260,6 +268,33 @@ export default function DamageScreen() {
             <MonoLabel T={T} color={T.dim} size={10.5} style={{ marginTop: 3 }}>COME AGAIN (YOU WILL)</MonoLabel>
           </View>
         </ReceiptShell>
+
+        {/* day-of-week bars */}
+        {txs.some(t => t.type !== 'credit') && (
+          <View style={{ marginTop: 18, backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 16, padding: 16 }}>
+            <MonoLabel T={T} color={T.dim} style={{ marginBottom: 14 }}>spend by day</MonoLabel>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 6, height: 64 }}>
+              {dowTotals.map((amt, i) => {
+                const pct = amt / dowMax;
+                const isTop = amt === dowMax && amt > 0;
+                return (
+                  <View key={i} style={{ flex: 1, alignItems: 'center', gap: 5 }}>
+                    <View style={{ flex: 1, width: '100%', justifyContent: 'flex-end' }}>
+                      <View style={{ width: '100%', height: `${Math.max(pct * 100, amt > 0 ? 6 : 2)}%`,
+                        backgroundColor: isTop ? accent : T.lineStrong, borderRadius: 3 }} />
+                    </View>
+                    <MonoLabel T={T} color={isTop ? accent : T.faint} size={8.5}>{DOW_LABELS[i]}</MonoLabel>
+                  </View>
+                );
+              })}
+            </View>
+            {dowMax > 1 && (
+              <MonoLabel T={T} color={T.faint} size={9} style={{ marginTop: 10 }}>
+                peak: {DOW_LABELS[dowTotals.indexOf(dowMax)]} · {fmtINR(dowMax)}
+              </MonoLabel>
+            )}
+          </View>
+        )}
 
         {/* recurring suspects */}
         {recurring.length > 0 && (

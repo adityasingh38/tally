@@ -189,6 +189,20 @@ export default function HomeScreen({ navigation }) {
               <MonoLabel T={T} color={T.red} size={10}>over budget · {fmtINR(total - income)} in the hole</MonoLabel>
             </View>
           )}
+          {hasIncome && left > 0 && isCurrentMonth && (() => {
+            const savedPct = Math.round((left / income) * 100);
+            if (savedPct < 5) return null;
+            return (
+              <View style={{ marginTop: 10, backgroundColor: T.card, borderWidth: 1, borderColor: T.creditText + '55',
+                borderRadius: 10, paddingVertical: 9, paddingHorizontal: 13,
+                flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <MonoLabel T={T} color={T.creditText} size={10}>saved so far this month</MonoLabel>
+                <Text style={{ fontFamily: FONTS.monoBold, fontSize: 13, color: T.creditText }}>
+                  {fmtINR(left)} · {savedPct}%
+                </Text>
+              </View>
+            );
+          })()}
         </>
       ) : (
         <>

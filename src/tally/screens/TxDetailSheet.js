@@ -1,6 +1,6 @@
 // src/tally/screens/TxDetailSheet.js — transaction detail with delete + recategorize.
 import React, { useState } from 'react';
-import { View, Text, Modal, Pressable, Alert, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, Modal, Pressable, Alert, ActivityIndicator, ScrollView, TextInput } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useTally } from '../TallyContext';
 import { FONTS, fmtINR } from '../theme';
@@ -13,6 +13,8 @@ export default function TxDetailSheet({ visible, tx, onClose }) {
   const { T, accent, accentInk, store } = useTally();
   const [editingCat, setEditingCat] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editingField, setEditingField] = useState(null); // 'merchant' | 'amount'
+  const [editVal, setEditVal] = useState('');
 
   if (!tx) return null;
 
@@ -52,8 +54,33 @@ export default function TxDetailSheet({ visible, tx, onClose }) {
     setEditingCat(false);
   }
 
+  function startEdit(field) {
+    setEditingField(field);
+    setEditVal(field === 'amount' ? String(tx.amount) : tx.merchant || '');
+  }
+
+  async function saveEdit() {
+    if (!editingField) return;
+    const fields = {};
+    if (editingField === 'merchant') {
+      const v = editVal.trim();
+      if (!v) { setEditingField(null); return; }
+      fields.merchant = v;
+    } else {
+      const n = Number(editVal.replace(/[^0-9.]/g, ''));
+      if (!n || n <= 0) { setEditingField(null); return; }
+      fields.amount = n;
+    }
+    setSaving(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await store.updateTx(tx, fields);
+    setSaving(false);
+    setEditingField(null);
+  }
+
   function handleClose() {
     setEditingCat(false);
+    setEditingField(null);
     onClose();
   }
 
@@ -72,10 +99,43 @@ export default function TxDetailSheet({ visible, tx, onClose }) {
             </Pressable>
           </View>
 
-          <Text style={{ fontFamily: FONTS.display, fontSize: 48, color: credit ? T.creditText : T.text, marginTop: 8 }}>
-            {credit ? '+' : '−'}{fmtINR(tx.amount)}
-          </Text>
-          <Text style={{ fontFamily: FONTS.sansBold, fontSize: 20, color: T.text, marginTop: 4 }}>{tx.merchant}</Text>
+          {editingField === 'amount' ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 }}>
+              <Text style={{ fontFamily: FONTS.display, fontSize: 36, color: T.dim }}>₹</Text>
+              <TextInput value={editVal} onChangeText={setEditVal} keyboardType="numeric" autoFocus
+                onSubmitEditing={saveEdit}
+                style={{ flex: 1, fontFamily: FONTS.display, fontSize: 36, color: T.text,
+                  borderBottomWidth: 2, borderBottomColor: accent, paddingBottom: 2 }} />
+              <Pressable onPress={saveEdit} disabled={saving}
+                style={{ backgroundColor: accent, borderRadius: 6, paddingHorizontal: 14, paddingVertical: 8 }}>
+                {saving ? <ActivityIndicator color={accentInk} size="small" />
+                  : <Text style={{ fontFamily: FONTS.monoBold, fontSize: 12, color: accentInk }}>SAVE</Text>}
+              </Pressable>
+            </View>
+          ) : (
+            <Pressable onPress={() => startEdit('amount')}>
+              <Text style={{ fontFamily: FONTS.display, fontSize: 48, color: credit ? T.creditText : T.text, marginTop: 8 }}>
+                {credit ? '+' : '−'}{fmtINR(tx.amount)}
+              </Text>
+            </Pressable>
+          )}
+
+          {editingField === 'merchant' ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 }}>
+              <TextInput value={editVal} onChangeText={setEditVal} autoFocus onSubmitEditing={saveEdit}
+                style={{ flex: 1, fontFamily: FONTS.sansBold, fontSize: 18, color: T.text,
+                  borderBottomWidth: 2, borderBottomColor: accent, paddingBottom: 2 }} />
+              <Pressable onPress={saveEdit} disabled={saving}
+                style={{ backgroundColor: accent, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 7 }}>
+                {saving ? <ActivityIndicator color={accentInk} size="small" />
+                  : <Text style={{ fontFamily: FONTS.monoBold, fontSize: 11, color: accentInk }}>OK</Text>}
+              </Pressable>
+            </View>
+          ) : (
+            <Pressable onPress={() => startEdit('merchant')} style={{ marginTop: 4 }}>
+              <Text style={{ fontFamily: FONTS.sansBold, fontSize: 20, color: T.text }}>{tx.merchant}</Text>
+            </Pressable>
+          )}
           {tx.note ? <Text style={{ fontFamily: FONTS.sans, fontStyle: 'italic', fontSize: 14, color: T.dim, marginTop: 6 }}>"{tx.note}"</Text> : null}
 
           <View style={{ marginTop: 20 }}>

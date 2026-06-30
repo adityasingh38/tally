@@ -5,7 +5,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { THEMES, resolveAccent } from './theme';
 import { SEED_TXS } from './data';
-import { deleteTransaction, updateTransactionCategory } from '../services/supabase';
+import { deleteTransaction, updateTransactionCategory, updateTransaction } from '../services/supabase';
 import { usePremium } from '../hooks/usePremium';
 
 const FREE_HISTORY_DAYS = 30;
@@ -114,6 +114,14 @@ export function TallyProvider({ children }) {
     if (!isLocal) setRealTxs(prev => patch(prev));
   }, [realTxs, txsLoaded]);
 
+  const updateTx = useCallback(async (tx, fields) => {
+    const isLocal = String(tx.id).startsWith('u');
+    if (!isLocal) await updateTransaction(tx.id, fields).catch(() => {});
+    const patch = (list) => list.map(t => t.id === tx.id ? { ...t, ...fields } : t);
+    setLocalTxs(prev => prev ? patch(prev) : patch(txsLoaded ? realTxs : SEED_TXS));
+    if (!isLocal) setRealTxs(prev => patch(prev));
+  }, [realTxs, txsLoaded]);
+
   // Seed is only a pre-load placeholder; once your data loads we show YOURS
   // (even if empty → honest empty states, not fake demo spends).
   const rawAllTxs = localTxs || (txsLoaded ? realTxs : SEED_TXS);
@@ -138,7 +146,7 @@ export function TallyProvider({ children }) {
     isPremium,
     prefs, setPref,
     income, setIncome,
-    store: { txs, allTxs, addTx, deleteTx, updateTxCategory, reactions, react },
+    store: { txs, allTxs, addTx, deleteTx, updateTxCategory, updateTx, reactions, react },
     selectedMonth, setSelectedMonth,
     setRealTransactions,
     registerRefetch,
