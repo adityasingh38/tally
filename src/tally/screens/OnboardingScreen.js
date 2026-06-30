@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { useAuth } from '../../hooks/useAuth';
 import { syncHistoricalSMS } from '../../services/smsSync';
+import { notifAccessAvailable, isNotifAccessEnabled, openNotifAccessSettings } from '../../services/notificationAccess';
 import { scheduleWeeklyDigest } from '../../services/weeklyDigest';
 import { FONTS } from '../theme';
 import { MonoLabel, Btn, Brand } from '../ui';
@@ -28,6 +29,23 @@ export default function OnboardingScreen({ onDone }) {
     if (n > 0) setIncome(n);
   };
   const finish = () => { saveIncome(); onDone && onDone(); };
+
+  // Play-safe path: read bank/UPI app notifications instead of SMS. Deep-links
+  // to the system toggle (no runtime dialog exists for this permission), then
+  // finishes onboarding — new spends flow in live as notifications arrive.
+  async function handleNotifAccess() {
+    saveIncome();
+    const already = await isNotifAccessEnabled();
+    if (already) { onDone && onDone(); return; }
+    Alert.alert(
+      'Turn on Notification access',
+      'Tally reads transaction alerts from your bank & UPI apps (GPay, PhonePe, Paytm…) to auto-log spends. Flip Tally on in the next screen.',
+      [
+        { text: 'Open Settings', onPress: () => { openNotifAccessSettings(); onDone && onDone(); } },
+        { text: 'Skip for now', style: 'cancel', onPress: () => onDone && onDone() },
+      ]
+    );
+  }
 
   async function requestSMS() {
     try {
@@ -124,6 +142,11 @@ export default function OnboardingScreen({ onDone }) {
         ) : (
           <>
             <Btn T={T} accent={accent} accentInk={accentInk} onPress={handleAllow}>allow SMS access</Btn>
+            {notifAccessAvailable() && (
+              <Btn T={T} accent={accent} accentInk={accentInk} variant="ghost" onPress={handleNotifAccess}>
+                use notifications instead (no SMS)
+              </Btn>
+            )}
             <Btn T={T} accent={accent} accentInk={accentInk} variant="ghost" onPress={finish}>i'll log it manually</Btn>
             <MonoLabel T={T} color={T.faint} size={9.5} style={{ textAlign: 'center', marginTop: 8 }}>
               we never store your texts. we just judge them.

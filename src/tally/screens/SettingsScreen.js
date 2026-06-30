@@ -1,10 +1,11 @@
 // src/tally/screens/SettingsScreen.js  → your "Settings" tab
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, Pressable, Alert, PermissionsAndroid, ActivityIndicator, TextInput } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { useAuth } from '../../hooks/useAuth';
 import { syncHistoricalSMS } from '../../services/smsSync';
+import { notifAccessAvailable, isNotifAccessEnabled, openNotifAccessSettings } from '../../services/notificationAccess';
 import { getTransactions, deleteAccount } from '../../services/supabase';
 import { exportToCSV } from '../../services/export';
 import { requestNotificationPermission } from '../../services/budgetAlerts';
@@ -57,6 +58,11 @@ export default function SettingsScreen() {
   const [exporting, setExporting] = useState(false);
   const [editIncome, setEditIncome] = useState(false);
   const [incomeInput, setIncomeInput] = useState('');
+  const [notifAccess, setNotifAccess] = useState(false);
+
+  // Reflect the live notification-access grant (user may toggle it in system
+  // Settings and return). Re-checked on mount; openSettings sets it optimistic.
+  useEffect(() => { isNotifAccessEnabled().then(setNotifAccess); }, []);
 
   function saveIncome() {
     const n = Number(incomeInput.replace(/[^0-9]/g, ''));
@@ -202,6 +208,16 @@ export default function SettingsScreen() {
       <Row T={T} label={syncing ? 'Syncing…' : 'Sync SMS history'} sub="re-scan bank texts for missed spends"
         onPress={syncing ? undefined : handleSync}
         control={syncing ? <ActivityIndicator color={accent} /> : <MonoLabel T={T} color={accent} size={11}>sync →</MonoLabel>} />
+      {notifAccessAvailable() && (
+        <>
+          <Rule T={T} />
+          <Row T={T} label="Notification access" sub="auto-log from GPay, PhonePe, Paytm & bank apps"
+            onPress={() => { openNotifAccessSettings(); setNotifAccess(true); }}
+            control={<MonoLabel T={T} color={notifAccess ? accent : T.dim} size={11}>
+              {notifAccess ? 'on ✓' : 'set up →'}
+            </MonoLabel>} />
+        </>
+      )}
       <Rule T={T} />
       <Row T={T} label={exporting ? 'Exporting…' : 'Export the damage'} sub="csv of every transaction"
         onPress={exporting ? undefined : handleExport}

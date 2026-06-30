@@ -16,6 +16,14 @@ AppRegistry.registerHeadlessTask('TallySmsTask', () => async (taskData) => {
   await handleHeadlessSms(taskData || {});
 });
 
+// Background notification processing (Play-safe alternative to READ_SMS).
+// Started by the native HeadlessNotifService when a watched bank/UPI app posts
+// a transaction notification. Same parse -> categorise -> insert pipeline.
+AppRegistry.registerHeadlessTask('TallyNotifTask', () => async (taskData) => {
+  const { handleHeadlessNotification } = require('./src/services/smsSync');
+  await handleHeadlessNotification(taskData || {});
+});
+
 // registerRootComponent calls AppRegistry.registerComponent('main', () => App);
 // It also ensures that whether you load the app in Expo Go or in a native build,
 // the environment is set up appropriately

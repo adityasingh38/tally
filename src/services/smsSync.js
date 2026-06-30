@@ -118,3 +118,49 @@ export async function handleHeadlessSms({ originatingAddress, messageBody }) {
 
   await checkBudgetAlerts(userId).catch(() => {});
 }
+
+/**
+ * Headless JS entry point for a captured bank/UPI app notification (registered
+ * as "TallyNotifTask" in index.js, started by HeadlessNotifService). The native
+ * side has already whitelisted the source app, so — unlike SMS — we don't gate
+ * on a bank sender ID; we trust the package and let parseSMS gatekeep the body
+ * (amount + debit/credit keyword, promo/OTP filtered out).
+ *
+ * Dedup is what keeps this honest when both a bank SMS *and* a UPI-app
+ * notification fire for the same transaction: same amount/type/date/tail within
+ * the dedup window collapses to one row.
+ */
+export async function handleHeadlessNotification({ packageName, body }) {
+  if (!body) return;
+
+  const parsed = parseSMS(body, packageName || 'notification');
+  if (!parsed) return;
+
+  const { data: { session } } = await supabase.auth.getSession();
+  const userId = session?.user?.id;
+  if (!userId) return;
+
+  const txn = { ...parsed, user_id: userId, txn_date: new Date().toISOString() };
+  const isDup = await checkDuplicate({
+    userId,
+    amount: txn.amount,
+    type: txn.type,
+    txnDate: new Date(),
+    merchantTail: txn.merchant_tail,
+  });
+  if (isDup) return;
+
+  const [categorised] = await categoriseTransactions([txn]);
+  await insertTransactions([{
+    user_id: userId,
+    amount: categorised.amount,
+    type: categorised.type,
+    merchant: categorised.merchant,
+    merchant_tail: categorised.merchant_tail,
+    category: categorised.category,
+    source: categorised.source,
+    txn_date: categorised.txn_date,
+  }]);
+
+  await checkBudgetAlerts(userId).catch(() => {});
+}
