@@ -102,6 +102,37 @@ export function TxRow({ T, tx, onPress }) {
   );
 }
 
+export function MonthPicker({ T, accent, selectedMonth, onChange }) {
+  const { year, month } = selectedMonth;
+  const label = new Date(year, month, 1)
+    .toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase();
+  const now = new Date();
+  const isNow = year === now.getFullYear() && month === now.getMonth();
+
+  const go = (delta) => {
+    let m = month + delta, y = year;
+    if (m < 0) { m = 11; y--; }
+    if (m > 11) { m = 0; y++; }
+    const target = new Date(y, m, 1);
+    const ceiling = new Date(now.getFullYear(), now.getMonth(), 1);
+    if (target > ceiling) return;
+    tap();
+    onChange({ year: y, month: m });
+  };
+
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+      <Pressable onPress={() => go(-1)} hitSlop={10}>
+        <Text style={{ fontFamily: FONTS.monoBold, fontSize: 14, color: T.dim }}>←</Text>
+      </Pressable>
+      <MonoLabel T={T} color={T.text} size={11}>{label}</MonoLabel>
+      <Pressable onPress={() => go(1)} disabled={isNow} hitSlop={10}>
+        <Text style={{ fontFamily: FONTS.monoBold, fontSize: 14, color: isNow ? T.chip : T.dim }}>→</Text>
+      </Pressable>
+    </View>
+  );
+}
+
 // jagged-edge receipt paper container
 export function ReceiptShell({ T, children, style }) {
   return (

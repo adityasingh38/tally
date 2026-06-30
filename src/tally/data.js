@@ -102,3 +102,25 @@ export function damageVerdict(nihil) {
   if (nihil === 2) return "it's giving 'declined'. respectfully.";
   return "you're not broke, you're pre-rich. (you're broke.)";
 }
+
+// Returns last n months of spend totals derived from real txns (txn_date required).
+export function monthlyTotals(txs, n = 4) {
+  const map = {};
+  txs.filter(t => t.type !== 'credit' && t.txn_date).forEach(t => {
+    const d = new Date(t.txn_date);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    map[key] = (map[key] || 0) + Number(t.amount || 0);
+  });
+  const now = new Date();
+  return Array.from({ length: n }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - (n - 1 - i), 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    return { key, label: d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(), total: map[key] || 0 };
+  });
+}
+
+export function fmtMonthLabel({ year, month }) {
+  return new Date(year, month, 1)
+    .toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    .toUpperCase();
+}

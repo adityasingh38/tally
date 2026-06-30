@@ -4,11 +4,12 @@ import { View, Text, ScrollView, Pressable, RefreshControl } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { FONTS, fmtINR } from '../theme';
-import { MonoLabel, ScreenHeader } from '../ui';
+import { MonoLabel, ScreenHeader, MonthPicker } from '../ui';
 import { catMeta, REACTIONS } from '../data';
 
 export default function FeedScreen({ navigation }) {
-  const { T, accent, accentInk, store, refreshing, refreshTxs, openTx } = useTally();
+  const { T, accent, accentInk, store, refreshing, refreshTxs, openTx,
+    selectedMonth, setSelectedMonth } = useTally();
   const insets = useSafeAreaInsets();
   const [filter, setFilter] = useState('all');
   const txs = store.txs.filter((tx) =>
@@ -21,6 +22,9 @@ export default function FeedScreen({ navigation }) {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshTxs} tintColor={accent} colors={[accent]} />}>
       <ScreenHeader T={T} accent={accent} title="the feed"
         right={<MonoLabel T={T} color={T.faint}>{store.txs.length} hits</MonoLabel>} />
+      <View style={{ marginBottom: 10 }}>
+        <MonthPicker T={T} accent={accent} selectedMonth={selectedMonth} onChange={setSelectedMonth} />
+      </View>
 
       {/* filters */}
       <View style={{ flexDirection: 'row', gap: 8, marginTop: 6, marginBottom: 18 }}>

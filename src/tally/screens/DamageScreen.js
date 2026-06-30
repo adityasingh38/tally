@@ -4,8 +4,8 @@ import { View, Text, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { FONTS, fmtINR } from '../theme';
-import { MonoLabel, Rule, Leader, ReceiptShell, Btn, Tag, Brand } from '../ui';
-import { totalSpent, groupByCat, copeZone } from '../data';
+import { MonoLabel, Rule, Leader, ReceiptShell, Btn, Tag, Brand, MonthPicker } from '../ui';
+import { totalSpent, groupByCat, copeZone, fmtMonthLabel } from '../data';
 import { getAIVerdict } from '../../services/aiAdvice';
 
 function VerdictSkeleton({ T }) {
@@ -25,7 +25,7 @@ function VerdictSkeleton({ T }) {
 }
 
 export default function DamageScreen() {
-  const { T, accent, accentInk, income, store, prefs } = useTally();
+  const { T, accent, accentInk, income, store, prefs, selectedMonth, setSelectedMonth } = useTally();
   const insets = useSafeAreaInsets();
   const txs = store.txs;
   const total = totalSpent(txs);
@@ -65,7 +65,10 @@ export default function DamageScreen() {
           <Brand T={T} color={T.text} size={26} />
           <Text style={{ fontFamily: FONTS.monoBold, letterSpacing: 4, fontSize: 15, color: T.text, marginTop: 10 }}>TALLY</Text>
           <MonoLabel T={T} color={T.dim} size={10.5} style={{ marginTop: 6 }}>THE DAMAGE · RECEIPT</MonoLabel>
-          <MonoLabel T={T} color={T.dim} size={10.5} style={{ marginTop: 3 }}>JUN 2026 · BENGALURU</MonoLabel>
+          <MonoLabel T={T} color={T.dim} size={10.5} style={{ marginTop: 3 }}>{fmtMonthLabel(selectedMonth)} · BENGALURU</MonoLabel>
+          <View style={{ marginTop: 10 }}>
+            <MonthPicker T={T} accent={accent} selectedMonth={selectedMonth} onChange={setSelectedMonth} />
+          </View>
         </View>
 
         {/* total */}

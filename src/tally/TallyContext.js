@@ -11,6 +11,11 @@ const REACT_KEY = 'tally_reactions_v1';
 const INCOME_KEY = 'tally_income';
 const DEFAULT_PREFS = { dark: true, accent: 'red', tone: 'unhinged', nihil: 2 };
 
+function currentMonth() {
+  const now = new Date();
+  return { year: now.getFullYear(), month: now.getMonth() };
+}
+
 const Ctx = createContext(null);
 export const useTally = () => useContext(Ctx);
 
@@ -24,6 +29,7 @@ export function TallyProvider({ children }) {
   const [modal, setModal] = useState(null); // 'add' | 'paywall' | 'txDetail' | null
   const [selectedTx, setSelectedTx] = useState(null);
   const [income, setIncomeState] = useState(null); // monthly income (₹), user-set
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const refetchRef = useRef(null);                  // TxBridge registers its refetch here
 
   // hydrate persisted prefs + reactions + income
@@ -80,13 +86,20 @@ export function TallyProvider({ children }) {
   const addTx = useCallback((tx) => {
     setLocalTxs((prev) => {
       const base = prev || (txsLoaded ? realTxs : SEED_TXS);
-      return [{ id: 'u' + Date.now(), when: 'just now', sms: false, type: 'debit', ...tx }, ...base];
+      return [{ id: 'u' + Date.now(), when: 'just now', sms: false, type: 'debit',
+        txn_date: new Date().toISOString(), ...tx }, ...base];
     });
   }, [realTxs, txsLoaded]);
 
   // Seed is only a pre-load placeholder; once your data loads we show YOURS
   // (even if empty → honest empty states, not fake demo spends).
-  const txs = localTxs || (txsLoaded ? realTxs : SEED_TXS);
+  const allTxs = localTxs || (txsLoaded ? realTxs : SEED_TXS);
+  // Filter to selected month — txns without txn_date (old seeds) pass through.
+  const txs = allTxs.filter(tx => {
+    if (!tx.txn_date) return true;
+    const d = new Date(tx.txn_date);
+    return d.getFullYear() === selectedMonth.year && d.getMonth() === selectedMonth.month;
+  });
 
   const theme = THEMES[prefs.dark ? 'dark' : 'light'];
   const { accent, accentInk } = resolveAccent(theme, prefs.accent);
@@ -95,7 +108,8 @@ export function TallyProvider({ children }) {
     T: theme, accent, accentInk,
     prefs, setPref,
     income, setIncome,
-    store: { txs, addTx, reactions, react },
+    store: { txs, allTxs, addTx, reactions, react },
+    selectedMonth, setSelectedMonth,
     setRealTransactions,
     registerRefetch,
     refreshing,
