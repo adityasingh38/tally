@@ -77,6 +77,13 @@ export default function HomeScreen({ navigation }) {
     : 0;
   const dailyBudget = hasIncome && left > 0 && daysLeft > 0 ? Math.round(left / daysLeft) : null;
 
+  // spending forecast — only for current month with enough data
+  const dayOfMonth = now2.getDate();
+  const daysInMonth = new Date(selectedMonth.year, selectedMonth.month + 1, 0).getDate();
+  const avgDailySpend = isCurrentMonth && dayOfMonth >= 3 ? total / dayOfMonth : null;
+  const projectedSpend = avgDailySpend ? Math.round(avgDailySpend * daysInMonth) : null;
+  const projectedOver = hasIncome && projectedSpend ? projectedSpend > income : false;
+
   const recent = txs.slice(0, 5);
 
   return (
@@ -163,6 +170,18 @@ export default function HomeScreen({ navigation }) {
         <Text style={{ fontFamily: FONTS.sansMed, fontSize: 16, lineHeight: 23, color: T.text }}>{buildRead(top, total)}</Text>
         <MonoLabel T={T} color={T.dim} size={10.5} style={{ marginTop: 12 }}>see the full damage →</MonoLabel>
       </Pressable>
+
+      {/* spending forecast */}
+      {projectedSpend != null && (
+        <View style={{ marginTop: 14, backgroundColor: T.card, borderWidth: 1,
+          borderColor: projectedOver ? T.red : T.line, borderRadius: 14,
+          padding: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <MonoLabel T={T} color={T.dim} size={10}>at this pace, month total →</MonoLabel>
+          <Text style={{ fontFamily: FONTS.monoBold, fontSize: 14, color: projectedOver ? T.red : T.text }}>
+            {fmtINR(projectedSpend)}
+          </Text>
+        </View>
+      )}
 
       {/* recent */}
       <View style={{ marginTop: 28 }}>

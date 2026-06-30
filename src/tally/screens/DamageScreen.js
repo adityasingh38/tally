@@ -74,6 +74,17 @@ export default function DamageScreen() {
   const total = totalSpent(txs);
   const rawCats = groupByCat(txs);
   const cats = rawCats.map(c => ({ ...c, pct: total > 0 ? Math.round(c.amount / total * 100) : 0 }));
+
+  // month-over-month deltas per category
+  const prevMonth = selectedMonth.month === 0
+    ? { year: selectedMonth.year - 1, month: 11 }
+    : { year: selectedMonth.year, month: selectedMonth.month - 1 };
+  const prevTxs = store.allTxs.filter(tx => {
+    if (!tx.txn_date) return false;
+    const d = new Date(tx.txn_date);
+    return d.getFullYear() === prevMonth.year && d.getMonth() === prevMonth.month;
+  });
+  const prevMap = Object.fromEntries(groupByCat(prevTxs).map(c => [c.id, c.amount]));
   const hasIncome = !!income && income > 0;
   const ratio = hasIncome ? total / income : 0.5;
   const zone = copeZone(ratio);
@@ -144,15 +155,22 @@ export default function DamageScreen() {
             borderBottomColor: T.lineStrong, gap: 11 }}>
             {cats.length === 0
               ? <MonoLabel T={T} color={T.faint} size={11}>nothing logged yet — suspiciously clean.</MonoLabel>
-              : cats.map((c) => (
-                <Pressable key={c.id} onPress={() => setActiveCat(c.id)}
-                  style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, flexDirection: 'row', alignItems: 'center' }]}>
-                  <View style={{ flex: 1 }}>
-                    <Leader T={T} label={c.tag} value={fmtINR(c.amount)} />
-                  </View>
-                  <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: T.faint, marginLeft: 6 }}>›</Text>
-                </Pressable>
-              ))}
+              : cats.map((c) => {
+                const prev = prevMap[c.id] || 0;
+                const delta = prev > 0 ? Math.round((c.amount - prev) / prev * 100) : null;
+                const deltaColor = delta == null ? T.faint : delta > 0 ? accent : T.creditText;
+                const deltaLabel = delta == null ? 'new' : delta > 0 ? `+${delta}%` : `${delta}%`;
+                return (
+                  <Pressable key={c.id} onPress={() => setActiveCat(c.id)}
+                    style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, flexDirection: 'row', alignItems: 'center', gap: 8 }]}>
+                    <View style={{ flex: 1 }}>
+                      <Leader T={T} label={c.tag} value={fmtINR(c.amount)} />
+                    </View>
+                    <Text style={{ fontFamily: FONTS.mono, fontSize: 9, color: deltaColor, minWidth: 28, textAlign: 'right' }}>{deltaLabel}</Text>
+                    <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: T.faint }}>›</Text>
+                  </Pressable>
+                );
+              })}
           </View>
 
           {/* cope meter */}
