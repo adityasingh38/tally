@@ -27,8 +27,10 @@ import {
 
 import TallyNavigation from './src/tally/TallyNavigation';
 import AnimatedSplash from './src/tally/AnimatedSplash';
+import notifee, { EventType } from '@notifee/react-native';
 import { setupNotificationChannel } from './src/services/budgetAlerts';
 import { setupWeeklyDigestChannel } from './src/services/weeklyDigest';
+import { routeFromPressAction } from './src/tally/TallyNavigation';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -38,6 +40,12 @@ export default function App() {
   useEffect(() => {
     setupNotificationChannel().catch(() => {});
     setupWeeklyDigestChannel().catch(() => {});
+    // Foreground notification tap → navigate immediately
+    return notifee.onForegroundEvent(({ type, detail }) => {
+      if (type === EventType.PRESS) {
+        routeFromPressAction(detail.pressAction?.id);
+      }
+    });
   }, []);
   const [loaded] = useFonts({
     BricolageGrotesque_700Bold,

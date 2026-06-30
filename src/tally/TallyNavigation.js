@@ -8,6 +8,7 @@ import { NavigationContainer, createNavigationContainerRef } from '@react-naviga
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 
+import notifee from '@notifee/react-native';
 import { TallyProvider, useTally } from './TallyContext';
 import TallyTabBar from './TallyTabBar';
 
@@ -33,6 +34,7 @@ export const navigationRef = createNavigationContainerRef();
 export function routeFromPressAction(pressActionId) {
   if (!navigationRef.isReady()) return;
   if (pressActionId === 'open_insights') navigationRef.navigate('Main', { screen: 'Insights' });
+  else if (pressActionId === 'open_budget') navigationRef.navigate('Main', { screen: 'Budget' });
   else navigationRef.navigate('Main');
 }
 
@@ -106,7 +108,11 @@ function Inner() {
   if (loading) return <View style={{ flex: 1, backgroundColor: '#0E0F0C' }} />;
 
   return (
-    <NavigationContainer ref={navigationRef}>
+    <NavigationContainer ref={navigationRef} onReady={() => {
+        notifee.getInitialNotification().then(n => {
+          if (n?.pressAction?.id) routeFromPressAction(n.pressAction.id);
+        }).catch(() => {});
+      }}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!user ? (
           <Stack.Screen name="Auth" component={AuthScreen} />

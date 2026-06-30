@@ -53,7 +53,7 @@ async function sendAlert({ title, body }) {
     body,
     android: {
       channelId: CHANNEL_ID,
-      pressAction: { id: 'default' },
+      pressAction: { id: 'open_budget' },
     },
   });
 }

@@ -1,12 +1,17 @@
 import { registerRootComponent } from 'expo';
 import { AppRegistry } from 'react-native';
-import notifee from '@notifee/react-native';
+import notifee, { EventType } from '@notifee/react-native';
 
 import App from './App';
 
-// Required by notifee so background notification events don't warn/crash.
-// Tap routing for background/killed taps is handled on foreground + initial.
-notifee.onBackgroundEvent(async () => {});
+// Background tap → navigate when app resumes. routeFromPressAction guards
+// navigationRef.isReady() so it's safe to call from the background handler.
+notifee.onBackgroundEvent(async ({ type, detail }) => {
+  if (type === EventType.PRESS) {
+    const { routeFromPressAction } = require('./src/tally/TallyNavigation');
+    routeFromPressAction(detail.pressAction?.id);
+  }
+});
 
 // Background SMS processing. Started by the native HeadlessSmsService on each
 // incoming SMS; runs even when the app is closed. require() keeps the import
