@@ -2,17 +2,21 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, Modal, TextInput } from 'react-native';
 import { useTally } from '../TallyContext';
+import { useAuth } from '../../hooks/useAuth';
 import { FONTS } from '../theme';
 import { MonoLabel, Btn } from '../ui';
 import { CAT_META } from '../data';
+import { checkBudgetAlerts } from '../../services/budgetAlerts';
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '⌫'];
 const CAT_IDS = ['food', 'transport', 'shopping', 'entertainment', 'health', 'rent', 'utilities'];
 
 export default function AddSheet({ visible, onClose }) {
   const { T, accent, accentInk, store } = useTally();
+  const { user } = useAuth();
   const [amount, setAmount] = useState('');
   const [merchant, setMerchant] = useState('');
+  const [note, setNote] = useState('');
   const [cat, setCat] = useState('food');
   const num = Number(amount || 0);
 
@@ -22,12 +26,15 @@ export default function AddSheet({ visible, onClose }) {
     if (amount.replace('.', '').length >= 7) return;
     setAmount((a) => (a === '0' && k !== '.' ? k : a + k));
   };
+
   const save = () => {
     if (num <= 0) return;
-    store.addTx({ merchant: merchant.trim() || 'Mystery spend', amount: num, category: cat, type: 'debit', note: 'logged by hand' });
-    setAmount(''); setMerchant(''); setCat('food');
+    store.addTx({ merchant: merchant.trim() || 'Mystery spend', amount: num, category: cat, type: 'debit', note: note.trim() || 'logged by hand' });
+    if (user?.id) checkBudgetAlerts(user.id).catch(() => {});
+    setAmount(''); setMerchant(''); setNote(''); setCat('food');
     onClose();
   };
+
   const display = num > 0 ? num.toLocaleString('en-IN') : '0';
 
   return (
@@ -42,15 +49,20 @@ export default function AddSheet({ visible, onClose }) {
             <Pressable onPress={onClose}><Text style={{ color: T.dim, fontSize: 20, fontFamily: FONTS.mono }}>✕</Text></Pressable>
           </View>
 
-          <View style={{ alignItems: 'center', paddingTop: 14, paddingBottom: 6 }}>
+          <View style={{ alignItems: 'center', paddingTop: 14, paddingBottom: 2 }}>
             <Text style={{ fontFamily: FONTS.display, fontSize: 56, color: num > 0 ? T.text : T.faint }}>₹{display}</Text>
           </View>
 
           <TextInput value={merchant} onChangeText={setMerchant} placeholder="where did it go?"
             placeholderTextColor={T.faint}
-            style={{ textAlign: 'center', color: T.text, fontFamily: FONTS.mono, fontSize: 14, paddingVertical: 8 }} />
+            style={{ textAlign: 'center', color: T.text, fontFamily: FONTS.mono, fontSize: 14, paddingVertical: 6 }} />
 
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, justifyContent: 'center', marginVertical: 14 }}>
+          <TextInput value={note} onChangeText={setNote} placeholder="add a note (optional)"
+            placeholderTextColor={T.faint}
+            style={{ textAlign: 'center', color: T.dim, fontFamily: FONTS.sans, fontStyle: 'italic',
+              fontSize: 13, paddingVertical: 4, marginBottom: 4 }} />
+
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, justifyContent: 'center', marginVertical: 12 }}>
             {CAT_IDS.map((id) => {
               const on = cat === id;
               return (

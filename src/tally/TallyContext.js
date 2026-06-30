@@ -5,6 +5,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { THEMES, resolveAccent } from './theme';
 import { SEED_TXS } from './data';
+import { deleteTransaction, updateTransactionCategory } from '../services/supabase';
 
 const PREFS_KEY = 'tally_prefs_v1';
 const REACT_KEY = 'tally_reactions_v1';
@@ -91,6 +92,24 @@ export function TallyProvider({ children }) {
     });
   }, [realTxs, txsLoaded]);
 
+  const deleteTx = useCallback(async (tx) => {
+    const isLocal = String(tx.id).startsWith('u');
+    if (!isLocal) await deleteTransaction(tx.id).catch(() => {});
+    setLocalTxs((prev) => {
+      const base = prev || (txsLoaded ? realTxs : SEED_TXS);
+      return base.filter(t => t.id !== tx.id);
+    });
+    if (!isLocal) setRealTxs(prev => prev.filter(t => t.id !== tx.id));
+  }, [realTxs, txsLoaded]);
+
+  const updateTxCategory = useCallback(async (tx, category) => {
+    const isLocal = String(tx.id).startsWith('u');
+    if (!isLocal) await updateTransactionCategory(tx.id, category).catch(() => {});
+    const patch = (list) => list.map(t => t.id === tx.id ? { ...t, category } : t);
+    setLocalTxs(prev => prev ? patch(prev) : patch(txsLoaded ? realTxs : SEED_TXS));
+    if (!isLocal) setRealTxs(prev => patch(prev));
+  }, [realTxs, txsLoaded]);
+
   // Seed is only a pre-load placeholder; once your data loads we show YOURS
   // (even if empty → honest empty states, not fake demo spends).
   const allTxs = localTxs || (txsLoaded ? realTxs : SEED_TXS);
@@ -108,7 +127,7 @@ export function TallyProvider({ children }) {
     T: theme, accent, accentInk,
     prefs, setPref,
     income, setIncome,
-    store: { txs, allTxs, addTx, reactions, react },
+    store: { txs, allTxs, addTx, deleteTx, updateTxCategory, reactions, react },
     selectedMonth, setSelectedMonth,
     setRealTransactions,
     registerRefetch,

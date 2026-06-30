@@ -70,6 +70,10 @@ export async function updateTransactionCategory(id, category) {
   return supabase.from('transactions').update({ category }).eq('id', id);
 }
 
+export async function deleteTransaction(id) {
+  return supabase.from('transactions').delete().eq('id', id);
+}
+
 export async function getBudgets(userId) {
   return supabase.from('budgets').select('*').eq('user_id', userId);
 }
