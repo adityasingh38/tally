@@ -22,11 +22,12 @@ export async function exportToCSV(transactions) {
 }
 
 export function generateCSVString(transactions) {
-  const header = 'Date,Merchant,Category,Type,Amount (INR)\n';
+  const header = 'Date,Merchant,Category,Type,Amount (INR),Note\n';
   const rows = transactions.map(tx => {
     const date = new Date(tx.txn_date).toLocaleDateString('en-IN');
     const merchant = `"${(tx.merchant || '').replace(/"/g, '""')}"`;
-    return `${date},${merchant},${tx.category},${tx.type},${tx.amount}`;
+    const note = tx.note ? `"${tx.note.replace(/"/g, '""')}"` : '';
+    return `${date},${merchant},${tx.category},${tx.type},${tx.amount},${note}`;
   }).join('\n');
   return header + rows;
 }

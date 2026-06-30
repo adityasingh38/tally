@@ -26,20 +26,37 @@ class TallyNotificationListenerService : NotificationListenerService() {
   // are deliberately excluded — bank *SMS* is already covered by SmsReceiver,
   // and reading chat notifications would be noisy and invasive.
   private val watched = setOf(
+    // UPI super-apps
     "com.google.android.apps.nbu.paisa.user", // Google Pay
     "com.phonepe.app",                        // PhonePe
     "net.one97.paytm",                        // Paytm
     "com.dreamplug.androidapp",               // CRED
     "in.org.npci.upiapp",                     // BHIM
+    "com.mobikwik_new",                       // MobiKwik
+    "com.freecharge.android",                 // FreeCharge
+    "in.amazon.mShop.android.shopping",       // Amazon Pay
+    "com.airtel.money",                       // Airtel Payments Bank
+    // Private & new-age banks
     "com.snapwork.hdfc",                      // HDFC
     "com.csam.icici.bank.imobile",            // ICICI iMobile
     "com.sbi.lotusintouch",                   // SBI YONO
     "com.sbi.SBIFreedomPlus",                 // SBI Anywhere
     "com.axis.mobile",                        // Axis
     "com.msf.kbank.mobile",                   // Kotak
+    "com.kotak.mahindra.kotak811",            // Kotak 811
     "com.bankofbaroda.mconnect",              // BoB
     "com.fss.pnbpsp",                         // PNB
-    "com.infrasofttech.indianBank"            // Indian Bank
+    "com.infrasofttech.indianBank",           // Indian Bank
+    "com.yesbank.yesmobile",                  // Yes Bank
+    "com.rbl.rblbank",                        // RBL Bank
+    "com.federalbank.mobbanking",             // Federal Bank
+    "com.idfcfirstbank.mobilebanking",        // IDFC First Bank
+    "com.sc.digitalbank",                     // Standard Chartered
+    "com.jupiter.money",                      // Jupiter Money
+    "com.fampay.merchant",                    // FamPay
+    "com.niyo.consumer",                      // Niyo
+    "com.bajajfinservlending",               // Bajaj Finance
+    "com.aubank.mobilebanking"               // AU Small Finance Bank
   )
 
   override fun onNotificationPosted(sbn: StatusBarNotification?) {

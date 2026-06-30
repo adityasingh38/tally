@@ -1,6 +1,6 @@
 // src/tally/screens/AddSheet.js — log a spend (modal). Calls store.addTx → live update.
 import React, { useState } from 'react';
-import { View, Text, Pressable, Modal, TextInput } from 'react-native';
+import { View, Text, Pressable, Modal, TextInput, Alert } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import * as StoreReview from 'expo-store-review';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -34,6 +34,25 @@ export default function AddSheet({ visible, onClose }) {
 
   const save = async () => {
     if (num <= 0) return;
+    // duplicate guard: same merchant + amount within 24 h
+    const key = (merchant.trim() || 'mystery spend').toLowerCase();
+    const cutoff = Date.now() - 86400000;
+    const dupe = store.allTxs.find(t =>
+      t.type !== 'credit' &&
+      Math.abs(t.amount - num) < 0.01 &&
+      (t.merchant || '').toLowerCase().trim() === key &&
+      new Date(t.txn_date || 0).getTime() > cutoff
+    );
+    if (dupe) {
+      const go = await new Promise(res =>
+        Alert.alert(
+          'Possible duplicate',
+          `You already logged ${merchant.trim() || 'this'} ₹${num.toLocaleString('en-IN')} recently. Log again?`,
+          [{ text: 'Cancel', onPress: () => res(false), style: 'cancel' }, { text: 'Log anyway', onPress: () => res(true) }]
+        )
+      );
+      if (!go) return;
+    }
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     store.addTx({ merchant: merchant.trim() || 'Mystery spend', amount: num, category: cat, type: 'debit', note: note.trim() || 'logged by hand' });
     if (user?.id) checkBudgetAlerts(user.id).catch(() => {});
