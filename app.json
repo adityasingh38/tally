@@ -1,16 +1,25 @@
 {
   "expo": {
-    "name": "tally",
+    "name": "Tally",
     "slug": "tally",
     "version": "1.0.0",
     "icon": "./assets/icon.png",
     "backgroundColor": "#0E0F0C",
     "userInterfaceStyle": "dark",
     "android": {
+      "package": "com.tally",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0E0F0C"
-      }
+      },
+      "permissions": [
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.VIBRATE",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECEIVE_SMS",
+        "android.permission.READ_SMS"
+      ]
     },
     "extra": {
       "eas": {
