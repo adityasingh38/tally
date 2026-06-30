@@ -70,6 +70,13 @@ export default function HomeScreen({ navigation }) {
   const ratio = hasIncome ? Math.min(total / income, 1) : 0;
   const zone = copeZone(hasIncome ? total / income : 0.5);
 
+  const now2 = new Date();
+  const isCurrentMonth = now2.getFullYear() === selectedMonth.year && now2.getMonth() === selectedMonth.month;
+  const daysLeft = isCurrentMonth
+    ? Math.max(1, new Date(selectedMonth.year, selectedMonth.month + 1, 0).getDate() - now2.getDate() + 1)
+    : 0;
+  const dailyBudget = hasIncome && left > 0 && daysLeft > 0 ? Math.round(left / daysLeft) : null;
+
   const recent = txs.slice(0, 5);
 
   return (
@@ -105,6 +112,20 @@ export default function HomeScreen({ navigation }) {
             <MonoLabel T={T} color={T.faint} size={10}>{Math.round(ratio * 100)}% gone</MonoLabel>
             <MonoLabel T={T} color={T.faint} size={10}>{zone.label}</MonoLabel>
           </View>
+          {dailyBudget != null && (
+            <View style={{ marginTop: 10, backgroundColor: T.card, borderWidth: 1, borderColor: T.line,
+              borderRadius: 10, paddingVertical: 9, paddingHorizontal: 13,
+              flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <MonoLabel T={T} color={T.dim} size={10}>daily budget to survive</MonoLabel>
+              <Text style={{ fontFamily: FONTS.monoBold, fontSize: 14, color: accent }}>{fmtINR(dailyBudget)}/day</Text>
+            </View>
+          )}
+          {hasIncome && left === 0 && (
+            <View style={{ marginTop: 10, backgroundColor: T.card, borderWidth: 1, borderColor: T.red,
+              borderRadius: 10, paddingVertical: 9, paddingHorizontal: 13 }}>
+              <MonoLabel T={T} color={T.red} size={10}>over budget · {fmtINR(total - income)} in the hole</MonoLabel>
+            </View>
+          )}
         </>
       ) : (
         <>
