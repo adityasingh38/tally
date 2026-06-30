@@ -56,7 +56,7 @@ export default function TxDetailSheet({ visible, tx, onClose }) {
 
   function startEdit(field) {
     setEditingField(field);
-    setEditVal(field === 'amount' ? String(tx.amount) : tx.merchant || '');
+    setEditVal(field === 'amount' ? String(tx.amount) : field === 'note' ? (tx.note || '') : tx.merchant || '');
   }
 
   async function saveEdit() {
@@ -66,6 +66,8 @@ export default function TxDetailSheet({ visible, tx, onClose }) {
       const v = editVal.trim();
       if (!v) { setEditingField(null); return; }
       fields.merchant = v;
+    } else if (editingField === 'note') {
+      fields.note = editVal.trim() || null;
     } else {
       const n = Number(editVal.replace(/[^0-9.]/g, ''));
       if (!n || n <= 0) { setEditingField(null); return; }
@@ -136,7 +138,25 @@ export default function TxDetailSheet({ visible, tx, onClose }) {
               <Text style={{ fontFamily: FONTS.sansBold, fontSize: 20, color: T.text }}>{tx.merchant}</Text>
             </Pressable>
           )}
-          {tx.note ? <Text style={{ fontFamily: FONTS.sans, fontStyle: 'italic', fontSize: 14, color: T.dim, marginTop: 6 }}>"{tx.note}"</Text> : null}
+          {editingField === 'note' ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 }}>
+              <TextInput value={editVal} onChangeText={setEditVal} autoFocus onSubmitEditing={saveEdit}
+                placeholder="add a note…" placeholderTextColor={T.faint}
+                style={{ flex: 1, fontFamily: FONTS.sans, fontStyle: 'italic', fontSize: 14, color: T.text,
+                  borderBottomWidth: 2, borderBottomColor: accent, paddingBottom: 2 }} />
+              <Pressable onPress={saveEdit} disabled={saving}
+                style={{ backgroundColor: accent, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 7 }}>
+                {saving ? <ActivityIndicator color={accentInk} size="small" />
+                  : <Text style={{ fontFamily: FONTS.monoBold, fontSize: 11, color: accentInk }}>OK</Text>}
+              </Pressable>
+            </View>
+          ) : (
+            <Pressable onPress={() => startEdit('note')} style={{ marginTop: 6 }}>
+              {tx.note
+                ? <Text style={{ fontFamily: FONTS.sans, fontStyle: 'italic', fontSize: 14, color: T.dim }}>"{tx.note}"</Text>
+                : <MonoLabel T={T} color={T.faint} size={10}>+ add note</MonoLabel>}
+            </Pressable>
+          )}
 
           <View style={{ marginTop: 20 }}>
             <Rule T={T} />

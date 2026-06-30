@@ -5,6 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { useAuth } from '../../hooks/useAuth';
+import { totalSpent } from '../data';
 import { syncHistoricalSMS } from '../../services/smsSync';
 import { usePremium } from '../../hooks/usePremium';
 import { notifAccessAvailable, isNotifAccessEnabled, openNotifAccessSettings } from '../../services/notificationAccess';
@@ -52,7 +53,7 @@ function Row({ T, label, sub, control, onPress }) {
 }
 
 export default function SettingsScreen() {
-  const { T, accent, accentInk, prefs, setPref, openPaywall, income, setIncome, isPremium } = useTally();
+  const { T, accent, accentInk, prefs, setPref, openPaywall, income, setIncome, isPremium, store } = useTally();
   const { user, signOut } = useAuth();
   const { restore } = usePremium();
   const insets = useSafeAreaInsets();
@@ -140,6 +141,15 @@ export default function SettingsScreen() {
   const handle = (user?.email || 'you').split('@')[0];
   const initial = handle[0]?.toLowerCase() || 'b';
 
+  // lifetime stats from allTxs
+  const lifetimeSpend = totalSpent(store.allTxs.filter(t => t.type !== 'credit'));
+  const lifetimeTxns = store.allTxs.filter(t => t.type !== 'credit').length;
+  const earliest = store.allTxs.reduce((acc, t) => {
+    if (!t.txn_date) return acc;
+    return !acc || t.txn_date < acc ? t.txn_date : acc;
+  }, null);
+  const memberDays = earliest ? Math.max(1, Math.round((Date.now() - new Date(earliest).getTime()) / 86400000)) : null;
+
   return (
     <ScrollView style={{ flex: 1, backgroundColor: T.bg }}
       contentContainerStyle={{ paddingHorizontal: 18, paddingTop: insets.top + 14, paddingBottom: 120 }}>
@@ -155,6 +165,26 @@ export default function SettingsScreen() {
           <MonoLabel T={T} color={T.dim} size={10.5} style={{ marginTop: 3 }}>{isPremium ? 'tally pro' : 'tally free'}</MonoLabel>
         </View>
       </View>
+
+      {/* lifetime stats */}
+      {lifetimeTxns > 0 && (
+        <View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}>
+          <View style={{ flex: 1, backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 12, padding: 12 }}>
+            <Text style={{ fontFamily: FONTS.display, fontSize: 20, color: T.text }}>{fmtINR(lifetimeSpend)}</Text>
+            <MonoLabel T={T} color={T.faint} size={9} style={{ marginTop: 3 }}>spent all time</MonoLabel>
+          </View>
+          <View style={{ flex: 1, backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 12, padding: 12 }}>
+            <Text style={{ fontFamily: FONTS.display, fontSize: 20, color: T.text }}>{lifetimeTxns}</Text>
+            <MonoLabel T={T} color={T.faint} size={9} style={{ marginTop: 3 }}>transactions</MonoLabel>
+          </View>
+          {memberDays && (
+            <View style={{ flex: 1, backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 12, padding: 12 }}>
+              <Text style={{ fontFamily: FONTS.display, fontSize: 20, color: T.text }}>{memberDays}</Text>
+              <MonoLabel T={T} color={T.faint} size={9} style={{ marginTop: 3 }}>days tracked</MonoLabel>
+            </View>
+          )}
+        </View>
+      )}
 
       {/* monthly income — powers "left to burn" */}
       <View style={{ marginTop: 20, backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 6, padding: 16 }}>

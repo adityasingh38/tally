@@ -70,6 +70,14 @@ export const BANK_SENDER_IDS = [
   'DBSBNK', 'SIBSMS', 'CSBBNK', 'DCBBNK', 'EQUITS', 'JANABK',
   'AMEXIN', 'ONECRD', 'SLICET', 'CREDCB', 'JUPAXS',
   'GPAY', 'PHONEPE', 'PHONPE', 'AMAZONPAY', 'AMZNPAY', 'MOBIKW', 'FREECH',
+  // Small finance banks + newer players
+  'UJJIVN', 'EQUITS', 'SURYOD', 'SAIBK', 'NKGSB', 'TMBLSM', 'JKBSMS',
+  'FINCRE', 'FINCSB', 'NIYOBN', 'JUPBNK', 'FAMPAY', 'JIOFIN', 'JIOBNK',
+  'AUSMFB', 'AUSFSB', 'AUSFIN', 'NORTH1', 'NORTBK',
+  // Credit card issuers
+  'HDFCCC', 'ICICCC', 'AXISCC', 'SBICC', 'KOTAKC', 'INDUSCC',
+  'BOBACC', 'CITICC', 'SCBINC', 'AMNEXC', 'BAJFIN', 'BAJFSL',
+  'TATACR', 'MONEYT', 'KREDITB', 'KREDIT', 'CASHEC',
 ];
 
 export const FREEMIUM = {

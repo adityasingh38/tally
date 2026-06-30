@@ -18,6 +18,9 @@ create table if not exists transactions (
 -- categorise time. Drop the column if an older schema created it.
 alter table transactions drop column if exists raw_sms;
 
+-- Optional note/label on a transaction (manually added or recategorisation note).
+alter table transactions add column if not exists note text;
+
 -- Index for fast per-user queries
 create index if not exists idx_transactions_user_date on transactions(user_id, txn_date desc);
 create index if not exists idx_transactions_user_category on transactions(user_id, category);
