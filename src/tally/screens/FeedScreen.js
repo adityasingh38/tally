@@ -1,6 +1,6 @@
 // src/tally/screens/FeedScreen.js  → your "Transactions" tab
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Pressable, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, Pressable, RefreshControl, TextInput } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { FONTS, fmtINR } from '../theme';
@@ -12,8 +12,12 @@ export default function FeedScreen({ navigation }) {
     selectedMonth, setSelectedMonth } = useTally();
   const insets = useSafeAreaInsets();
   const [filter, setFilter] = useState('all');
-  const txs = store.txs.filter((tx) =>
-    filter === 'all' ? true : filter === 'spent' ? tx.type !== 'credit' : tx.type === 'credit');
+  const [query, setQuery] = useState('');
+  const txs = store.txs.filter((tx) => {
+    const typeOk = filter === 'all' ? true : filter === 'spent' ? tx.type !== 'credit' : tx.type === 'credit';
+    const queryOk = !query || (tx.merchant || '').toLowerCase().includes(query.toLowerCase());
+    return typeOk && queryOk;
+  });
   const FILTERS = [['all', 'all'], ['spent', 'spent'], ['in', 'received']];
 
   return (
@@ -25,6 +29,17 @@ export default function FeedScreen({ navigation }) {
       <View style={{ marginBottom: 10 }}>
         <MonthPicker T={T} accent={accent} selectedMonth={selectedMonth} onChange={setSelectedMonth} />
       </View>
+
+      {/* search */}
+      <TextInput
+        value={query}
+        onChangeText={setQuery}
+        placeholder="search merchants…"
+        placeholderTextColor={T.faint}
+        style={{ backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 8,
+          paddingVertical: 10, paddingHorizontal: 14, color: T.text, fontFamily: FONTS.sans,
+          fontSize: 14, marginBottom: 16 }}
+      />
 
       {/* filters */}
       <View style={{ flexDirection: 'row', gap: 8, marginTop: 6, marginBottom: 18 }}>

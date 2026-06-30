@@ -53,7 +53,6 @@ async function sendAlert({ title, body }) {
     body,
     android: {
       channelId: CHANNEL_ID,
-      smallIcon: 'ic_notification',
       pressAction: { id: 'default' },
     },
   });
