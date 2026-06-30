@@ -1,29 +1,59 @@
-// src/tally/screens/DamageScreen.js  → your "Insights" tab
-import React from 'react';
+// src/tally/screens/DamageScreen.js  → "Insights" tab
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { FONTS, fmtINR } from '../theme';
 import { MonoLabel, Rule, Leader, ReceiptShell, Btn, Tag, Brand } from '../ui';
 import { totalSpent, groupByCat, copeZone } from '../data';
+import { getAIVerdict } from '../../services/aiAdvice';
+
+function VerdictSkeleton({ T }) {
+  return (
+    <View style={{ gap: 16 }}>
+      {[0, 1, 2].map(i => (
+        <View key={i} style={{ flexDirection: 'row', gap: 12 }}>
+          <View style={{ width: 46, height: 12, borderRadius: 2, backgroundColor: T.chip, marginTop: 2 }} />
+          <View style={{ flex: 1, gap: 6 }}>
+            <View style={{ height: 13, borderRadius: 2, backgroundColor: T.chip, width: '90%' }} />
+            <View style={{ height: 11, borderRadius: 2, backgroundColor: T.chip, width: '60%' }} />
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
 
 export default function DamageScreen() {
-  const { T, accent, accentInk, income, store } = useTally();
+  const { T, accent, accentInk, income, store, prefs } = useTally();
   const insets = useSafeAreaInsets();
   const txs = store.txs;
   const total = totalSpent(txs);
-  const cats = groupByCat(txs);
+  const rawCats = groupByCat(txs);
+  const cats = rawCats.map(c => ({ ...c, pct: total > 0 ? Math.round(c.amount / total * 100) : 0 }));
   const hasIncome = !!income && income > 0;
   const ratio = hasIncome ? total / income : 0.5;
   const zone = copeZone(ratio);
-  const pctOf = (a) => (total > 0 ? Math.round((a / total) * 100) : 0);
-  // The "verdict" is now derived from the real top categories, not canned lines.
-  const vs = cats.slice(0, 3).map((c) => ({
-    big: c.tag,
-    line: `${fmtINR(c.amount)} on ${c.label.toLowerCase()}.`,
-    sub: `${pctOf(c.amount)}% of your spend`,
-  }));
   const blocks = 12, filled = Math.max(0, Math.min(blocks, Math.round(ratio * blocks)));
+
+  const [verdict, setVerdict] = useState(null);
+  const [verdictLoading, setVerdictLoading] = useState(false);
+  const fetchedRef = useRef(null); // tracks last fetch key to avoid redundant calls
+
+  useEffect(() => {
+    if (cats.length === 0) return;
+    const key = `${prefs.tone}_${prefs.nihil}_${Math.round(total / 500)}`; // re-fetch per ₹500 spend change
+    if (fetchedRef.current === key) return;
+    fetchedRef.current = key;
+
+    setVerdictLoading(true);
+    getAIVerdict({ cats, total, income, tone: prefs.tone, nihil: prefs.nihil })
+      .then(setVerdict)
+      .catch(() => {})
+      .finally(() => setVerdictLoading(false));
+  }, [cats.length, prefs.tone, prefs.nihil, Math.round(total / 500)]);
+
+  const vs = verdict || [];
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: T.bg }}
@@ -45,7 +75,7 @@ export default function DamageScreen() {
           <Text style={{ fontFamily: FONTS.display, fontSize: 52, color: T.text, marginTop: 6 }}>{fmtINR(total)}</Text>
           <View style={{ marginTop: 12 }}>
             <Tag T={T} accent={accent} accentInk={accentInk} rotate={-1.5}>
-              {cats[0] ? `${cats[0].tag} LEADS · ${pctOf(cats[0].amount)}% OF SPEND` : 'NO DAMAGE YET'}
+              {cats[0] ? `${cats[0].tag} LEADS · ${cats[0].pct}% OF SPEND` : 'NO DAMAGE YET'}
             </Tag>
           </View>
         </View>
@@ -77,21 +107,34 @@ export default function DamageScreen() {
 
         {/* verdict */}
         <View style={{ paddingTop: 16 }}>
-          <MonoLabel T={T} color={T.dim} size={10.5} style={{ letterSpacing: 2, marginBottom: 12 }}>* THE VERDICT *</MonoLabel>
-          {vs.length === 0 && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <MonoLabel T={T} color={T.dim} size={10.5} style={{ letterSpacing: 2 }}>* THE VERDICT *</MonoLabel>
+            {verdictLoading && (
+              <MonoLabel T={T} color={T.faint} size={9}>generating…</MonoLabel>
+            )}
+          </View>
+
+          {cats.length === 0 && (
             <MonoLabel T={T} color={T.faint} size={11}>log a spend and we'll judge it.</MonoLabel>
           )}
-          <View style={{ gap: 16 }}>
-            {vs.map((v, i) => (
-              <View key={i} style={{ flexDirection: 'row', gap: 12 }}>
-                <Text style={{ fontFamily: FONTS.monoBold, fontSize: 11, color: accent, paddingTop: 2, width: 46 }}>{v.big}</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontFamily: FONTS.sans, fontSize: 13, lineHeight: 19, color: T.text }}>{v.line}</Text>
-                  <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: T.dim, marginTop: 5 }}>› {v.sub}</Text>
+
+          {cats.length > 0 && verdictLoading && vs.length === 0 && (
+            <VerdictSkeleton T={T} />
+          )}
+
+          {vs.length > 0 && (
+            <View style={{ gap: 16 }}>
+              {vs.map((v, i) => (
+                <View key={i} style={{ flexDirection: 'row', gap: 12 }}>
+                  <Text style={{ fontFamily: FONTS.monoBold, fontSize: 11, color: accent, paddingTop: 2, width: 46 }}>{v.tag}</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontFamily: FONTS.sans, fontSize: 13, lineHeight: 19, color: T.text }}>{v.line}</Text>
+                    <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: T.dim, marginTop: 5 }}>› {v.sub}</Text>
+                  </View>
                 </View>
-              </View>
-            ))}
-          </View>
+              ))}
+            </View>
+          )}
         </View>
 
         {/* barcode + footer */}
