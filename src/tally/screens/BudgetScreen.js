@@ -4,7 +4,7 @@ import { View, Text, ScrollView, Pressable, TextInput, Alert, ActivityIndicator 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { useAuth } from '../../hooks/useAuth';
-import { getBudgets, upsertBudget } from '../../services/supabase';
+import { getBudgets, upsertBudget, deleteBudget } from '../../services/supabase';
 import { FONTS, fmtINR } from '../theme';
 import { MonoLabel, ScreenHeader, Tag } from '../ui';
 import { groupByCat, CAT_META } from '../data';
@@ -34,6 +34,12 @@ export default function BudgetScreen() {
   // real spend per category from the live store
   const spentMap = {};
   groupByCat(store.txs).forEach((c) => { spentMap[c.id] = c.amount; });
+
+  async function removeBudget(catId) {
+    await deleteBudget(user.id, catId);
+    setBudgets((prev) => { const next = { ...prev }; delete next[catId]; return next; });
+    if (editing === catId) setEditing(null);
+  }
 
   async function save(catId) {
     const limit = Number(inputVal.replace(/[^0-9]/g, ''));
@@ -100,6 +106,11 @@ export default function BudgetScreen() {
                   <Pressable onPress={() => { setEditing(isEditing ? null : id); setInputVal(limit != null ? String(limit) : ''); }}>
                     <MonoLabel T={T} color={accent} size={10}>{limit != null ? 'edit' : 'set'}</MonoLabel>
                   </Pressable>
+                  {limit != null && (
+                    <Pressable onPress={() => removeBudget(id)}>
+                      <MonoLabel T={T} color={T.red} size={10}>✕</MonoLabel>
+                    </Pressable>
+                  )}
                 </View>
               </View>
 

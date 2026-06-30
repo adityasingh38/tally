@@ -81,3 +81,7 @@ export async function getBudgets(userId) {
 export async function upsertBudget(budget) {
   return supabase.from('budgets').upsert(budget, { onConflict: 'user_id,category' });
 }
+
+export async function deleteBudget(userId, category) {
+  return supabase.from('budgets').delete().eq('user_id', userId).eq('category', category);
+}

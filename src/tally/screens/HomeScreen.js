@@ -77,6 +77,12 @@ export default function HomeScreen({ navigation }) {
     : 0;
   const dailyBudget = hasIncome && left > 0 && daysLeft > 0 ? Math.round(left / daysLeft) : null;
 
+  // today's spend
+  const todayStr = now2.toISOString().slice(0, 10);
+  const todayTotal = isCurrentMonth
+    ? totalSpent(txs.filter(tx => tx.txn_date && tx.txn_date.slice(0, 10) === todayStr && tx.type !== 'credit'))
+    : 0;
+
   // spending forecast — only for current month with enough data
   const dayOfMonth = now2.getDate();
   const daysInMonth = new Date(selectedMonth.year, selectedMonth.month + 1, 0).getDate();
@@ -147,17 +153,25 @@ export default function HomeScreen({ navigation }) {
       )}
 
       {/* mini stats */}
-      <View style={{ flexDirection: 'row', gap: 12, marginTop: 22 }}>
-        <View style={{ flex: 1, backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 14, padding: 16 }}>
-          <Text style={{ fontFamily: FONTS.display, fontSize: 26, color: T.text }}>{count}</Text>
-          <MonoLabel T={T} color={T.dim} size={10} style={{ marginTop: 4 }}>spends logged</MonoLabel>
+      <View style={{ flexDirection: 'row', gap: 10, marginTop: 22 }}>
+        <View style={{ flex: 1, backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 14, padding: 14 }}>
+          <Text style={{ fontFamily: FONTS.display, fontSize: 22, color: T.text }}>{count}</Text>
+          <MonoLabel T={T} color={T.dim} size={9.5} style={{ marginTop: 3 }}>spends</MonoLabel>
         </View>
-        <View style={{ flex: 1, backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 14, padding: 16 }}>
-          <Text style={{ fontFamily: FONTS.display, fontSize: 26, color: accent }}>{top ? top.tag : '—'}</Text>
-          <MonoLabel T={T} color={T.dim} size={10} style={{ marginTop: 4 }}>
-            {top ? `top · ${fmtINR(top.amount)}` : 'no category yet'}
+        <View style={{ flex: 1, backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 14, padding: 14 }}>
+          <Text style={{ fontFamily: FONTS.display, fontSize: 22, color: accent }}>{top ? top.tag : '—'}</Text>
+          <MonoLabel T={T} color={T.dim} size={9.5} style={{ marginTop: 3 }}>
+            {top ? `top · ${fmtINR(top.amount)}` : 'no top yet'}
           </MonoLabel>
         </View>
+        {isCurrentMonth && (
+          <View style={{ flex: 1, backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 14, padding: 14 }}>
+            <Text style={{ fontFamily: FONTS.display, fontSize: 22, color: todayTotal > 0 ? T.text : T.faint }}>
+              {todayTotal > 0 ? fmtINR(todayTotal) : '₹0'}
+            </Text>
+            <MonoLabel T={T} color={T.dim} size={9.5} style={{ marginTop: 3 }}>today</MonoLabel>
+          </View>
+        )}
       </View>
 
       {/* 4-month trend bars */}

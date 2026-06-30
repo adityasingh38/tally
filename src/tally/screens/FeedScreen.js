@@ -46,6 +46,7 @@ export default function FeedScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const [filter, setFilter] = useState('all');
   const [query, setQuery] = useState('');
+  const [sort, setSort] = useState('date'); // 'date' | 'amount'
 
   const filtered = store.txs.filter((tx) => {
     const typeOk = filter === 'all' ? true : filter === 'spent' ? tx.type !== 'credit' : tx.type === 'credit';
@@ -53,7 +54,14 @@ export default function FeedScreen({ navigation }) {
     return typeOk && queryOk;
   });
 
-  const sections = groupTxsByDate(filtered);
+  const sorted = sort === 'amount'
+    ? [...filtered].sort((a, b) => b.amount - a.amount)
+    : filtered;
+
+  const sections = sort === 'amount'
+    ? [{ label: 'largest first', txs: sorted }]
+    : groupTxsByDate(sorted);
+
   const FILTERS = [['all', 'all'], ['spent', 'spent'], ['in', 'received']];
 
   return (
@@ -87,6 +95,21 @@ export default function FeedScreen({ navigation }) {
                 borderWidth: 1.5, borderColor: on ? accent : T.line, backgroundColor: on ? accent : 'transparent' }}>
               <Text style={{ fontFamily: FONTS.monoBold, fontSize: 11, letterSpacing: 0.8,
                 textTransform: 'uppercase', color: on ? accentInk : T.dim }}>{label}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      {/* sort */}
+      <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: 6, marginTop: -12, marginBottom: 14 }}>
+        <MonoLabel T={T} color={T.faint} size={9}>sort:</MonoLabel>
+        {[['date', 'date'], ['amount', 'amount']].map(([k, label]) => {
+          const on = sort === k;
+          return (
+            <Pressable key={k} onPress={() => setSort(k)}
+              style={{ paddingVertical: 4, paddingHorizontal: 9, borderRadius: 999,
+                borderWidth: 1, borderColor: on ? accent : T.line, backgroundColor: on ? accent + '22' : 'transparent' }}>
+              <MonoLabel T={T} color={on ? accent : T.dim} size={9}>{label}</MonoLabel>
             </Pressable>
           );
         })}
