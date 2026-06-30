@@ -21,6 +21,66 @@ function todayLabel() {
     .toLowerCase();
 }
 
+function SevenDayBars({ T, accent, allTxs }) {
+  const now = new Date();
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(now);
+    d.setDate(now.getDate() - (6 - i));
+    const key = d.toISOString().slice(0, 10);
+    const label = d.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 1).toUpperCase();
+    const isToday = i === 6;
+    return { key, label, isToday, total: 0 };
+  });
+  allTxs.filter(t => t.type !== 'credit' && t.txn_date).forEach(t => {
+    const key = t.txn_date.slice(0, 10);
+    const bar = days.find(d => d.key === key);
+    if (bar) bar.total += Number(t.amount || 0);
+  });
+  const max = Math.max(...days.map(d => d.total), 1);
+  const hasAny = days.some(d => d.total > 0);
+  if (!hasAny) return null;
+
+  return (
+    <View style={{ marginTop: 16 }}>
+      <MonoLabel T={T} color={T.faint} size={10} style={{ marginBottom: 8 }}>last 7 days</MonoLabel>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 5, height: 48 }}>
+        {days.map((d) => {
+          const barH = d.total > 0 ? Math.max(4, Math.round(36 * (d.total / max))) : 2;
+          return (
+            <View key={d.key} style={{ flex: 1, alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
+              <View style={{ width: '100%', height: barH, borderRadius: 2,
+                backgroundColor: d.isToday ? accent : d.total > 0 ? T.lineStrong : T.chip }} />
+              <MonoLabel T={T} color={d.isToday ? accent : T.faint} size={8}>{d.label}</MonoLabel>
+            </View>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+function MonthCompare({ T, accent, allTxs }) {
+  const bars = monthlyTotals(allTxs, 3);
+  if (bars.length < 2) return null;
+  const current = bars[bars.length - 1].total;
+  const prev = bars[bars.length - 2].total;
+  if (!prev || !current) return null;
+  const diff = current - prev;
+  const pct = Math.abs(Math.round((diff / prev) * 100));
+  const less = diff < 0;
+  const color = less ? T.creditText : T.red || '#ef4444';
+  const prevLabel = bars[bars.length - 2].label;
+  return (
+    <View style={{ marginTop: 10, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: color }} />
+      <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: T.dim }}>
+        <Text style={{ color, fontFamily: FONTS.monoBold }}>{less ? '-' : '+'}{pct}% vs {prevLabel.toLowerCase()}</Text>
+        {'  '}({less ? 'saved' : 'extra'} {fmtINR(Math.abs(diff))})
+      </Text>
+    </View>
+  );
+}
+
 function TrendBars({ T, accent, allTxs }) {
   const bars = monthlyTotals(allTxs, 4);
   const max = Math.max(...bars.map(b => b.total), 1);
@@ -56,10 +116,11 @@ function TrendBars({ T, accent, allTxs }) {
 }
 
 export default function HomeScreen({ navigation }) {
-  const { T, accent, accentInk, income, store, openAdd, refreshing, refreshTxs, openTx,
+  const { T, accent, accentInk, income, setIncome, store, openAdd, refreshing, refreshTxs, openTx,
     selectedMonth, setSelectedMonth } = useTally();
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
+  const [salaryDismissed, setSalaryDismissed] = React.useState(false);
 
   const txs = store.txs;
   const isNewUser = store.txsLoaded && store.allTxs.length === 0;
@@ -116,6 +177,21 @@ export default function HomeScreen({ navigation }) {
     })
     .filter(Boolean)
     .sort((a, b) => b.pct - a.pct);
+
+  // salary detection — largest credit this month, if no income set
+  const SALARY_RE = /\b(sal(?:ary)?|neft|imps|salary credit|payroll|empl(?:oyee)?)\b/i;
+  const salaryCandidate = !income && !salaryDismissed
+    ? (() => {
+        const credits = txs.filter(t => t.type === 'credit' && t.amount >= 10000);
+        if (!credits.length) return null;
+        credits.sort((a, b) => b.amount - a.amount);
+        const top2 = credits[0];
+        // prefer ones with salary keyword; fall back to largest credit >= 20k
+        const salaryMatch = credits.find(t => SALARY_RE.test(t.merchant || ''));
+        const best = salaryMatch || (top2.amount >= 20000 ? top2 : null);
+        return best || null;
+      })()
+    : null;
 
   // spending streak — consecutive days (going back from yesterday) under rough daily limit
   const roughDailyLimit = hasIncome && income > 0 ? Math.round(income / daysInMonth) : null;
@@ -270,8 +346,10 @@ export default function HomeScreen({ navigation }) {
         </View>
       )}
 
-      {/* 4-month trend bars */}
+      {/* 4-month trend + 7-day sparkline */}
       <TrendBars T={T} accent={accent} allTxs={store.allTxs} />
+      <SevenDayBars T={T} accent={accent} allTxs={store.allTxs} />
+      <MonthCompare T={T} accent={accent} allTxs={store.allTxs} />
 
       {/* today's read */}
       <Pressable onPress={() => navigation && navigation.navigate('Insights')}
@@ -316,6 +394,27 @@ export default function HomeScreen({ navigation }) {
               </MonoLabel>
             </Pressable>
           ))}
+        </View>
+      )}
+
+      {/* salary detection nudge */}
+      {salaryCandidate && (
+        <View style={{ marginTop: 14, backgroundColor: T.card, borderWidth: 1, borderColor: accent + '55',
+          borderRadius: 14, padding: 14 }}>
+          <MonoLabel T={T} color={accent} size={10} style={{ marginBottom: 4 }}>income detected</MonoLabel>
+          <Text style={{ fontFamily: FONTS.sansMed, fontSize: 14, color: T.text, marginBottom: 10 }}>
+            Set {fmtINR(salaryCandidate.amount)} as monthly income? Unlocks burn rate, streak, and savings tracking.
+          </Text>
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <Pressable onPress={() => { setIncome(salaryCandidate.amount); setSalaryDismissed(true); }}
+              style={{ flex: 1, backgroundColor: accent, borderRadius: 8, paddingVertical: 9, alignItems: 'center' }}>
+              <Text style={{ fontFamily: FONTS.monoBold, fontSize: 11, color: accentInk }}>YES, SET IT</Text>
+            </Pressable>
+            <Pressable onPress={() => setSalaryDismissed(true)}
+              style={{ flex: 1, borderWidth: 1, borderColor: T.line, borderRadius: 8, paddingVertical: 9, alignItems: 'center' }}>
+              <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: T.dim }}>dismiss</Text>
+            </Pressable>
+          </View>
         </View>
       )}
 
