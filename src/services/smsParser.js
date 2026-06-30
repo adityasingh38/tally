@@ -104,6 +104,8 @@ const MERCHANT_PATTERNS = [
   new RegExp(`\\bat\\s+(${MERCHANT_CHARS})${MERCHANT_BOUNDARY}`, 'i'),
   // UPI/transfer: "to MERCHANT".
   new RegExp(`\\bto\\s+(${MERCHANT_CHARS})${MERCHANT_BOUNDARY}`, 'i'),
+  // UPI ref path: "UPI/txnid/MERCHANT" (ICICI and similar).
+  /\bUPI\/[^\s/]+\/([A-Z][A-Za-z0-9&'.\- ]{1,20})/i,
   // "MERCHANT credited" (payee side of a debit).
   /[;,]\s*([A-Za-z][A-Za-z0-9&'.\- ]{1,28}?)\s+credited\b/i,
   // Bare merchant between amount and date: "INR 799 NETFLIX 05-06-26".
