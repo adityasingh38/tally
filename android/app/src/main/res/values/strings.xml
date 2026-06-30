@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">tally</string>
+    <string name="shortcut_log_spend_short">Log spend</string>
+    <string name="shortcut_log_spend_long">Log a new spend</string>
+    <string name="shortcut_insights_short">Insights</string>
+    <string name="shortcut_insights_long">Open monthly Insights</string>
+    <string name="shortcut_disabled">Shortcut unavailable</string>
 </resources>

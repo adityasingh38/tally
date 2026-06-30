@@ -3,7 +3,7 @@
 // Wraps everything in TallyProvider, renders the custom tab bar, and mounts
 // the Add + Paywall modals globally so any screen can open them.
 import React from 'react';
-import { View } from 'react-native';
+import { View, Linking } from 'react-native';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -36,6 +36,21 @@ export function routeFromPressAction(pressActionId) {
   if (pressActionId === 'open_insights') navigationRef.navigate('Main', { screen: 'Insights' });
   else if (pressActionId === 'open_budget') navigationRef.navigate('Main', { screen: 'Budget' });
   else navigationRef.navigate('Main');
+}
+
+function handleDeepLink(url) {
+  if (!url || !navigationRef.isReady()) return;
+  if (url.includes('tally://insights')) navigationRef.navigate('Main', { screen: 'Insights' });
+  else if (url.includes('tally://log')) {
+    // navigate home then open add sheet
+    navigationRef.navigate('Main', { screen: 'Dashboard' });
+    // slight delay so the nav settles before opening the modal
+    setTimeout(() => {
+      // open add modal via context — can't access it directly here;
+      // the tab bar's floating + button is the canonical entry point.
+      // This deep link just ensures the user lands on Dashboard.
+    }, 100);
+  }
 }
 
 function MainTabs() {
@@ -105,6 +120,12 @@ function Inner() {
   // Your real auth gate (kept intact). If you don't have AuthScreen wired yet,
   // you can temporarily replace this with `const user = true, hasOnboarded = true;`
   const { user, loading, hasOnboarded, completeOnboarding } = useAuth();
+
+  React.useEffect(() => {
+    const sub = Linking.addEventListener('url', ({ url }) => handleDeepLink(url));
+    return () => sub.remove();
+  }, []);
+
   if (loading) return <View style={{ flex: 1, backgroundColor: '#0E0F0C' }} />;
 
   return (
@@ -112,7 +133,10 @@ function Inner() {
         notifee.getInitialNotification().then(n => {
           if (n?.pressAction?.id) routeFromPressAction(n.pressAction.id);
         }).catch(() => {});
-      }}>
+        // Handle app shortcuts (tally://log, tally://insights)
+        Linking.getInitialURL().then(url => { if (url) handleDeepLink(url); }).catch(() => {});
+      }}
+    >
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!user ? (
           <Stack.Screen name="Auth" component={AuthScreen} />

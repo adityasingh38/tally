@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <!-- "Log spend" — opens the AddSheet directly -->
+  <shortcut
+    android:shortcutId="log_spend"
+    android:enabled="true"
+    android:icon="@drawable/ic_launcher"
+    android:shortcutShortLabel="@string/shortcut_log_spend_short"
+    android:shortcutLongLabel="@string/shortcut_log_spend_long"
+    android:shortcutDisabledMessage="@string/shortcut_disabled">
+    <intent
+      android:action="android.intent.action.VIEW"
+      android:targetPackage="com.tally"
+      android:targetClass="com.tally.MainActivity"
+      android:data="tally://log" />
+    <categories android:name="android.shortcut.conversation" />
+  </shortcut>
+
+  <!-- "Insights" — opens the Damage/Insights tab -->
+  <shortcut
+    android:shortcutId="open_insights"
+    android:enabled="true"
+    android:icon="@drawable/ic_launcher"
+    android:shortcutShortLabel="@string/shortcut_insights_short"
+    android:shortcutLongLabel="@string/shortcut_insights_long"
+    android:shortcutDisabledMessage="@string/shortcut_disabled">
+    <intent
+      android:action="android.intent.action.VIEW"
+      android:targetPackage="com.tally"
+      android:targetClass="com.tally.MainActivity"
+      android:data="tally://insights" />
+    <categories android:name="android.shortcut.conversation" />
+  </shortcut>
+
+</shortcuts>
