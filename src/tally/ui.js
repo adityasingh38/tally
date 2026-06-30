@@ -134,15 +134,15 @@ export function MonthPicker({ T, accent, selectedMonth, onChange }) {
 }
 
 // jagged-edge receipt paper container
-export function ReceiptShell({ T, children, style }) {
+export const ReceiptShell = React.forwardRef(function ReceiptShell({ T, children, style }, ref) {
   return (
-    <View style={[{ backgroundColor: T.surface, borderWidth: 1, borderColor: T.line, borderRadius: 4 }, style]}>
+    <View ref={ref} style={[{ backgroundColor: T.surface, borderWidth: 1, borderColor: T.line, borderRadius: 4 }, style]}>
       <Zigzag T={T} flip />
       <View style={{ paddingHorizontal: 20, paddingVertical: 18 }}>{children}</View>
       <Zigzag T={T} />
     </View>
   );
-}
+});
 
 // little torn-paper zigzag made of triangles
 function Zigzag({ T, flip }) {

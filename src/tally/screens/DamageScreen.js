@@ -1,7 +1,9 @@
 // src/tally/screens/DamageScreen.js  → "Insights" tab
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, ScrollView, Share, Modal, Pressable, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, Modal, Pressable, RefreshControl, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { captureRef } from 'react-native-view-shot';
+import * as Sharing from 'expo-sharing';
 import { useTally } from '../TallyContext';
 import { FONTS, fmtINR } from '../theme';
 import { MonoLabel, Rule, Leader, ReceiptShell, Btn, Tag, Brand, MonthPicker, TxRow } from '../ui';
@@ -24,52 +26,12 @@ function VerdictSkeleton({ T }) {
   );
 }
 
-function buildReceiptText(cats, total, income, zone, selectedMonth) {
-  const W = 34;
-  const pad = (s) => {
-    const n = Math.max(0, W - String(s).length);
-    return ' '.repeat(Math.floor(n / 2)) + s;
-  };
-  const ldr = (l, v) => {
-    const dots = Math.max(1, W - l.length - v.length - 2);
-    return `${l} ${'.'.repeat(dots)} ${v}`;
-  };
-  const line = '─'.repeat(W);
-  const rows = cats.map(c => ldr(c.tag, fmtINR(c.amount)));
-  const incomeLines = income
-    ? [ldr('INCOME', fmtINR(income)), ldr('SPENT', fmtINR(total)), ldr('RATIO', `${Math.round(total / income * 100)}%`)]
-    : [];
-
-  return [
-    line,
-    pad('TALLY'),
-    pad('THE DAMAGE · RECEIPT'),
-    pad(fmtMonthLabel(selectedMonth)),
-    line,
-    '',
-    pad('TOTAL DAMAGE'),
-    pad(fmtINR(total)),
-    '',
-    line,
-    ...rows,
-    ...(incomeLines.length ? ['', ...incomeLines] : []),
-    line,
-    '',
-    `COPE METER  ${zone.label.toUpperCase()}`,
-    `            ${zone.note}`,
-    '',
-    line,
-    pad('THANK YOU FOR SPENDING'),
-    pad('COME AGAIN (YOU WILL)'),
-    line,
-    '',
-    'tally · track the damage · financially feral',
-  ].join('\n');
-}
 
 export default function DamageScreen() {
   const { T, accent, accentInk, income, store, prefs, selectedMonth, setSelectedMonth, openTx, refreshing, refreshTxs } = useTally();
   const insets = useSafeAreaInsets();
+  const receiptRef = useRef(null);
+  const [sharing, setSharing] = useState(false);
   const txs = store.txs;
   const total = totalSpent(txs);
   const rawCats = groupByCat(txs);
@@ -89,6 +51,21 @@ export default function DamageScreen() {
   const ratio = hasIncome ? total / income : 0.5;
   const zone = copeZone(ratio);
   const blocks = 12, filled = Math.max(0, Math.min(blocks, Math.round(ratio * blocks)));
+
+  // recurring spend suspects — merchants appearing 3+ times this month
+  const merchantCounts = {};
+  const merchantTotals = {};
+  txs.filter(t => t.type !== 'credit').forEach(tx => {
+    const key = (tx.merchant || '').toLowerCase().trim();
+    if (!key || key === 'mystery spend') return;
+    merchantCounts[key] = (merchantCounts[key] || 0) + 1;
+    merchantTotals[key] = (merchantTotals[key] || 0) + (tx.amount || 0);
+  });
+  const recurring = Object.entries(merchantCounts)
+    .filter(([, count]) => count >= 3)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([name, count]) => ({ name, count, total: merchantTotals[name] }));
 
   const [verdict, setVerdict] = useState(null);
   const [verdictLoading, setVerdictLoading] = useState(false);
@@ -116,9 +93,16 @@ export default function DamageScreen() {
     : [];
 
   async function handleShare() {
+    if (!receiptRef.current) return;
+    setSharing(true);
     try {
-      await Share.share({ message: buildReceiptText(cats, total, income, zone, selectedMonth) });
+      const uri = await captureRef(receiptRef, { format: 'png', quality: 1 });
+      const canShare = await Sharing.isAvailableAsync();
+      if (canShare) {
+        await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: 'the damage · tally' });
+      }
     } catch {}
+    setSharing(false);
   }
 
   return (
@@ -126,7 +110,7 @@ export default function DamageScreen() {
       <ScrollView style={{ flex: 1, backgroundColor: T.bg }}
         contentContainerStyle={{ paddingHorizontal: 18, paddingTop: insets.top + 14, paddingBottom: 120 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshTxs} tintColor={accent} colors={[accent]} />}>
-        <ReceiptShell T={T}>
+        <ReceiptShell T={T} ref={receiptRef}>
           {/* header */}
           <View style={{ alignItems: 'center', borderBottomWidth: 1.5, borderStyle: 'dashed',
             borderBottomColor: T.lineStrong, paddingBottom: 16 }}>
@@ -230,9 +214,28 @@ export default function DamageScreen() {
           </View>
         </ReceiptShell>
 
+        {/* recurring suspects */}
+        {recurring.length > 0 && (
+          <View style={{ marginTop: 18, backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 16, padding: 16 }}>
+            <MonoLabel T={T} color={T.dim} style={{ marginBottom: 12 }}>recurring suspects</MonoLabel>
+            {recurring.map(({ name, count, total: rTotal }, i) => (
+              <View key={name}>
+                {i > 0 && <Rule T={T} />}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10 }}>
+                  <View>
+                    <Text style={{ fontFamily: FONTS.sansSemi, fontSize: 14, color: T.text, textTransform: 'capitalize' }}>{name}</Text>
+                    <MonoLabel T={T} color={T.faint} size={10} style={{ marginTop: 2 }}>{count}x this month</MonoLabel>
+                  </View>
+                  <Text style={{ fontFamily: FONTS.monoBold, fontSize: 14, color: accent }}>{fmtINR(rTotal)}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+
         <View style={{ marginTop: 18 }}>
-          <Btn T={T} accent={accent} accentInk={accentInk} variant="ink" onPress={handleShare}>
-            print & share ↗
+          <Btn T={T} accent={accent} accentInk={accentInk} variant="ink" onPress={handleShare} disabled={sharing}>
+            {sharing ? 'capturing…' : 'print & share ↗'}
           </Btn>
         </View>
       </ScrollView>
