@@ -86,6 +86,7 @@ export const FREEMIUM = {
   PREMIUM_YEARLY_PRICE_INR: 1499,
   // RevenueCat public SDK key (Android). Set via EAS/.env REVENUECAT_API_KEY.
   REVENUE_CAT_API_KEY: process.env.REVENUECAT_API_KEY || '',
-  // RevenueCat entitlement identifier that grants Pro.
-  ENTITLEMENT_ID: 'premium',
+  // RevenueCat entitlement identifier that grants Pro. Must match the
+  // "Identifier" column exactly (RevenueCat dashboard → Entitlements).
+  ENTITLEMENT_ID: 'Tally Pro',
 };

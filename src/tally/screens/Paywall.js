@@ -13,14 +13,44 @@ const PERKS = [
   ['BANKS', 'connect unlimited accounts & cards'],
   ['WIDGET', 'the broke-streak widget for your home screen'],
 ];
-const PLANS = [
+// Package types shortcut off the RevenueCat Offering object (offerings.monthly,
+// .annual, .lifetime) — display copy pulls price/name from the store product
+// itself so it never drifts from what's actually configured in RevenueCat.
+const PLAN_DEFS = [
+  ['monthly', 'monthly', 'Monthly', '/mo'],
+  ['yearly', 'annual', 'Yearly', '/yr'],
+  ['lifetime', 'lifetime', 'Lifetime', ''],
+];
+
+// Static fallback for dev/preview builds where offerings haven't loaded
+// (RevenueCat not configured) — no lifetime price is known statically.
+const FALLBACK_PLANS = [
   ['monthly', 'Monthly', '₹199', '/mo', null],
   ['yearly', 'Yearly', '₹1,499', '/yr', 'save 37%'],
 ];
 
+function buildPlans(offerings) {
+  if (!offerings) return null;
+  const available = PLAN_DEFS
+    .map(([id, key, name, per]) => ({ id, pkg: offerings[key], name, per }))
+    .filter(p => p.pkg);
+  if (!available.length) return null;
+
+  const monthly = available.find(p => p.id === 'monthly');
+  return available.map(p => {
+    let badge = null;
+    if (p.id === 'yearly' && monthly) {
+      const savings = 1 - p.pkg.product.price / (monthly.pkg.product.price * 12);
+      if (savings > 0) badge = `save ${Math.round(savings * 100)}%`;
+    }
+    return [p.id, p.name, p.pkg.product.priceString, p.per, badge, p.pkg];
+  });
+}
+
 export default function Paywall({ visible, onClose }) {
   const { T, accent, accentInk } = useTally();
   const { offerings, purchase, restore, loading: rcLoading } = usePremium();
+  const plans = buildPlans(offerings) || FALLBACK_PLANS;
   const [plan, setPlan] = useState('yearly');
   const [busy, setBusy] = useState(false);
 
@@ -30,9 +60,8 @@ export default function Paywall({ visible, onClose }) {
       Alert.alert('Not configured', 'RevenueCat API key not set. Set REVENUE_CAT_API_KEY in constants to enable billing.');
       return;
     }
-    const pkg = plan === 'yearly'
-      ? offerings.annual
-      : offerings.monthly;
+    const selected = plans.find(p => p[0] === plan);
+    const pkg = selected?.[5];
     if (!pkg) { Alert.alert('Unavailable', 'Plan not available. Try again later.'); return; }
     setBusy(true);
     const result = await purchase(pkg);
@@ -78,7 +107,7 @@ export default function Paywall({ visible, onClose }) {
             </View>
 
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 24 }}>
-              {PLANS.map(([id, name, price, per, badge]) => {
+              {plans.map(([id, name, price, per, badge]) => {
                 const on = plan === id;
                 return (
                   <Pressable key={id} onPress={() => setPlan(id)}

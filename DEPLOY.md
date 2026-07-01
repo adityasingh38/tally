@@ -64,11 +64,17 @@ Premium is gated by a RevenueCat entitlement named `premium`.
 - **To enable real purchases:**
   1. RevenueCat dashboard → create project → add the Android app (Play package
      `com.tally`).
-  2. Create products in Play Console (monthly ₹199, annual ₹1499) and import
-     them into a RevenueCat Offering.
-  3. Create an entitlement `premium` and attach the products.
+  2. Create products in Play Console (monthly ₹199, annual ₹1499, plus a
+     one-time lifetime product) and import them into a RevenueCat Offering as
+     Monthly / Annual / Lifetime duration packages (the app reads
+     `offerings.monthly` / `.annual` / `.lifetime`).
+  3. Create an entitlement with identifier **`Tally Pro`** and attach the
+     products. (Must match `FREEMIUM.ENTITLEMENT_ID` in
+     `src/constants/index.js` exactly.)
   4. Set the **public SDK key**: add `REVENUECAT_API_KEY` to the production `env`
-     in [eas.json](eas.json) (or via `eas env`), then rebuild.
+     in [eas.json](eas.json) (or via `eas env`), then rebuild. Confirm the key
+     shown in the RevenueCat "Install the SDK" screen isn't a `test_`-prefixed
+     placeholder before using it in production.
   5. Remove `FORCE_PREMIUM` from any profile you want to actually charge in.
 
 ## Known limitations
