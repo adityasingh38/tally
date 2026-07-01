@@ -24,6 +24,12 @@ export function usePremium() {
   const [loading, setLoading] = useState(true);
   const [offerings, setOfferings] = useState(null);
 
+  function refreshOfferings() {
+    return Purchases.getOfferings()
+      .then(o => setOfferings(o.current))
+      .catch(() => {});
+  }
+
   useEffect(() => {
     if (!API_KEY) {
       // Billing not configured: unlocked in development and in builds that opt in
@@ -41,9 +47,7 @@ export function usePremium() {
       .catch(() => setIsPremium(false))
       .finally(() => setLoading(false));
 
-    Purchases.getOfferings()
-      .then(o => setOfferings(o.current))
-      .catch(() => {});
+    refreshOfferings();
   }, []);
 
   async function purchase(packageToBuy) {
@@ -51,6 +55,10 @@ export function usePremium() {
       const { customerInfo } = await Purchases.purchasePackage(packageToBuy);
       const active = hasPremium(customerInfo);
       setIsPremium(active);
+      // Refresh so an already-owned package (e.g. lifetime after buying it)
+      // stops showing as purchasable — offerings were previously fetched
+      // once on mount and never updated after a purchase.
+      refreshOfferings();
       return { success: active };
     } catch (e) {
       if (!e.userCancelled) return { success: false, error: e.message };
@@ -63,6 +71,7 @@ export function usePremium() {
       const info = await Purchases.restorePurchases();
       const active = hasPremium(info);
       setIsPremium(active);
+      refreshOfferings();
       return active;
     } catch {
       return false;

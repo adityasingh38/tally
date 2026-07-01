@@ -94,8 +94,8 @@ const NODES = [
   { id: 'useAuth.js', col: 'hooks', desc: 'Supabase session + onboarding-complete state.' },
   { id: 'usePremium.js', col: 'hooks', desc: 'RevenueCat SDK wrapper: entitlement check, offerings, purchase, restore.',
     bugs: [
-      { status: 'open', sev: 'MEDIUM', summary: 'offerings fetched once on mount and never refreshed after purchase/restore — can keep offering an already-owned package if RevenueCat-side offerings change.',
-        fix: 'Not yet fixed. Refetch getOfferings() after a successful purchase/restore.' }
+      { status: 'fixed', sev: 'MEDIUM', summary: 'offerings were fetched once on mount and never refreshed after purchase/restore — could keep offering an already-owned package if RevenueCat-side offerings changed.',
+        fix: 'Extracted refreshOfferings() and call it after a successful purchase() and restore(), not just on mount.' }
     ] },
   { id: 'useTransactions.js', col: 'hooks', desc: 'Paginated Supabase transaction fetch + refetch, feeds TxBridge.' },
 
@@ -176,7 +176,7 @@ const EDGES = [
   ['TallyNavigation.js','useAuth.js'], ['TallyNavigation.js','useTransactions.js'],
   ['TallyContext.js','theme.js'], ['TallyContext.js','data.js'], ['TallyContext.js','supabase.js'], ['TallyContext.js','usePremium.js'],
   ['TallyTabBar.js','TallyContext.js'], ['TallyTabBar.js','theme.js'], ['TallyTabBar.js','TallyMark.js'],
-  ['useAuth.js','supabase.js'], ['usePremium.js','usePremium.js'], ['useTransactions.js','supabase.js'],
+  ['useAuth.js','supabase.js'], ['useTransactions.js','supabase.js'],
   ['smsSync.js','smsParser.js'], ['smsSync.js','categoriser.js'], ['smsSync.js','supabase.js'], ['smsSync.js','budgetAlerts.js'],
   ['categoriser.js','smsParser.js'], ['categoriser.js','supabase.js'],
   ['aiAdvice.js','supabase.js'], ['budgetAlerts.js','supabase.js'], ['weeklyDigest.js','supabase.js'],
