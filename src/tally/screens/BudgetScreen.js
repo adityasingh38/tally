@@ -60,6 +60,11 @@ export default function BudgetScreen() {
   const totalSpent = setCats.reduce((a, id) => a + (spentMap[id] || 0), 0);
   const over = totalLimit > 0 ? ((totalSpent - totalLimit) / totalLimit) * 100 : 0;
 
+  const now = new Date();
+  const dayOfMonth = now.getDate();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const daysLeft = daysInMonth - dayOfMonth;
+
   return (
     <ScrollView style={{ flex: 1, backgroundColor: T.bg }}
       contentContainerStyle={{ paddingHorizontal: 18, paddingTop: insets.top + 14, paddingBottom: 120 }}>
@@ -105,6 +110,12 @@ export default function BudgetScreen() {
           const pct = limit ? (spent / limit) * 100 : 0;
           const blown = pct > 100;
           const isEditing = editing === id;
+          // forecast: daily average × remaining days → projected total
+          const dailyAvg = dayOfMonth > 0 ? spent / dayOfMonth : 0;
+          const projected = spent + dailyAvg * daysLeft;
+          const projectedBlowDay = dailyAvg > 0 && limit && !blown
+            ? Math.ceil((limit - spent) / dailyAvg) : null;
+          const willBlow = projectedBlowDay != null && projectedBlowDay < daysLeft;
 
           return (
             <View key={id}>
@@ -132,9 +143,21 @@ export default function BudgetScreen() {
                   <View style={{ height: 9, borderRadius: 999, backgroundColor: T.chip, overflow: 'hidden', flexDirection: 'row' }}>
                     <View style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: blown ? accent : T.lineStrong }} />
                   </View>
-                  <MonoLabel T={T} color={blown ? accent : T.faint} size={10} style={{ marginTop: 6 }}>
-                    {blown ? `blew past by ${Math.round(pct - 100)}%` : `${Math.round(pct)}% used · for now`}
-                  </MonoLabel>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 }}>
+                    <MonoLabel T={T} color={blown ? accent : T.faint} size={10}>
+                      {blown ? `blew past by ${Math.round(pct - 100)}%` : `${Math.round(pct)}% used · for now`}
+                    </MonoLabel>
+                    {!blown && willBlow && (
+                      <MonoLabel T={T} color={accent} size={10}>
+                        {projectedBlowDay === 0 ? 'hits limit today' : `hits limit in ~${projectedBlowDay}d`}
+                      </MonoLabel>
+                    )}
+                    {!blown && !willBlow && limit && (
+                      <MonoLabel T={T} color={T.creditText} size={10}>
+                        projected: {fmtINR(Math.round(projected))} / {fmtINR(limit)}
+                      </MonoLabel>
+                    )}
+                  </View>
                 </>
               )}
 
