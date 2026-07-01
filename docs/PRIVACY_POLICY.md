@@ -7,15 +7,11 @@ Tally ("Tally", "we", "us") is a personal expense-tracking app that reads your
 bank transaction SMS to automatically log your spending and show you insights.
 This policy explains what we collect, why, how we handle it, and your rights.
 
-> Replace the bracketed placeholders (contact email, legal entity, jurisdiction)
-> before publishing. Host this at a public URL and link it in the Google Play
-> listing and in-app.
-
 ---
 
 ## 1. Who we are
-Tally is operated by **[Your legal name / entity]**, India.
-Contact: **[support@yourdomain.com]**.
+Tally is operated by **Aditya Singh**, an individual developer based in India.
+Contact: **adityasuper38@gmail.com**.
 
 ## 2. What we collect
 
@@ -100,7 +96,7 @@ You can:
 
 Where the **Digital Personal Data Protection Act, 2023 (India)** or other
 applicable laws grant additional rights (access, correction, erasure,
-grievance redressal), we honour them. Contact **[support@yourdomain.com]** for
+grievance redressal), we honour them. Contact **adityasuper38@gmail.com** for
 any request; we respond within the timeframe required by law.
 
 ## 10. Security
@@ -117,5 +113,5 @@ We may update this policy. Material changes will be notified in-app or by email,
 and the "Last updated" date above will change.
 
 ## 13. Contact
-Questions or requests: **[support@yourdomain.com]**
-Grievance Officer (India DPDP): **[Name, email]**
+Questions or requests: **adityasuper38@gmail.com**
+Grievance Officer (India DPDP): **Aditya Singh, adityasuper38@gmail.com**
