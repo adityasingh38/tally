@@ -104,7 +104,7 @@ const NODES = [
       { status: 'fixed', sev: 'HIGH', summary: '`increment_api_usage` RPC (schema.sql) was callable by any authenticated client with an arbitrary p_user, letting one user drain/inflate another\'s AI-usage quota and lock them out.',
         fix: 'Migration revokes EXECUTE from public/anon/authenticated, grants only to service_role (matches how the edge function already calls it).' }
     ] },
-  { id: 'smsParser.js', col: 'services', desc: 'Regex-based SMS/notification text parser: amount, debit/credit, merchant, rule-based category.',
+  { id: 'smsParser.js', col: 'services', desc: 'Regex-based SMS/notification text parser: amount, debit/credit, merchant, rule-based category. Now covered by src/services/__tests__/smsParser.test.js (27 tests incl. the debit/credit regression below) — the first and only test suite in the repo.',
     bugs: [
       { status: 'fixed', sev: 'HIGH', summary: 'Debit/credit tie-break regex omitted "debit"/"charged" — a credit-card charge SMS containing a boilerplate "refund will be credited" clause got filed as income instead of a real ₹ spend.',
         fix: 'Tie-break now reuses DEBIT_KEYWORDS directly instead of a separate, narrower, driftable regex.' }
