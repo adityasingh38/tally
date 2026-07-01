@@ -51,7 +51,8 @@ export default function FeedScreen({ navigation }) {
 
   const filtered = store.txs.filter((tx) => {
     const typeOk = filter === 'all' ? true : filter === 'spent' ? tx.type !== 'credit' : tx.type === 'credit';
-    const queryOk = !query || (tx.merchant || '').toLowerCase().includes(query.toLowerCase());
+    const queryOk = !query || (tx.merchant || '').toLowerCase().includes(query.toLowerCase())
+      || (tx.note || '').toLowerCase().includes(query.toLowerCase());
     const catOk = !catFilter || tx.category === catFilter;
     return typeOk && queryOk && catOk;
   });
@@ -203,6 +204,24 @@ export default function FeedScreen({ navigation }) {
           </View>
         </View>
       ))}
+
+      {/* filtered total */}
+      {filtered.length > 0 && (() => {
+        const debits = filtered.filter(t => t.type !== 'credit');
+        const credits = filtered.filter(t => t.type === 'credit');
+        const debitTotal = debits.reduce((s, t) => s + (t.amount || 0), 0);
+        const creditTotal = credits.reduce((s, t) => s + (t.amount || 0), 0);
+        return (
+          <View style={{ marginTop: 16, flexDirection: 'row', justifyContent: 'space-between',
+            borderTopWidth: 1, borderTopColor: T.line, paddingTop: 10 }}>
+            <MonoLabel T={T} color={T.faint} size={10}>{filtered.length} transaction{filtered.length !== 1 ? 's' : ''}</MonoLabel>
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              {creditTotal > 0 && <Text style={{ fontFamily: FONTS.monoBold, fontSize: 12, color: T.creditText }}>+{fmtINR(creditTotal)}</Text>}
+              {debitTotal > 0 && <Text style={{ fontFamily: FONTS.monoBold, fontSize: 12, color: T.text }}>−{fmtINR(debitTotal)}</Text>}
+            </View>
+          </View>
+        );
+      })()}
 
       {!isPremium && (
         <Pressable onPress={openPaywall}
