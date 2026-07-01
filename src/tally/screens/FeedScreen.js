@@ -47,12 +47,19 @@ export default function FeedScreen({ navigation }) {
   const [filter, setFilter] = useState('all');
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState('date'); // 'date' | 'amount'
+  const [catFilter, setCatFilter] = useState(null); // category id or null
 
   const filtered = store.txs.filter((tx) => {
     const typeOk = filter === 'all' ? true : filter === 'spent' ? tx.type !== 'credit' : tx.type === 'credit';
     const queryOk = !query || (tx.merchant || '').toLowerCase().includes(query.toLowerCase());
-    return typeOk && queryOk;
+    const catOk = !catFilter || tx.category === catFilter;
+    return typeOk && queryOk && catOk;
   });
+
+  // unique categories present in current view (before cat filter applied)
+  const activeCats = Array.from(new Set(
+    store.txs.filter(t => t.type !== 'credit').map(t => t.category).filter(Boolean)
+  ));
 
   const sorted = sort === 'amount'
     ? [...filtered].sort((a, b) => b.amount - a.amount)
@@ -99,6 +106,30 @@ export default function FeedScreen({ navigation }) {
           );
         })}
       </View>
+
+      {/* category filter chips — shown only when there are multiple categories */}
+      {activeCats.length > 1 && (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: -10, marginBottom: 14 }}>
+          <View style={{ flexDirection: 'row', gap: 6, paddingVertical: 4 }}>
+            <Pressable onPress={() => setCatFilter(null)}
+              style={{ paddingVertical: 4, paddingHorizontal: 10, borderRadius: 999, borderWidth: 1,
+                borderColor: !catFilter ? accent : T.line, backgroundColor: !catFilter ? accent + '22' : 'transparent' }}>
+              <MonoLabel T={T} color={!catFilter ? accent : T.dim} size={9}>all cats</MonoLabel>
+            </Pressable>
+            {activeCats.map(id => {
+              const m = catMeta(id);
+              const on = catFilter === id;
+              return (
+                <Pressable key={id} onPress={() => setCatFilter(on ? null : id)}
+                  style={{ paddingVertical: 4, paddingHorizontal: 10, borderRadius: 999, borderWidth: 1,
+                    borderColor: on ? accent : T.line, backgroundColor: on ? accent + '22' : 'transparent' }}>
+                  <MonoLabel T={T} color={on ? accent : T.dim} size={9}>{m.tag}</MonoLabel>
+                </Pressable>
+              );
+            })}
+          </View>
+        </ScrollView>
+      )}
 
       {/* sort */}
       <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: 6, marginTop: -12, marginBottom: 14 }}>
