@@ -18,7 +18,8 @@
         "android.permission.VIBRATE",
         "android.permission.POST_NOTIFICATIONS",
         "android.permission.RECEIVE_SMS",
-        "android.permission.READ_SMS"
+        "android.permission.READ_SMS",
+        "android.permission.WAKE_LOCK"
       ]
     },
     "extra": {
@@ -38,7 +39,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#0E0F0C"
         }
-      ]
+      ],
+      "./plugins/withNativeCapture.js"
     ]
   }
 }
