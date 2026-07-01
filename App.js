@@ -31,8 +31,11 @@ import notifee, { EventType } from '@notifee/react-native';
 import { setupNotificationChannel } from './src/services/budgetAlerts';
 import { setupWeeklyDigestChannel, scheduleMonthEndSummary } from './src/services/weeklyDigest';
 import { routeFromPressAction } from './src/tally/TallyNavigation';
+import { ErrorBoundary } from './src/components/ErrorBoundary';
+import { initCrashReporting } from './src/services/crashReporting';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
+initCrashReporting();
 
 export default function App() {
   const [introDone, setIntroDone] = useState(false);
@@ -66,14 +69,16 @@ export default function App() {
   if (!loaded) return <View style={{ flex: 1, backgroundColor: '#0E0F0C' }} />;
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider onLayout={onReady}>
-        <StatusBar style="light" />
-        <AuthProvider>
-          <TallyNavigation />
-        </AuthProvider>
-        {!introDone && <AnimatedSplash onDone={() => setIntroDone(true)} />}
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <ErrorBoundary>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider onLayout={onReady}>
+          <StatusBar style="light" />
+          <AuthProvider>
+            <TallyNavigation />
+          </AuthProvider>
+          {!introDone && <AnimatedSplash onDone={() => setIntroDone(true)} />}
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }

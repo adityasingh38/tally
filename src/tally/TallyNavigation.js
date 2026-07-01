@@ -9,8 +9,10 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import notifee from '@notifee/react-native';
+import NetInfo from '@react-native-community/netinfo';
 import { TallyProvider, useTally } from './TallyContext';
 import TallyTabBar from './TallyTabBar';
+import { flushPendingTransactions } from '../services/offlineQueue';
 
 import HomeScreen from './screens/HomeScreen';
 import FeedScreen from './screens/FeedScreen';
@@ -128,6 +130,16 @@ function Inner() {
     const sub = Linking.addEventListener('url', ({ url }) => handleDeepLink(url));
     return () => sub.remove();
   }, []);
+
+  // Retry any SMS/notification captures that failed to insert while offline,
+  // the moment connectivity actually returns (not just next headless event).
+  React.useEffect(() => {
+    if (!user?.id) return;
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      if (state.isConnected) flushPendingTransactions(user.id).catch(() => {});
+    });
+    return unsubscribe;
+  }, [user?.id]);
 
   if (loading) return <View style={{ flex: 1, backgroundColor: '#0E0F0C' }} />;
 

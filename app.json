@@ -6,6 +6,12 @@
     "icon": "./assets/icon.png",
     "backgroundColor": "#0E0F0C",
     "userInterfaceStyle": "dark",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/6d5141af-cb22-4e25-b1db-5a9f83a0c262"
+    },
     "android": {
       "package": "com.tally",
       "versionCode": 1,
@@ -58,7 +64,8 @@
             }
           ]
         }
-      ]
+      ],
+      "@sentry/react-native"
     ]
   }
 }

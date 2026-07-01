@@ -3,6 +3,7 @@ import { parseSMS, isBankSMS, looksLikeBankSMS } from './smsParser';
 import { categoriseTransactions } from './categoriser';
 import { supabase, insertTransactions, checkDuplicate, insertTransactionIfNew } from './supabase';
 import { checkBudgetAlerts } from './budgetAlerts';
+import { enqueuePending, flushPendingTransactions } from './offlineQueue';
 
 const BATCH_SIZE = 20;
 
@@ -94,15 +95,17 @@ export async function handleHeadlessSms({ originatingAddress, messageBody, times
   const userId = session?.user?.id;
   if (!userId) return; // not signed in — nothing to attribute the txn to
 
+  // Opportunistic retry of anything queued from a previous offline capture —
+  // this may be the first headless invocation since connectivity returned.
+  await flushPendingTransactions(userId).catch(() => {});
+
   // Real SMS timestamp from the native receiver, not the time this headless
   // task happened to run (Android can defer it minutes under Doze).
   const txnDate = timestampMillis ? new Date(timestampMillis) : new Date();
   const txn = { ...parsed, user_id: userId, txn_date: txnDate.toISOString() };
 
   const [categorised] = await categoriseTransactions([txn]);
-  // Atomic dedup+insert — closes the race between this and the notification
-  // capture path firing for the same real-world transaction near-simultaneously.
-  const { data } = await insertTransactionIfNew({
+  const toInsert = {
     user_id: userId,
     amount: categorised.amount,
     type: categorised.type,
@@ -111,8 +114,12 @@ export async function handleHeadlessSms({ originatingAddress, messageBody, times
     category: categorised.category,
     source: categorised.source,
     txn_date: categorised.txn_date,
-  });
-  if (!data?.[0]?.inserted) return;
+  };
+  // Atomic dedup+insert — closes the race between this and the notification
+  // capture path firing for the same real-world transaction near-simultaneously.
+  const { data, error } = await insertTransactionIfNew(toInsert);
+  if (error) { await enqueuePending(toInsert); return; } // no network — retry later, don't lose the capture
+  if (!data?.[0]?.inserted) return; // genuine duplicate, nothing to do
 
   await checkBudgetAlerts(userId).catch(() => {});
 }
@@ -138,14 +145,14 @@ export async function handleHeadlessNotification({ packageName, body, postTime }
   const userId = session?.user?.id;
   if (!userId) return;
 
+  await flushPendingTransactions(userId).catch(() => {});
+
   // Real notification post time, not headless-task-execution time.
   const txnDate = postTime ? new Date(postTime) : new Date();
   const txn = { ...parsed, user_id: userId, txn_date: txnDate.toISOString() };
 
   const [categorised] = await categoriseTransactions([txn]);
-  // Atomic dedup+insert — see handleHeadlessSms for why this replaced
-  // checkDuplicate+insertTransactions here.
-  const { data } = await insertTransactionIfNew({
+  const toInsert = {
     user_id: userId,
     amount: categorised.amount,
     type: categorised.type,
@@ -154,7 +161,11 @@ export async function handleHeadlessNotification({ packageName, body, postTime }
     category: categorised.category,
     source: categorised.source,
     txn_date: categorised.txn_date,
-  });
+  };
+  // Atomic dedup+insert — see handleHeadlessSms for why this replaced
+  // checkDuplicate+insertTransactions here.
+  const { data, error } = await insertTransactionIfNew(toInsert);
+  if (error) { await enqueuePending(toInsert); return; }
   if (!data?.[0]?.inserted) return;
 
   await checkBudgetAlerts(userId).catch(() => {});

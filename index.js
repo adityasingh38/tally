@@ -21,10 +21,16 @@ notifee.onBackgroundEvent(async ({ type, detail }) => {
 
 // Background SMS processing. Started by the native HeadlessSmsService on each
 // incoming SMS; runs even when the app is closed. require() keeps the import
-// lazy so the headless context only pulls in what it needs.
+// lazy so the headless context only pulls in what it needs. A failure here
+// used to just vanish (no UI, uncaught rejection) — now at least reported.
 AppRegistry.registerHeadlessTask('TallySmsTask', () => async (taskData) => {
   const { handleHeadlessSms } = require('./src/services/smsSync');
-  await handleHeadlessSms(taskData || {});
+  try {
+    await handleHeadlessSms(taskData || {});
+  } catch (e) {
+    const { reportError } = require('./src/services/crashReporting');
+    reportError(e, { task: 'TallySmsTask' });
+  }
 });
 
 // Background notification processing (Play-safe alternative to READ_SMS).
@@ -32,7 +38,12 @@ AppRegistry.registerHeadlessTask('TallySmsTask', () => async (taskData) => {
 // a transaction notification. Same parse -> categorise -> insert pipeline.
 AppRegistry.registerHeadlessTask('TallyNotifTask', () => async (taskData) => {
   const { handleHeadlessNotification } = require('./src/services/smsSync');
-  await handleHeadlessNotification(taskData || {});
+  try {
+    await handleHeadlessNotification(taskData || {});
+  } catch (e) {
+    const { reportError } = require('./src/services/crashReporting');
+    reportError(e, { task: 'TallyNotifTask' });
+  }
 });
 
 // registerRootComponent calls AppRegistry.registerComponent('main', () => App);

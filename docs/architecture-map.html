@@ -72,8 +72,11 @@ const COLUMNS = [
 ];
 
 const NODES = [
-  { id: 'App.js', col: 'entry', desc: 'Root RN entry. Wraps the app in providers, mounts notifee foreground handler.' },
-  { id: 'index.js', col: 'entry', desc: 'RN registerRootComponent + headless task registration (TallySmsTask, TallyNotifTask).' },
+  { id: 'App.js', col: 'entry', desc: 'Root RN entry. Wraps the app in providers, mounts notifee foreground handler, initCrashReporting(), and the top-level ErrorBoundary.' },
+  { id: 'index.js', col: 'entry', desc: 'RN registerRootComponent + headless task registration (TallySmsTask, TallyNotifTask, widget task handler). Headless task failures now reportError()\'d instead of vanishing silently.' },
+  { id: 'ErrorBoundary.js', col: 'entry', desc: 'Catches uncaught render errors app-wide — was previously nonexistent, meaning any render crash white-screened the app with no recovery. Self-contained (no theme/context import, since the crash could be from inside that provider tree). Reload button uses Updates.reloadAsync().' },
+  { id: 'crashReporting.js', col: 'entry', desc: 'Sentry wrapper. No-op until SENTRY_DSN env var is set — no Sentry account exists yet, so this is wired but currently inert in production.' },
+  { id: 'offlineQueue.js', col: 'services', desc: 'AsyncStorage-backed retry queue for captures that failed to insert (no network). A captured SMS/notification is a one-shot event — without this, an offline capture was silently lost forever. Flushed opportunistically on every new headless capture and on NetInfo reconnect (TallyNavigation.js). Covered by src/services/__tests__/offlineQueue.test.js.' },
   { id: 'TallyNavigation.js', col: 'core', desc: 'Tab navigator, deep-link routing (tally://), global modals, TxBridge (real-data feed).',
     bugs: [
       { status: 'fixed', sev: 'MEDIUM', summary: '`tally://log` deep link never actually opened the Add sheet — dead setTimeout with an empty body.',
@@ -110,7 +113,7 @@ const NODES = [
       { status: 'fixed', sev: 'HIGH', summary: 'Debit/credit tie-break regex omitted "debit"/"charged" — a credit-card charge SMS containing a boilerplate "refund will be credited" clause got filed as income instead of a real ₹ spend.',
         fix: 'Tie-break now reuses DEBIT_KEYWORDS directly instead of a separate, narrower, driftable regex.' }
     ] },
-  { id: 'smsSync.js', col: 'services', desc: 'Bulk historical SMS import + headless SMS/notification handlers (live capture).',
+  { id: 'smsSync.js', col: 'services', desc: 'Bulk historical SMS import + headless SMS/notification handlers (live capture). On insertTransactionIfNew network failure, queues via offlineQueue.js instead of losing the capture; flushes the queue for the current user on every new invocation.',
     bugs: [
       { status: 'fixed', sev: 'MEDIUM', summary: 'Headless handlers stamped txn_date with processing time (Date.now()), not message time — Android can defer headless tasks minutes under Doze, so displayed date could be wrong and the ±60s dedup window could miss a later historical resync of the same message.',
         fix: 'Native SmsReceiver/TallyNotificationListenerService now pass the real SMS timestampMillis / notification postTime as extras; JS uses those for txn_date instead of Date.now().' },
@@ -172,6 +175,8 @@ const NODES = [
 
 // import edges (subset — cross-column, the ones that matter visually)
 const EDGES = [
+  ['App.js','ErrorBoundary.js'], ['App.js','crashReporting.js'], ['index.js','crashReporting.js'],
+  ['smsSync.js','offlineQueue.js'], ['TallyNavigation.js','offlineQueue.js'],
   ['TallyNavigation.js','TallyContext.js'], ['TallyNavigation.js','TallyTabBar.js'],
   ['TallyNavigation.js','HomeScreen.js'], ['TallyNavigation.js','FeedScreen.js'],
   ['TallyNavigation.js','DamageScreen.js'], ['TallyNavigation.js','BudgetScreen.js'],
