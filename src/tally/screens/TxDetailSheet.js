@@ -38,7 +38,8 @@ export default function TxDetailSheet({ visible, tx, onClose }) {
         { text: 'Cancel', style: 'cancel' },
         { text: 'Delete', style: 'destructive', onPress: async () => {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-          await store.deleteTx(tx);
+          const { success, error } = await store.deleteTx(tx);
+          if (!success) { Alert.alert('Delete failed', error?.message || 'Try again.'); return; }
           onClose();
         }},
       ]
@@ -49,8 +50,9 @@ export default function TxDetailSheet({ visible, tx, onClose }) {
     if (newCat === tx.category) { setEditingCat(false); return; }
     setSaving(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    await store.updateTxCategory(tx, newCat);
+    const { success, error } = await store.updateTxCategory(tx, newCat);
     setSaving(false);
+    if (!success) { Alert.alert('Update failed', error?.message || 'Try again.'); return; }
     setEditingCat(false);
   }
 
@@ -75,8 +77,9 @@ export default function TxDetailSheet({ visible, tx, onClose }) {
     }
     setSaving(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    await store.updateTx(tx, fields);
+    const { success, error } = await store.updateTx(tx, fields);
     setSaving(false);
+    if (!success) { Alert.alert('Update failed', error?.message || 'Try again.'); return; }
     setEditingField(null);
   }
 

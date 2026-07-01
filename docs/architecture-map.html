@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Tally — architecture map</title>
+<style>
+  :root {
+    --bg: #0E0F0C; --panel: #15160E; --line: rgba(233,255,208,0.14);
+    --text: #F2F3EC; --dim: #9DA08F; --faint: #63655A;
+    --red: #FF5436; --green: #6FE38C; --amber: #E3C86F; --grey: #3A3C31;
+    --mono: 'Consolas', 'Space Mono', monospace; --sans: -apple-system, 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); overflow: hidden; }
+  header { padding: 16px 22px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+  header h1 { font-size: 16px; margin: 0; font-weight: 700; letter-spacing: -0.02em; }
+  header .legend { display: flex; gap: 18px; font-family: var(--mono); font-size: 11px; color: var(--dim); }
+  header .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  #main { display: flex; height: calc(100vh - 53px); }
+  #graph { flex: 1; overflow: auto; }
+  svg { display: block; }
+  .node rect { stroke-width: 1.5; cursor: pointer; transition: filter .12s; }
+  .node:hover rect { filter: brightness(1.25); }
+  .node text { font-family: var(--mono); font-size: 11px; fill: var(--text); pointer-events: none; }
+  .node .sub { font-size: 8.5px; fill: var(--faint); text-transform: uppercase; letter-spacing: 0.06em; }
+  .edge { stroke: rgba(233,255,208,0.16); stroke-width: 1.2; fill: none; }
+  .edge.hi { stroke: var(--text); stroke-width: 2; opacity: 0.9; }
+  .col-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; fill: var(--faint); }
+
+  #sidebar { width: 380px; border-left: 1px solid var(--line); background: var(--panel); overflow-y: auto; padding: 20px; }
+  #sidebar.empty { display: flex; align-items: center; justify-content: center; color: var(--faint); font-family: var(--mono); font-size: 12px; text-align: center; padding: 40px; }
+  #sidebar h2 { font-size: 18px; margin: 0 0 2px; font-family: var(--mono); }
+  #sidebar .path { font-size: 10.5px; color: var(--faint); margin-bottom: 16px; word-break: break-all; }
+  #sidebar .desc { font-size: 13px; color: var(--dim); line-height: 1.5; margin-bottom: 18px; }
+  .bug { border-left: 3px solid var(--grey); padding: 10px 0 10px 12px; margin-bottom: 12px; }
+  .bug.open { border-left-color: var(--red); }
+  .bug.fixed { border-left-color: var(--green); }
+  .bug-tag { display: inline-block; font-family: var(--mono); font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; padding: 2px 7px; border-radius: 3px; margin-right: 6px; }
+  .bug.open .bug-tag { background: var(--red); color: #1a0a06; }
+  .bug.fixed .bug-tag { background: var(--green); color: #06210d; }
+  .bug-sev { font-family: var(--mono); font-size: 9.5px; color: var(--faint); text-transform: uppercase; }
+  .bug-summary { font-size: 13px; margin: 6px 0 4px; color: var(--text); }
+  .bug-fix { font-size: 12px; color: var(--dim); line-height: 1.45; }
+  .bug-fix b { color: var(--text); }
+  .clean { font-family: var(--mono); font-size: 12px; color: var(--faint); padding: 10px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>tally — architecture map</h1>
+  <div class="legend">
+    <span><i class="dot" style="background:var(--red)"></i>open bug</span>
+    <span><i class="dot" style="background:var(--green)"></i>fixed this session</span>
+    <span><i class="dot" style="background:var(--grey)"></i>audited, clean</span>
+  </div>
+</header>
+<div id="main">
+  <div id="graph"><svg id="svg" width="1360" height="1500"></svg></div>
+  <div id="sidebar" class="empty">click a file to see its bugs</div>
+</div>
+
+<script>
+// ---- Real data extracted from this session's codebase audit + import graph ----
+const COLUMNS = [
+  { key: 'entry',      label: 'entry',      x: 40 },
+  { key: 'core',       label: 'core / context', x: 260 },
+  { key: 'hooks',      label: 'hooks',      x: 500 },
+  { key: 'services',   label: 'services',   x: 720 },
+  { key: 'screens',    label: 'screens',    x: 1000 },
+];
+
+const NODES = [
+  { id: 'App.js', col: 'entry', desc: 'Root RN entry. Wraps the app in providers, mounts notifee foreground handler.' },
+  { id: 'index.js', col: 'entry', desc: 'RN registerRootComponent + headless task registration (TallySmsTask, TallyNotifTask).' },
+  { id: 'TallyNavigation.js', col: 'core', desc: 'Tab navigator, deep-link routing (tally://), global modals, TxBridge (real-data feed).',
+    bugs: [
+      { status: 'fixed', sev: 'MEDIUM', summary: '`tally://log` deep link never actually opened the Add sheet — dead setTimeout with an empty body.',
+        fix: 'Added a module-level ref set by GlobalModals from context\'s openAdd(), called from the deep-link handler after navigation settles.' }
+    ] },
+  { id: 'TallyContext.js', col: 'core', desc: 'Theme + prefs + live transaction store (single source of truth for the whole app).',
+    bugs: [
+      { status: 'fixed', sev: 'HIGH', summary: 'deleteTx / updateTx / updateTxCategory swallowed write errors (`.catch(() => {})`) — UI always looked successful even when the DB rejected the write.',
+        fix: 'Each now returns { success, error }; local optimistic state only updates on success.' },
+      { status: 'fixed', sev: 'HIGH', summary: 'usePremium() called independently in TallyContext AND Paywall/Settings — buying Pro updated only the Paywall\'s local state, so history stayed gated to 30 days until app restart.',
+        fix: 'Context now holds the single usePremium() instance; Paywall/Settings read isPremium/offerings/purchase/restore from useTally() instead of calling the hook again.' }
+    ] },
+  { id: 'TallyTabBar.js', col: 'core', desc: 'Custom bottom tab bar + floating add button.' },
+  { id: 'theme.js', col: 'core', desc: 'Design tokens: colors, fonts, currency formatting.' },
+  { id: 'data.js', col: 'core', desc: 'Category metadata, grouping/aggregation helpers, seed demo data.' },
+  { id: 'ui.js', col: 'core', desc: 'Shared UI primitives (labels, buttons, tags, rules).' },
+  { id: 'TallyMark.js', col: 'core', desc: 'Brand mark / logo SVG component.' },
+
+  { id: 'useAuth.js', col: 'hooks', desc: 'Supabase session + onboarding-complete state.' },
+  { id: 'usePremium.js', col: 'hooks', desc: 'RevenueCat SDK wrapper: entitlement check, offerings, purchase, restore.',
+    bugs: [
+      { status: 'open', sev: 'MEDIUM', summary: 'offerings fetched once on mount and never refreshed after purchase/restore — can keep offering an already-owned package if RevenueCat-side offerings change.',
+        fix: 'Not yet fixed. Refetch getOfferings() after a successful purchase/restore.' }
+    ] },
+  { id: 'useTransactions.js', col: 'hooks', desc: 'Paginated Supabase transaction fetch + refetch, feeds TxBridge.' },
+
+  { id: 'supabase.js', col: 'services', desc: 'Supabase client + all table queries: insert/update/delete transactions, budgets, dedup check.',
+    bugs: [
+      { status: 'fixed', sev: 'HIGH', summary: '`increment_api_usage` RPC (schema.sql) was callable by any authenticated client with an arbitrary p_user, letting one user drain/inflate another\'s AI-usage quota and lock them out.',
+        fix: 'Migration revokes EXECUTE from public/anon/authenticated, grants only to service_role (matches how the edge function already calls it).' }
+    ] },
+  { id: 'smsParser.js', col: 'services', desc: 'Regex-based SMS/notification text parser: amount, debit/credit, merchant, rule-based category.',
+    bugs: [
+      { status: 'fixed', sev: 'HIGH', summary: 'Debit/credit tie-break regex omitted "debit"/"charged" — a credit-card charge SMS containing a boilerplate "refund will be credited" clause got filed as income instead of a real ₹ spend.',
+        fix: 'Tie-break now reuses DEBIT_KEYWORDS directly instead of a separate, narrower, driftable regex.' }
+    ] },
+  { id: 'smsSync.js', col: 'services', desc: 'Bulk historical SMS import + headless SMS/notification handlers (live capture).',
+    bugs: [
+      { status: 'fixed', sev: 'MEDIUM', summary: 'Headless handlers stamped txn_date with processing time (Date.now()), not message time — Android can defer headless tasks minutes under Doze, so displayed date could be wrong and the ±60s dedup window could miss a later historical resync of the same message.',
+        fix: 'Native SmsReceiver/TallyNotificationListenerService now pass the real SMS timestampMillis / notification postTime as extras; JS uses those for txn_date instead of Date.now().' },
+      { status: 'fixed', sev: 'HIGH', summary: 'TOCTOU race: SMS and notification handlers both called checkDuplicate (a plain SELECT) then inserted independently — a UPI payment firing both a bank SMS and the UPI app notification within milliseconds could pass the dedup check in both before either insert landed, double-counting one real transaction.',
+        fix: 'New insert_transaction_if_new RPC does the dedup check + insert atomically inside one function, serialized per-user via pg_advisory_xact_lock. Both headless handlers now call this instead of checkDuplicate+insertTransactions.' }
+    ] },
+  { id: 'categoriser.js', col: 'services', desc: 'AI (Anthropic proxy) + rule-based category assignment, batches transactions.' },
+  { id: 'budgetAlerts.js', col: 'services', desc: 'Budget threshold math, local notification triggers.' },
+  { id: 'aiAdvice.js', col: 'services', desc: '"Verdict" / spending commentary generation for Insights.' },
+  { id: 'weeklyDigest.js', col: 'services', desc: 'Scheduled weekly/month-end summary notification.' },
+  { id: 'export.js', col: 'services', desc: 'CSV export + native share sheet.',
+    bugs: [
+      { status: 'fixed', sev: 'MEDIUM', summary: 'CSV export was vulnerable to formula injection — merchant/note fields starting with = + - @ are executed as formulas by Excel/Sheets even inside quotes.',
+        fix: 'csvField() now prefixes a leading quote when a field starts with one of = + - @ \\t before quoting.' }
+    ] },
+  { id: 'notificationAccess.js', col: 'services', desc: 'Native NotificationListenerService permission bridge (isEnabled/openSettings).' },
+
+  { id: 'HomeScreen.js', col: 'screens', desc: 'Dashboard: totals, 7-day bars, budget warnings, salary detection, spend streak.',
+    bugs: [
+      { status: 'fixed', sev: 'MEDIUM', summary: '"Today" and the 7-day bars bucketed by UTC day (toISOString().slice(0,10)) instead of local day, disagreeing with FeedScreen\'s local-day grouping for the ~5.5hr IST offset window (12:00–5:30am IST).',
+        fix: 'Added a shared localDateKey() helper using local Date getters, applied to all four UTC-slice call sites.' }
+    ] },
+  { id: 'FeedScreen.js', col: 'screens', desc: 'Transaction feed, category chips, note search, local-day grouping (today/yesterday/date).' },
+  { id: 'DamageScreen.js', col: 'screens', desc: 'AI spending "verdict" / Insights screen.',
+    bugs: [
+      { status: 'fixed', sev: 'LOW', summary: 'Verdict-refresh effect keyed off tone/nihilism/rounded-total, not the category breakdown itself — recategorizing a transaction between two existing categories (same total) left the AI verdict stale until total spend shifted ≥₹500.',
+        fix: 'Effect now keys off a catsKey string of every category id:amount pair, not just cats.length.' }
+    ] },
+  { id: 'BudgetScreen.js', col: 'screens', desc: '"Delusions" — per-category monthly budgets.',
+    bugs: [
+      { status: 'fixed', sev: 'HIGH', summary: 'save()/removeBudget() discarded the { error } from upsertBudget/deleteBudget and always showed a success haptic + updated local state — a failed write (offline, RLS reject) silently reverted on next load with no explanation.',
+        fix: 'Both now check the returned error and Alert.alert on failure instead of updating local state.' }
+    ] },
+  { id: 'SettingsScreen.js', col: 'screens', desc: 'Account, notifications, SMS sync, export, delete account, notification-access toggle.',
+    bugs: [
+      { status: 'fixed', sev: 'HIGH', summary: 'Restore-purchase used its own independent usePremium() instance — restoring updated a throwaway hook\'s isPremium, not the isPremium this screen actually reads from context.',
+        fix: 'Now reads restore from useTally(), same single source of truth as the rest of the app.' },
+      { status: 'fixed', sev: 'LOW', summary: 'Notification-access row was set to "on" optimistically the instant Settings was opened for setup, with no re-check when the user returned from system Settings without actually enabling it.',
+        fix: 'Removed the optimistic setNotifAccess(true) on press; now re-runs isNotifAccessEnabled() on AppState change to "active" as well as on mount.' }
+    ] },
+  { id: 'OnboardingScreen.js', col: 'screens', desc: 'Sign-up flow: SMS permission request, historical import, notification-access setup.' },
+  { id: 'AuthScreen.js', col: 'screens', desc: 'Sign in / sign up.' },
+  { id: 'AddSheet.js', col: 'screens', desc: 'Manual transaction entry modal.' },
+  { id: 'Paywall.js', col: 'screens', desc: 'Tally Pro paywall — monthly/annual/lifetime, live RevenueCat pricing.',
+    bugs: [
+      { status: 'fixed', sev: 'HIGH', summary: 'Same usePremium() desync as TallyContext/Settings — purchasing here didn\'t update the app\'s real isPremium.',
+        fix: 'Now consumes offerings/purchase/restore/premiumLoading from useTally() context instead of its own hook instance.' }
+    ] },
+  { id: 'TxDetailSheet.js', col: 'screens', desc: 'Transaction detail: delete, recategorize, edit merchant/amount/note.',
+    bugs: [
+      { status: 'fixed', sev: 'HIGH', summary: 'handleDelete/handleRecategorize/saveEdit awaited store methods that swallowed errors internally, then always closed the modal / cleared editing state as if the write succeeded.',
+        fix: 'Now checks { success, error } from the (fixed) TallyContext store methods and Alert.alert()s on failure instead of closing.' }
+    ] },
+];
+
+// import edges (subset — cross-column, the ones that matter visually)
+const EDGES = [
+  ['TallyNavigation.js','TallyContext.js'], ['TallyNavigation.js','TallyTabBar.js'],
+  ['TallyNavigation.js','HomeScreen.js'], ['TallyNavigation.js','FeedScreen.js'],
+  ['TallyNavigation.js','DamageScreen.js'], ['TallyNavigation.js','BudgetScreen.js'],
+  ['TallyNavigation.js','SettingsScreen.js'], ['TallyNavigation.js','OnboardingScreen.js'],
+  ['TallyNavigation.js','AuthScreen.js'], ['TallyNavigation.js','AddSheet.js'],
+  ['TallyNavigation.js','Paywall.js'], ['TallyNavigation.js','TxDetailSheet.js'],
+  ['TallyNavigation.js','useAuth.js'], ['TallyNavigation.js','useTransactions.js'],
+  ['TallyContext.js','theme.js'], ['TallyContext.js','data.js'], ['TallyContext.js','supabase.js'], ['TallyContext.js','usePremium.js'],
+  ['TallyTabBar.js','TallyContext.js'], ['TallyTabBar.js','theme.js'], ['TallyTabBar.js','TallyMark.js'],
+  ['useAuth.js','supabase.js'], ['usePremium.js','usePremium.js'], ['useTransactions.js','supabase.js'],
+  ['smsSync.js','smsParser.js'], ['smsSync.js','categoriser.js'], ['smsSync.js','supabase.js'], ['smsSync.js','budgetAlerts.js'],
+  ['categoriser.js','smsParser.js'], ['categoriser.js','supabase.js'],
+  ['aiAdvice.js','supabase.js'], ['budgetAlerts.js','supabase.js'], ['weeklyDigest.js','supabase.js'],
+  ['HomeScreen.js','TallyContext.js'], ['HomeScreen.js','useAuth.js'], ['HomeScreen.js','supabase.js'],
+  ['FeedScreen.js','TallyContext.js'],
+  ['DamageScreen.js','TallyContext.js'], ['DamageScreen.js','aiAdvice.js'], ['DamageScreen.js','supabase.js'], ['DamageScreen.js','useAuth.js'],
+  ['BudgetScreen.js','TallyContext.js'], ['BudgetScreen.js','useAuth.js'], ['BudgetScreen.js','supabase.js'],
+  ['SettingsScreen.js','TallyContext.js'], ['SettingsScreen.js','useAuth.js'], ['SettingsScreen.js','smsSync.js'],
+  ['SettingsScreen.js','notificationAccess.js'], ['SettingsScreen.js','supabase.js'], ['SettingsScreen.js','export.js'], ['SettingsScreen.js','budgetAlerts.js'],
+  ['OnboardingScreen.js','TallyContext.js'], ['OnboardingScreen.js','useAuth.js'], ['OnboardingScreen.js','smsSync.js'],
+  ['OnboardingScreen.js','notificationAccess.js'], ['OnboardingScreen.js','weeklyDigest.js'],
+  ['AuthScreen.js','TallyContext.js'], ['AuthScreen.js','supabase.js'],
+  ['AddSheet.js','TallyContext.js'], ['AddSheet.js','useAuth.js'], ['AddSheet.js','budgetAlerts.js'],
+  ['Paywall.js','TallyContext.js'], ['TxDetailSheet.js','TallyContext.js'],
+];
+
+function status(node) {
+  if (!node.bugs || !node.bugs.length) return 'grey';
+  return node.bugs.some(b => b.status === 'open') ? 'red' : 'green';
+}
+const COLOR = { red: 'var(--red)', green: 'var(--green)', grey: 'var(--grey)' };
+const STROKE = { red: '#FF5436', green: '#6FE38C', grey: '#5a5c4d' };
+
+// layout: stack nodes within each column
+const colNodes = {};
+COLUMNS.forEach(c => colNodes[c.key] = []);
+NODES.forEach(n => colNodes[n.col].push(n));
+
+const NODE_W = 190, NODE_H = 40, GAP = 14, TOP = 50;
+const pos = {};
+COLUMNS.forEach(col => {
+  colNodes[col.key].forEach((n, i) => {
+    pos[n.id] = { x: col.x, y: TOP + i * (NODE_H + GAP) };
+  });
+});
+
+const svg = document.getElementById('svg');
+const maxRows = Math.max(...COLUMNS.map(c => colNodes[c.key].length));
+svg.setAttribute('height', TOP + maxRows * (NODE_H + GAP) + 40);
+svg.setAttribute('width', COLUMNS[COLUMNS.length-1].x + NODE_W + 40);
+
+function svgEl(tag, attrs) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+
+// column labels
+COLUMNS.forEach(c => {
+  const t = svgEl('text', { x: c.x, y: 26, class: 'col-label' });
+  t.textContent = c.label;
+  svg.appendChild(t);
+});
+
+// edges (drawn first, under nodes)
+const edgeGroup = svgEl('g', {});
+svg.appendChild(edgeGroup);
+EDGES.forEach(([a, b]) => {
+  if (a === b || !pos[a] || !pos[b]) return;
+  const pa = pos[a], pb = pos[b];
+  const x1 = pa.x + NODE_W, y1 = pa.y + NODE_H / 2;
+  const x2 = pb.x, y2 = pb.y + NODE_H / 2;
+  const mx = (x1 + x2) / 2;
+  const path = svgEl('path', {
+    d: `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`,
+    class: 'edge', 'data-a': a, 'data-b': b,
+  });
+  edgeGroup.appendChild(path);
+});
+
+// nodes
+const nodeGroup = svgEl('g', {});
+svg.appendChild(nodeGroup);
+NODES.forEach(n => {
+  const p = pos[n.id];
+  const st = status(n);
+  const g = svgEl('g', { class: 'node', 'data-id': n.id, transform: `translate(${p.x},${p.y})` });
+  g.appendChild(svgEl('rect', { width: NODE_W, height: NODE_H, rx: 8, fill: '#1c1e14', stroke: STROKE[st] }));
+  g.appendChild(svgEl('circle', { cx: 14, cy: NODE_H/2, r: 4, fill: STROKE[st] }));
+  const label = svgEl('text', { x: 26, y: NODE_H/2 + 4 });
+  label.textContent = n.id.replace('.js', '');
+  g.appendChild(label);
+  g.addEventListener('click', () => selectNode(n.id));
+  g.addEventListener('mouseenter', () => highlightEdges(n.id, true));
+  g.addEventListener('mouseleave', () => highlightEdges(n.id, false));
+  nodeGroup.appendChild(g);
+});
+
+function highlightEdges(id, on) {
+  edgeGroup.querySelectorAll('path').forEach(p => {
+    if (p.dataset.a === id || p.dataset.b === id) p.classList.toggle('hi', on);
+  });
+}
+
+function selectNode(id) {
+  const n = NODES.find(x => x.id === id);
+  const sb = document.getElementById('sidebar');
+  sb.classList.remove('empty');
+  let html = `<h2>${n.id}</h2><div class="path">src/.../${n.id}</div><div class="desc">${n.desc}</div>`;
+  if (n.bugs && n.bugs.length) {
+    n.bugs.forEach(b => {
+      html += `<div class="bug ${b.status}">
+        <span class="bug-tag">${b.status === 'open' ? 'OPEN' : 'FIXED'}</span><span class="bug-sev">${b.sev}</span>
+        <div class="bug-summary">${b.summary}</div>
+        <div class="bug-fix"><b>${b.status === 'open' ? 'Fix needed:' : 'Fix applied:'}</b> ${b.fix}</div>
+      </div>`;
+    });
+  } else {
+    html += `<div class="clean">audited — no bugs found</div>`;
+  }
+  sb.innerHTML = html;
+}
+</script>
+</body>
+</html>

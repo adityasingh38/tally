@@ -21,12 +21,21 @@ export async function exportToCSV(transactions) {
   });
 }
 
+// Neutralise CSV formula injection: a field starting with = + - @ (or a tab)
+// is interpreted as a formula by Excel/Sheets even when quoted, so prefix
+// with a leading quote to force it back to plain text.
+function csvField(value) {
+  const s = (value || '').replace(/"/g, '""');
+  const safe = /^[=+\-@\t]/.test(s) ? `'${s}` : s;
+  return `"${safe}"`;
+}
+
 export function generateCSVString(transactions) {
   const header = 'Date,Merchant,Category,Type,Amount (INR),Note\n';
   const rows = transactions.map(tx => {
     const date = new Date(tx.txn_date).toLocaleDateString('en-IN');
-    const merchant = `"${(tx.merchant || '').replace(/"/g, '""')}"`;
-    const note = tx.note ? `"${tx.note.replace(/"/g, '""')}"` : '';
+    const merchant = csvField(tx.merchant);
+    const note = tx.note ? csvField(tx.note) : '';
     return `${date},${merchant},${tx.category},${tx.type},${tx.amount},${note}`;
   }).join('\n');
   return header + rows;

@@ -15,6 +15,13 @@ function buildRead(top, total) {
   return `${fmtINR(top.amount)} on ${top.label.toLowerCase()} — ${pct}% of everything. bold strategy.`;
 }
 
+// Local calendar-day key (not toISOString, which is UTC and rolls back to the
+// previous day for any local time before 05:30 IST) — matches FeedScreen's
+// groupTxsByDate so "today"/day-bucketing agree across screens.
+function localDateKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 function todayLabel() {
   return new Date()
     .toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
@@ -26,13 +33,13 @@ function SevenDayBars({ T, accent, allTxs }) {
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(now);
     d.setDate(now.getDate() - (6 - i));
-    const key = d.toISOString().slice(0, 10);
+    const key = localDateKey(d);
     const label = d.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 1).toUpperCase();
     const isToday = i === 6;
     return { key, label, isToday, total: 0 };
   });
   allTxs.filter(t => t.type !== 'credit' && t.txn_date).forEach(t => {
-    const key = t.txn_date.slice(0, 10);
+    const key = localDateKey(new Date(t.txn_date));
     const bar = days.find(d => d.key === key);
     if (bar) bar.total += Number(t.amount || 0);
   });
@@ -147,9 +154,9 @@ export default function HomeScreen({ navigation }) {
   const dailyBudget = hasIncome && left > 0 && daysLeft > 0 ? Math.round(left / daysLeft) : null;
 
   // today's spend
-  const todayStr = now2.toISOString().slice(0, 10);
+  const todayStr = localDateKey(now2);
   const todayTotal = isCurrentMonth
-    ? totalSpent(txs.filter(tx => tx.txn_date && tx.txn_date.slice(0, 10) === todayStr && tx.type !== 'credit'))
+    ? totalSpent(txs.filter(tx => tx.txn_date && localDateKey(new Date(tx.txn_date)) === todayStr && tx.type !== 'credit'))
     : 0;
 
   // spending forecast — only for current month with enough data
@@ -204,14 +211,14 @@ export default function HomeScreen({ navigation }) {
     const byDay = {};
     store.allTxs.forEach((tx) => {
       if (!tx.txn_date || tx.type === 'credit') return;
-      const d = tx.txn_date.slice(0, 10);
+      const d = localDateKey(new Date(tx.txn_date));
       byDay[d] = (byDay[d] || 0) + (tx.amount || 0);
     });
     let count = 0;
     const cur = new Date(now2);
     cur.setDate(cur.getDate() - 1); // start from yesterday
     for (let i = 0; i < 60; i++) {
-      const ds = cur.toISOString().slice(0, 10);
+      const ds = localDateKey(cur);
       const daySpent = byDay[ds] || 0;
       if (daySpent === 0) { cur.setDate(cur.getDate() - 1); continue; } // skip zero-spend days
       if (daySpent > roughDailyLimit) break;

@@ -62,6 +62,25 @@ export async function checkDuplicate({ userId, amount, type, txnDate, merchantTa
   return data && data.length > 0;
 }
 
+// Atomic dedup-check + insert (insert_transaction_if_new in schema.sql) — use
+// this instead of checkDuplicate+insertTransaction(s) wherever two capture
+// paths (SMS + notification listener) can race for the same transaction.
+// checkDuplicate/insertTransactions above are still used by the historical
+// bulk-import path, which doesn't have that race.
+export async function insertTransactionIfNew(tx) {
+  return supabase.rpc('insert_transaction_if_new', {
+    p_user_id: tx.user_id,
+    p_amount: tx.amount,
+    p_type: tx.type,
+    p_merchant: tx.merchant,
+    p_merchant_tail: tx.merchant_tail,
+    p_category: tx.category,
+    p_source: tx.source,
+    p_txn_date: tx.txn_date,
+    p_note: tx.note ?? null,
+  });
+}
+
 export async function deleteAccount() {
   return supabase.functions.invoke('delete-account', { body: {} });
 }

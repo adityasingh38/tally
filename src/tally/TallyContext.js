@@ -26,7 +26,12 @@ const Ctx = createContext(null);
 export const useTally = () => useContext(Ctx);
 
 export function TallyProvider({ children }) {
-  const { isPremium } = usePremium();
+  // Single source of truth for premium state — Paywall/SettingsScreen must
+  // read this from context instead of calling usePremium() again, since a
+  // second independent hook instance never learns about a purchase made
+  // through the first one (isPremium there stays stale until app restart).
+  const premium = usePremium();
+  const { isPremium } = premium;
   const [prefs, setPrefs] = useState(DEFAULT_PREFS);
   const [reactions, setReactions] = useState({});
   const [realTxs, setRealTxs] = useState([]);     // fed by TxBridge
@@ -98,30 +103,46 @@ export function TallyProvider({ children }) {
     });
   }, [realTxs, txsLoaded]);
 
+  // Each returns { success, error } so screens can surface a failed write
+  // instead of silently treating it as done (server writes used to be
+  // fire-and-forget here, closing the confirmation UI even when the DB
+  // rejected the change).
   const deleteTx = useCallback(async (tx) => {
     const isLocal = String(tx.id).startsWith('u');
-    if (!isLocal) await deleteTransaction(tx.id).catch(() => {});
+    if (!isLocal) {
+      const { error } = await deleteTransaction(tx.id);
+      if (error) return { success: false, error };
+    }
     setLocalTxs((prev) => {
       const base = prev || (txsLoaded ? realTxs : SEED_TXS);
       return base.filter(t => t.id !== tx.id);
     });
     if (!isLocal) setRealTxs(prev => prev.filter(t => t.id !== tx.id));
+    return { success: true };
   }, [realTxs, txsLoaded]);
 
   const updateTxCategory = useCallback(async (tx, category) => {
     const isLocal = String(tx.id).startsWith('u');
-    if (!isLocal) await updateTransactionCategory(tx.id, category).catch(() => {});
+    if (!isLocal) {
+      const { error } = await updateTransactionCategory(tx.id, category);
+      if (error) return { success: false, error };
+    }
     const patch = (list) => list.map(t => t.id === tx.id ? { ...t, category } : t);
     setLocalTxs(prev => prev ? patch(prev) : patch(txsLoaded ? realTxs : SEED_TXS));
     if (!isLocal) setRealTxs(prev => patch(prev));
+    return { success: true };
   }, [realTxs, txsLoaded]);
 
   const updateTx = useCallback(async (tx, fields) => {
     const isLocal = String(tx.id).startsWith('u');
-    if (!isLocal) await updateTransaction(tx.id, fields).catch(() => {});
+    if (!isLocal) {
+      const { error } = await updateTransaction(tx.id, fields);
+      if (error) return { success: false, error };
+    }
     const patch = (list) => list.map(t => t.id === tx.id ? { ...t, ...fields } : t);
     setLocalTxs(prev => prev ? patch(prev) : patch(txsLoaded ? realTxs : SEED_TXS));
     if (!isLocal) setRealTxs(prev => patch(prev));
+    return { success: true };
   }, [realTxs, txsLoaded]);
 
   // Seed is only a pre-load placeholder; once your data loads we show YOURS
@@ -147,7 +168,8 @@ export function TallyProvider({ children }) {
 
   const value = {
     T: theme, accent, accentInk,
-    isPremium,
+    isPremium, premiumLoading: premium.loading, offerings: premium.offerings,
+    purchase: premium.purchase, restore: premium.restore,
     prefs, setPref,
     income, setIncome,
     store: { txs, allTxs, addTx, deleteTx, updateTxCategory, updateTx, reactions, react, txsLoaded },

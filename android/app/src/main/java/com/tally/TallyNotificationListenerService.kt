@@ -76,6 +76,8 @@ class TallyNotificationListenerService : NotificationListenerService() {
       putExtra("packageName", pkg)
       putExtra("title", title)
       putExtra("body", body)
+      // Real post time, not headless-task-execution time (see SmsReceiver).
+      putExtra("postTime", sbn.postTime)
     }
     try {
       startService(serviceIntent)

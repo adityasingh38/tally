@@ -77,7 +77,10 @@ create table if not exists api_usage (
 );
 alter table api_usage enable row level security;
 
--- Atomic increment; returns true if still within the limit.
+-- Atomic increment; returns true if still within the limit. Only callable by
+-- the service role (the anthropic-proxy edge function) — see grant below.
+-- Without the revoke, PostgREST exposes this to any authenticated client,
+-- letting one user inflate another's count by passing an arbitrary p_user.
 create or replace function increment_api_usage(p_user uuid, p_limit int)
 returns boolean
 language plpgsql
@@ -89,6 +92,48 @@ begin
   on conflict (user_id, day) do update set count = api_usage.count + 1
   returning count into cur;
   return cur <= p_limit;
+end;
+$$;
+revoke execute on function increment_api_usage(uuid, int) from public, anon, authenticated;
+grant execute on function increment_api_usage(uuid, int) to service_role;
+
+-- Atomic dedup+insert: closes a TOCTOU race between the SMS and notification
+-- capture paths, which used to each run a plain SELECT (checkDuplicate) then
+-- a separate INSERT — a UPI payment firing both within milliseconds could
+-- pass the dedup check in both before either insert landed.
+-- pg_advisory_xact_lock serializes concurrent calls per user so check+insert
+-- become atomic, without a rigid unique constraint over the fuzzy ±60s match.
+create or replace function insert_transaction_if_new(
+  p_user_id uuid, p_amount numeric, p_type text, p_merchant text,
+  p_merchant_tail text, p_category text, p_source text, p_txn_date timestamptz,
+  p_note text default null
+)
+returns table (id uuid, inserted boolean)
+language plpgsql
+security invoker
+as $$
+declare
+  new_id uuid;
+begin
+  perform pg_advisory_xact_lock(hashtext(p_user_id::text));
+
+  if exists (
+    select 1 from transactions
+    where user_id = p_user_id
+      and amount = p_amount
+      and (p_type is null or type = p_type)
+      and (p_merchant_tail is null or p_merchant_tail = '' or merchant_tail = p_merchant_tail)
+      and txn_date between p_txn_date - interval '60 seconds' and p_txn_date + interval '60 seconds'
+  ) then
+    return query select null::uuid, false;
+    return;
+  end if;
+
+  insert into transactions (user_id, amount, type, merchant, merchant_tail, category, source, txn_date, note)
+  values (p_user_id, p_amount, p_type, p_merchant, p_merchant_tail, p_category, p_source, p_txn_date, p_note)
+  returning transactions.id into new_id;
+
+  return query select new_id, true;
 end;
 $$;
 

@@ -87,9 +87,11 @@ function extractType(body) {
   if (debit && !credit) return 'debit';
   if (credit && !debit) return 'credit';
   if (debit && credit) {
-    // Both present (e.g. "A/c debited ... MERCHANT credited"). The user-side
-    // action is the debit, so it wins when an explicit debit verb is present.
-    return /\b(debited|spent|sent|paid|withdrawn|deducted|purchase)\b/i.test(body) ? 'debit' : 'credit';
+    // Both present (e.g. "A/c debited ... MERCHANT credited", or a credit-card
+    // charge SMS with a boilerplate "refund will be credited" disclaimer). The
+    // user-side action is the debit, so it wins when an explicit debit verb is
+    // present — reuse DEBIT_KEYWORDS itself so this can't drift out of sync.
+    return DEBIT_KEYWORDS.test(body) ? 'debit' : 'credit';
   }
   return null;
 }

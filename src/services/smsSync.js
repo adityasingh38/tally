@@ -1,7 +1,7 @@
 import SmsAndroid from 'react-native-get-sms-android';
 import { parseSMS, isBankSMS, looksLikeBankSMS } from './smsParser';
 import { categoriseTransactions } from './categoriser';
-import { supabase, insertTransactions, checkDuplicate } from './supabase';
+import { supabase, insertTransactions, checkDuplicate, insertTransactionIfNew } from './supabase';
 import { checkBudgetAlerts } from './budgetAlerts';
 
 const BATCH_SIZE = 20;
@@ -84,7 +84,7 @@ export async function syncHistoricalSMS(userId, onProgress) {
  * foreground, background, or killed. Reads the user from the persisted Supabase
  * session, so no userId needs to be passed in.
  */
-export async function handleHeadlessSms({ originatingAddress, messageBody }) {
+export async function handleHeadlessSms({ originatingAddress, messageBody, timestampMillis }) {
   if (!isBankSMS(originatingAddress) && !looksLikeBankSMS(messageBody)) return;
 
   const parsed = parseSMS(messageBody, originatingAddress);
@@ -94,18 +94,15 @@ export async function handleHeadlessSms({ originatingAddress, messageBody }) {
   const userId = session?.user?.id;
   if (!userId) return; // not signed in — nothing to attribute the txn to
 
-  const txn = { ...parsed, user_id: userId, txn_date: new Date().toISOString() };
-  const isDup = await checkDuplicate({
-    userId,
-    amount: txn.amount,
-    type: txn.type,
-    txnDate: new Date(),
-    merchantTail: txn.merchant_tail,
-  });
-  if (isDup) return;
+  // Real SMS timestamp from the native receiver, not the time this headless
+  // task happened to run (Android can defer it minutes under Doze).
+  const txnDate = timestampMillis ? new Date(timestampMillis) : new Date();
+  const txn = { ...parsed, user_id: userId, txn_date: txnDate.toISOString() };
 
   const [categorised] = await categoriseTransactions([txn]);
-  await insertTransactions([{
+  // Atomic dedup+insert — closes the race between this and the notification
+  // capture path firing for the same real-world transaction near-simultaneously.
+  const { data } = await insertTransactionIfNew({
     user_id: userId,
     amount: categorised.amount,
     type: categorised.type,
@@ -114,7 +111,8 @@ export async function handleHeadlessSms({ originatingAddress, messageBody }) {
     category: categorised.category,
     source: categorised.source,
     txn_date: categorised.txn_date,
-  }]);
+  });
+  if (!data?.[0]?.inserted) return;
 
   await checkBudgetAlerts(userId).catch(() => {});
 }
@@ -130,7 +128,7 @@ export async function handleHeadlessSms({ originatingAddress, messageBody }) {
  * notification fire for the same transaction: same amount/type/date/tail within
  * the dedup window collapses to one row.
  */
-export async function handleHeadlessNotification({ packageName, body }) {
+export async function handleHeadlessNotification({ packageName, body, postTime }) {
   if (!body) return;
 
   const parsed = parseSMS(body, packageName || 'notification');
@@ -140,18 +138,14 @@ export async function handleHeadlessNotification({ packageName, body }) {
   const userId = session?.user?.id;
   if (!userId) return;
 
-  const txn = { ...parsed, user_id: userId, txn_date: new Date().toISOString() };
-  const isDup = await checkDuplicate({
-    userId,
-    amount: txn.amount,
-    type: txn.type,
-    txnDate: new Date(),
-    merchantTail: txn.merchant_tail,
-  });
-  if (isDup) return;
+  // Real notification post time, not headless-task-execution time.
+  const txnDate = postTime ? new Date(postTime) : new Date();
+  const txn = { ...parsed, user_id: userId, txn_date: txnDate.toISOString() };
 
   const [categorised] = await categoriseTransactions([txn]);
-  await insertTransactions([{
+  // Atomic dedup+insert — see handleHeadlessSms for why this replaced
+  // checkDuplicate+insertTransactions here.
+  const { data } = await insertTransactionIfNew({
     user_id: userId,
     amount: categorised.amount,
     type: categorised.type,
@@ -160,7 +154,8 @@ export async function handleHeadlessNotification({ packageName, body }) {
     category: categorised.category,
     source: categorised.source,
     txn_date: categorised.txn_date,
-  }]);
+  });
+  if (!data?.[0]?.inserted) return;
 
   await checkBudgetAlerts(userId).catch(() => {});
 }

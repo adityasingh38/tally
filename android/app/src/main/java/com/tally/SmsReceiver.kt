@@ -20,12 +20,17 @@ class SmsReceiver : BroadcastReceiver() {
     if (messages.isEmpty()) return
 
     val address = messages[0].originatingAddress ?: return
+    // Real SMS timestamp, not the time the headless JS task happens to run —
+    // Android can defer headless task execution by minutes under Doze/battery
+    // restrictions, which was making txn_date drift from the actual send time.
+    val timestampMillis = messages[0].timestampMillis
     val body = StringBuilder()
     for (msg in messages) body.append(msg.messageBody ?: "")
 
     val serviceIntent = Intent(context, HeadlessSmsService::class.java).apply {
       putExtra("originatingAddress", address)
       putExtra("messageBody", body.toString())
+      putExtra("timestampMillis", timestampMillis)
     }
     try {
       context.startService(serviceIntent)

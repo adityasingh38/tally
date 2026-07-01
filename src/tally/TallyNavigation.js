@@ -30,6 +30,10 @@ import { useTransactions } from '../hooks/useTransactions';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 export const navigationRef = createNavigationContainerRef();
+// Set by GlobalModals once TallyProvider is mounted — lets the module-level
+// deep-link handler below open the Add sheet, which otherwise has no way to
+// reach context (registerRefetch uses the same cross-tree-ref pattern).
+const openAddRef = { current: null };
 
 export function routeFromPressAction(pressActionId) {
   if (!navigationRef.isReady()) return;
@@ -45,11 +49,7 @@ function handleDeepLink(url) {
     // navigate home then open add sheet
     navigationRef.navigate('Main', { screen: 'Dashboard' });
     // slight delay so the nav settles before opening the modal
-    setTimeout(() => {
-      // open add modal via context — can't access it directly here;
-      // the tab bar's floating + button is the canonical entry point.
-      // This deep link just ensures the user lands on Dashboard.
-    }, 100);
+    setTimeout(() => { openAddRef.current?.(); }, 100);
   }
 }
 
@@ -108,7 +108,8 @@ function TxBridge({ userId }) {
 
 // renders the globally-available modals, reading visibility from the context
 function GlobalModals() {
-  const { modal, closeModal, selectedTx } = useTally();
+  const { modal, closeModal, selectedTx, openAdd } = useTally();
+  React.useEffect(() => { openAddRef.current = openAdd; }, [openAdd]);
   return (
     <>
       <AddSheet visible={modal === 'add'} onClose={closeModal} />

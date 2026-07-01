@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Pressable, Modal, Alert, ActivityIndicator } from 'react-native';
 import { useTally } from '../TallyContext';
-import { usePremium } from '../../hooks/usePremium';
 import { FONTS } from '../theme';
 import { MonoLabel, Btn, Tag, Brand } from '../ui';
 
@@ -48,8 +47,7 @@ function buildPlans(offerings) {
 }
 
 export default function Paywall({ visible, onClose }) {
-  const { T, accent, accentInk } = useTally();
-  const { offerings, purchase, restore, loading: rcLoading } = usePremium();
+  const { T, accent, accentInk, offerings, purchase, restore, premiumLoading: rcLoading } = useTally();
   const plans = buildPlans(offerings) || FALLBACK_PLANS;
   const [plan, setPlan] = useState('yearly');
   const [busy, setBusy] = useState(false);

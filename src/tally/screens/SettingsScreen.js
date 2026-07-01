@@ -1,13 +1,12 @@
 // src/tally/screens/SettingsScreen.js  → your "Settings" tab
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable, Alert, PermissionsAndroid, ActivityIndicator, TextInput, Linking } from 'react-native';
+import { View, Text, ScrollView, Pressable, Alert, PermissionsAndroid, ActivityIndicator, TextInput, Linking, AppState } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { useAuth } from '../../hooks/useAuth';
 import { totalSpent } from '../data';
 import { syncHistoricalSMS } from '../../services/smsSync';
-import { usePremium } from '../../hooks/usePremium';
 import { notifAccessAvailable, isNotifAccessEnabled, openNotifAccessSettings } from '../../services/notificationAccess';
 import { getTransactions, deleteAccount } from '../../services/supabase';
 import { exportToCSV } from '../../services/export';
@@ -53,9 +52,8 @@ function Row({ T, label, sub, control, onPress }) {
 }
 
 export default function SettingsScreen() {
-  const { T, accent, accentInk, prefs, setPref, openPaywall, income, setIncome, isPremium, store } = useTally();
+  const { T, accent, accentInk, prefs, setPref, openPaywall, income, setIncome, isPremium, store, restore } = useTally();
   const { user, signOut } = useAuth();
-  const { restore } = usePremium();
   const insets = useSafeAreaInsets();
   const [notif, setNotif] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -67,7 +65,16 @@ export default function SettingsScreen() {
 
   // Reflect the live notification-access grant (user may toggle it in system
   // Settings and return). Re-checked on mount; openSettings sets it optimistic.
-  useEffect(() => { isNotifAccessEnabled().then(setNotifAccess); }, []);
+  useEffect(() => {
+    isNotifAccessEnabled().then(setNotifAccess);
+    // Re-check on foreground, not just optimistically on press — a user can
+    // open system Settings from "set up ->" and come back without actually
+    // enabling it, and the row was staying stuck on "on" regardless.
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') isNotifAccessEnabled().then(setNotifAccess);
+    });
+    return () => sub.remove();
+  }, []);
 
   function saveIncome() {
     const n = Number(incomeInput.replace(/[^0-9]/g, ''));
@@ -257,7 +264,7 @@ export default function SettingsScreen() {
         <>
           <Rule T={T} />
           <Row T={T} label="Notification access" sub="auto-log from GPay, PhonePe, Paytm & bank apps"
-            onPress={() => { openNotifAccessSettings(); setNotifAccess(true); }}
+            onPress={() => { openNotifAccessSettings(); }}
             control={<MonoLabel T={T} color={notifAccess ? accent : T.dim} size={11}>
               {notifAccess ? 'on ✓' : 'set up →'}
             </MonoLabel>} />

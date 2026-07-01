@@ -96,9 +96,15 @@ export default function DamageScreen() {
   const [askAnswer, setAskAnswer] = useState(null);
   const [askLoading, setAskLoading] = useState(false);
 
+  // Category id+amount, not just cats.length — recategorizing a transaction
+  // between two existing categories doesn't change the total or the category
+  // *count*, so a length-only key left the verdict stale until total spend
+  // moved by >=500.
+  const catsKey = cats.map(c => `${c.id}:${c.amount}`).join('|');
+
   useEffect(() => {
     if (cats.length === 0) return;
-    const key = `${prefs.tone}_${prefs.nihil}_${Math.round(total / 500)}`;
+    const key = `${prefs.tone}_${prefs.nihil}_${catsKey}`;
     if (fetchedRef.current === key) return;
     fetchedRef.current = key;
 
@@ -107,7 +113,7 @@ export default function DamageScreen() {
       .then(setVerdict)
       .catch(() => {})
       .finally(() => setVerdictLoading(false));
-  }, [cats.length, prefs.tone, prefs.nihil, Math.round(total / 500)]);
+  }, [catsKey, prefs.tone, prefs.nihil]);
 
   const vs = verdict || [];
 

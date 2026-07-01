@@ -38,7 +38,8 @@ export default function BudgetScreen() {
 
   async function removeBudget(catId) {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    await deleteBudget(user.id, catId);
+    const { error } = await deleteBudget(user.id, catId);
+    if (error) { Alert.alert('Delete failed', error.message || 'Try again.'); return; }
     setBudgets((prev) => { const next = { ...prev }; delete next[catId]; return next; });
     if (editing === catId) setEditing(null);
   }
@@ -47,12 +48,13 @@ export default function BudgetScreen() {
     const limit = Number(inputVal.replace(/[^0-9]/g, ''));
     if (!limit || limit <= 0) { Alert.alert('Invalid', 'Enter a positive amount.'); return; }
     setSaving(true);
-    await upsertBudget({ user_id: user.id, category: catId, monthly_limit: limit, alert_threshold: 0.8 });
+    const { error } = await upsertBudget({ user_id: user.id, category: catId, monthly_limit: limit, alert_threshold: 0.8 });
+    setSaving(false);
+    if (error) { Alert.alert('Save failed', error.message || 'Try again.'); return; }
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setBudgets((prev) => ({ ...prev, [catId]: limit }));
     setEditing(null);
     setInputVal('');
-    setSaving(false);
   }
 
   const setCats = BUDGETABLE.filter((id) => budgets[id] != null);
