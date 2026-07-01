@@ -8,6 +8,7 @@ import { getBudgets } from '../../services/supabase';
 import { FONTS, fmtINR } from '../theme';
 import { MonoLabel, Rule, Btn, TxRow, Brand, MonthPicker } from '../ui';
 import { totalSpent, groupByCat, copeZone, monthlyTotals } from '../data';
+import { writeWidgetCache } from '../../services/widgetSync';
 
 function buildRead(top, total) {
   if (!top || total <= 0) return "no damage logged yet. suspicious, honestly.";
@@ -124,7 +125,7 @@ function TrendBars({ T, accent, allTxs }) {
 
 export default function HomeScreen({ navigation }) {
   const { T, accent, accentInk, income, setIncome, store, openAdd, refreshing, refreshTxs, openTx,
-    selectedMonth, setSelectedMonth } = useTally();
+    selectedMonth, setSelectedMonth, isPremium } = useTally();
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const [salaryDismissed, setSalaryDismissed] = React.useState(false);
@@ -227,6 +228,12 @@ export default function HomeScreen({ navigation }) {
     }
     return count;
   })();
+
+  // Keep the home-screen widget's cached summary in sync — the widget renders
+  // in a separate headless context with no access to this component's state.
+  useEffect(() => {
+    writeWidgetCache({ streak, todayTotal, isPremium });
+  }, [streak, todayTotal, isPremium]);
 
   const recent = txs.slice(0, 5);
 

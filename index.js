@@ -1,8 +1,14 @@
 import { registerRootComponent } from 'expo';
 import { AppRegistry } from 'react-native';
 import notifee, { EventType } from '@notifee/react-native';
+import { registerWidgetTaskHandler } from 'react-native-android-widget';
 
 import App from './App';
+import { widgetTaskHandler } from './src/widgets/widget-task-handler';
+
+// Home-screen widget (Tally Pro perk). Runs headless whenever Android needs
+// to (re)draw it — see src/widgets/widget-task-handler.js.
+registerWidgetTaskHandler(widgetTaskHandler);
 
 // Background tap → navigate when app resumes. routeFromPressAction guards
 // navigationRef.isReady() so it's safe to call from the background handler.

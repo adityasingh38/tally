@@ -68,6 +68,7 @@ const COLUMNS = [
   { key: 'hooks',      label: 'hooks',      x: 500 },
   { key: 'services',   label: 'services',   x: 720 },
   { key: 'screens',    label: 'screens',    x: 1000 },
+  { key: 'widgets',    label: 'home-screen widget', x: 1240 },
 ];
 
 const NODES = [
@@ -127,7 +128,7 @@ const NODES = [
     ] },
   { id: 'notificationAccess.js', col: 'services', desc: 'Native NotificationListenerService permission bridge (isEnabled/openSettings).' },
 
-  { id: 'HomeScreen.js', col: 'screens', desc: 'Dashboard: totals, 7-day bars, budget warnings, salary detection, spend streak.',
+  { id: 'HomeScreen.js', col: 'screens', desc: 'Dashboard: totals, 7-day bars, budget warnings, salary detection, spend streak. Also syncs streak/today-total/isPremium to widgetSync.js on every recompute so the home-screen widget stays current.',
     bugs: [
       { status: 'fixed', sev: 'MEDIUM', summary: '"Today" and the 7-day bars bucketed by UTC day (toISOString().slice(0,10)) instead of local day, disagreeing with FeedScreen\'s local-day grouping for the ~5.5hr IST offset window (12:00–5:30am IST).',
         fix: 'Added a shared localDateKey() helper using local Date getters, applied to all four UTC-slice call sites.' }
@@ -163,6 +164,10 @@ const NODES = [
       { status: 'fixed', sev: 'HIGH', summary: 'handleDelete/handleRecategorize/saveEdit awaited store methods that swallowed errors internally, then always closed the modal / cleared editing state as if the write succeeded.',
         fix: 'Now checks { success, error } from the (fixed) TallyContext store methods and Alert.alert()s on failure instead of closing.' }
     ] },
+
+  { id: 'widgetSync.js', col: 'services', desc: 'Writes streak/today-spend/isPremium to AsyncStorage + calls requestWidgetUpdate whenever HomeScreen recomputes them. Bridge between React state and the widget\'s separate headless render context.' },
+  { id: 'widget-task-handler.js', col: 'widgets', desc: 'registerWidgetTaskHandler entry (index.js) — runs headless whenever Android (re)draws the widget. Reads widgetSync\'s cache, has no access to React state directly.' },
+  { id: 'BrokeStreakWidget.js', col: 'widgets', desc: 'The widget JSX itself (FlexWidget/TextWidget, not real RN View/Text — renders to RemoteViews). Shows streak + today\'s spend if Pro, a locked upsell state otherwise. Previously promised in Paywall copy with zero implementation — this closes that gap.' },
 ];
 
 // import edges (subset — cross-column, the ones that matter visually)
@@ -191,6 +196,7 @@ const EDGES = [
   ['AuthScreen.js','TallyContext.js'], ['AuthScreen.js','supabase.js'],
   ['AddSheet.js','TallyContext.js'], ['AddSheet.js','useAuth.js'], ['AddSheet.js','budgetAlerts.js'],
   ['Paywall.js','TallyContext.js'], ['TxDetailSheet.js','TallyContext.js'],
+  ['HomeScreen.js','widgetSync.js'], ['widgetSync.js','BrokeStreakWidget.js'], ['widget-task-handler.js','BrokeStreakWidget.js'],
 ];
 
 function status(node) {

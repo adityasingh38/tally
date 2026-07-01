@@ -40,7 +40,25 @@
           "backgroundColor": "#0E0F0C"
         }
       ],
-      "./plugins/withNativeCapture.js"
+      "./plugins/withNativeCapture.js",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "BrokeStreakWidget",
+              "label": "Tally — broke streak",
+              "description": "Days under budget + today's spend, at a glance.",
+              "minWidth": "180dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 3,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ]
     ]
   }
 }
