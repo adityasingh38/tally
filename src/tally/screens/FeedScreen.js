@@ -48,8 +48,11 @@ export default function FeedScreen({ navigation }) {
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState('date'); // 'date' | 'amount'
   const [catFilter, setCatFilter] = useState(null); // category id or null
+  const [allTime, setAllTime] = useState(false);
 
-  const filtered = store.txs.filter((tx) => {
+  const sourceTxs = allTime ? store.allTxs : store.txs;
+
+  const filtered = sourceTxs.filter((tx) => {
     const typeOk = filter === 'all' ? true : filter === 'spent' ? tx.type !== 'credit' : tx.type === 'credit';
     const queryOk = !query || (tx.merchant || '').toLowerCase().includes(query.toLowerCase())
       || (tx.note || '').toLowerCase().includes(query.toLowerCase());
@@ -59,7 +62,7 @@ export default function FeedScreen({ navigation }) {
 
   // unique categories present in current view (before cat filter applied)
   const activeCats = Array.from(new Set(
-    store.txs.filter(t => t.type !== 'credit').map(t => t.category).filter(Boolean)
+    sourceTxs.filter(t => t.type !== 'credit').map(t => t.category).filter(Boolean)
   ));
 
   const sorted = sort === 'amount'
@@ -78,8 +81,15 @@ export default function FeedScreen({ navigation }) {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refreshTxs} tintColor={accent} colors={[accent]} />}>
       <ScreenHeader T={T} accent={accent} title="the feed"
         right={<MonoLabel T={T} color={T.faint}>{filtered.length} hits</MonoLabel>} />
-      <View style={{ marginBottom: 10 }}>
-        <MonthPicker T={T} accent={accent} selectedMonth={selectedMonth} onChange={setSelectedMonth} />
+      <View style={{ marginBottom: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        {allTime
+          ? <MonoLabel T={T} color={accent} size={10}>all time</MonoLabel>
+          : <MonthPicker T={T} accent={accent} selectedMonth={selectedMonth} onChange={setSelectedMonth} />}
+        <Pressable onPress={() => { setAllTime(v => !v); setCatFilter(null); }}
+          style={{ paddingVertical: 5, paddingHorizontal: 10, borderRadius: 999, borderWidth: 1,
+            borderColor: allTime ? accent : T.line, backgroundColor: allTime ? accent + '22' : 'transparent' }}>
+          <MonoLabel T={T} color={allTime ? accent : T.dim} size={9}>all time</MonoLabel>
+        </Pressable>
       </View>
 
       {/* search */}

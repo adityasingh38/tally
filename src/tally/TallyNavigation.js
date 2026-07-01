@@ -71,9 +71,11 @@ function MainTabs() {
 // Real-data bridge. Mounted INSIDE the navigator (so useFocusEffect is legal) —
 // pushes your Supabase transactions into the Tally store. When there are no real
 // transactions the store falls back to demo seed data automatically.
-const fromDate90 = (() => {
+// Load 365 days: free tier gates display to 30 days in TallyContext already,
+// but having more data improves trend analysis, lifetime stats, and salary detection.
+const fromDate365 = (() => {
   const d = new Date();
-  d.setDate(d.getDate() - 90);
+  d.setFullYear(d.getFullYear() - 1);
   return d;
 })();
 
@@ -91,7 +93,7 @@ function toTallyTx(tx) {
 
 function TxBridge({ userId }) {
   const { setRealTransactions, registerRefetch } = useTally();
-  const { transactions, loading, refetch } = useTransactions(userId, { fromDate: fromDate90, limit: 200 });
+  const { transactions, loading, refetch } = useTransactions(userId, { fromDate: fromDate365, limit: 500 });
 
   React.useEffect(() => { registerRefetch(refetch); }, [refetch, registerRefetch]);
 
