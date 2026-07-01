@@ -56,7 +56,8 @@ create policy "Users see own budgets"
   with check (auth.uid() = user_id);
 
 -- Monthly spending summary view (used by Insights screen)
-create or replace view spending_by_month as
+create or replace view spending_by_month
+  with (security_invoker = true) as
 select
   user_id,
   date_trunc('month', txn_date) as month,
