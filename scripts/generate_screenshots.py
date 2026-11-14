@@ -396,10 +396,10 @@ def build_screen_dashboard():
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) rotate(28deg);
+  transform: translate(-50%, -50%) rotate(-28deg);
   width: 1080px;
   border: 5px solid var(--red);
-  border-radius: 14px;
+  border-radius: 12px;
   padding: 4px;
   background: rgba(255, 68, 37, 0.08);
   pointer-events: none;
@@ -412,27 +412,36 @@ def build_screen_dashboard():
 .stamp-feral-inner {{
   width: 100%;
   border: 2px solid var(--red);
-  border-radius: 8px;
-  padding: 10px 24px;
+  border-radius: 7px;
+  padding: 8px 24px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 16px;
+  gap: 4px;
 }}
-.stamp-feral-star {{
-  font-size: 22px;
+.stamp-feral-tag {{
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 4px;
   color: var(--red);
-  opacity: 0.85;
+  text-transform: uppercase;
+}}
+.stamp-feral-rule {{
+  width: 100%;
+  height: 1.5px;
+  background: var(--red);
+  opacity: 0.6;
 }}
 .stamp-feral-title {{
   font-family: var(--display);
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 900;
   letter-spacing: 8px;
   color: var(--red);
   text-transform: uppercase;
   white-space: nowrap;
-  line-height: 1.0;
+  line-height: 1.1;
 }}
 </style>
 </head>
@@ -451,9 +460,9 @@ def build_screen_dashboard():
     <div class="card-hero" style="position:relative; overflow:hidden;">
       <div class="stamp-feral">
         <div class="stamp-feral-inner">
-          <span class="stamp-feral-star">★</span>
-          <span class="stamp-feral-title">FINANCIALLY FERAL</span>
-          <span class="stamp-feral-star">★</span>
+          <div class="stamp-feral-tag">★ OFFICIAL TALLY VERDICT ★</div>
+          <div class="stamp-feral-rule"></div>
+          <div class="stamp-feral-title">FINANCIALLY FERAL</div>
         </div>
       </div>
       <div style="display:flex; justify-content:space-between; align-items:center;">

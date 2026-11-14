@@ -72,11 +72,11 @@ function FeralStampOverlay({ accent }) {
         transform: [
           { translateY: stampY },
           { scale: stampScale },
-          { rotate: '28deg' },
+          { rotate: '-28deg' },
         ],
       }}
     >
-      {/* Authentic Diagonal Corner-to-Corner Rubber Stamp */}
+      {/* Authentic Diagonal Corner-to-Corner Rubber Stamp (Bottom-Left to Top-Right) */}
       <View
         style={{
           width: 380,
@@ -99,17 +99,30 @@ function FeralStampOverlay({ accent }) {
             borderRadius: 5,
             paddingVertical: 5,
             paddingHorizontal: 16,
-            flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
+            gap: 2,
           }}
         >
-          <Text style={{ color: stampInk, fontSize: 10, opacity: 0.85 }}>★</Text>
+          {/* Top Stamp Header */}
+          <Text
+            style={{
+              fontFamily: FONTS.monoBold,
+              fontSize: 8,
+              color: stampInk,
+              letterSpacing: 2,
+              textTransform: 'uppercase',
+            }}
+          >
+            ★ OFFICIAL TALLY VERDICT ★
+          </Text>
+
+          <View style={{ width: '100%', height: 1, backgroundColor: stampInk, opacity: 0.5, marginVertical: 2 }} />
+
+          {/* Main Stamp Headline */}
           <Text
             style={{
               fontFamily: FONTS.display,
-              fontSize: 15,
+              fontSize: 16,
               color: stampInk,
               letterSpacing: 3.5,
               fontWeight: '900',
@@ -118,7 +131,6 @@ function FeralStampOverlay({ accent }) {
           >
             FINANCIALLY FERAL
           </Text>
-          <Text style={{ color: stampInk, fontSize: 10, opacity: 0.85 }}>★</Text>
         </View>
       </View>
     </Animated.View>
