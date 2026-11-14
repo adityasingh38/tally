@@ -1,6 +1,6 @@
 // src/tally/screens/Paywall.js — modal sheet (Tally Pro)
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Pressable, Modal, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Pressable, Modal, Alert, ActivityIndicator, Linking } from 'react-native';
 import { useTally } from '../TallyContext';
 import { FONTS } from '../theme';
 import { MonoLabel, Btn, Tag, Brand } from '../ui';
@@ -135,6 +135,16 @@ export default function Paywall({ visible, onClose }) {
               </Pressable>
               <MonoLabel T={T} color={T.faint} size={9.5}>·</MonoLabel>
               <MonoLabel T={T} color={T.faint} size={9.5}>cancel anytime</MonoLabel>
+            </View>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 12, marginTop: 8 }}>
+              <Pressable onPress={() => Linking.openURL('https://adityasingh38.github.io/tally/terms.html').catch(() => {})}>
+                <MonoLabel T={T} color={T.faint} size={9}>terms of use</MonoLabel>
+              </Pressable>
+              <MonoLabel T={T} color={T.faint} size={9}>·</MonoLabel>
+              <Pressable onPress={() => Linking.openURL('https://adityasingh38.github.io/tally/privacy.html').catch(() => {})}>
+                <MonoLabel T={T} color={T.faint} size={9}>privacy policy</MonoLabel>
+              </Pressable>
             </View>
           </ScrollView>
         </View>

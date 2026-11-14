@@ -297,11 +297,11 @@ export default function SettingsScreen() {
       <MonoLabel T={T} color={T.faint} style={{ marginTop: 28, marginBottom: 4 }}>legal</MonoLabel>
       <Rule T={T} />
       <Row T={T} label="Privacy policy" sub="what we collect and why"
-        onPress={() => Linking.openURL('https://tally.adityasingh.dev/privacy').catch(() => {})}
+        onPress={() => Linking.openURL('https://adityasingh38.github.io/tally/privacy.html').catch(() => {})}
         control={<MonoLabel T={T} color={T.dim} size={11}>↗</MonoLabel>} />
       <Rule T={T} />
       <Row T={T} label="Terms of use"
-        onPress={() => Linking.openURL('https://tally.adityasingh.dev/terms').catch(() => {})}
+        onPress={() => Linking.openURL('https://adityasingh38.github.io/tally/terms.html').catch(() => {})}
         control={<MonoLabel T={T} color={T.dim} size={11}>↗</MonoLabel>} />
 
       <View style={{ alignItems: 'center', marginTop: 34, gap: 10 }}>
