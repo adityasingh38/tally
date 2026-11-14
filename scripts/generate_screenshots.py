@@ -239,7 +239,7 @@ TALLY_MARK_SVG = """
     <rect x="36" y="22" width="11" height="72" rx="4"/>
     <rect x="58" y="22" width="11" height="72" rx="4"/>
     <rect x="80" y="22" width="11" height="72" rx="4"/>
-    <rect x="40" y="16" width="11" height="86" rx="4" transform="rotate(26 50 58)"/>
+    <rect x="47" y="9" width="11" height="98" rx="4" transform="rotate(56 52.5 58)"/>
   </g>
 </svg>
 """
@@ -248,7 +248,7 @@ def get_tab_bar_html(active_tab):
     tabs = [
         ("Dashboard", "home", """<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="4"/></svg>"""),
         ("Transactions", "feed", """<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>"""),
-        ("Insights", "damage", f"""<svg width="36" height="36" viewBox="0 0 100 116"><g fill="{'#FF5436' if active_tab == 'damage' else '#63655A'}"><rect x="14" y="22" width="11" height="72" rx="4"/><rect x="36" y="22" width="11" height="72" rx="4"/><rect x="58" y="22" width="11" height="72" rx="4"/><rect x="80" y="22" width="11" height="72" rx="4"/><rect x="40" y="16" width="11" height="86" rx="4" transform="rotate(26 50 58)"/></g></svg>"""),
+        ("Insights", "damage", f"""<svg width="36" height="36" viewBox="0 0 100 116"><g fill="{'#FF5436' if active_tab == 'damage' else '#63655A'}"><rect x="14" y="22" width="11" height="72" rx="4"/><rect x="36" y="22" width="11" height="72" rx="4"/><rect x="58" y="22" width="11" height="72" rx="4"/><rect x="80" y="22" width="11" height="72" rx="4"/><rect x="47" y="9" width="11" height="98" rx="4" transform="rotate(56 52.5 58)"/></g></svg>"""),
         ("Budget", "budget", """<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/></svg>"""),
         ("Settings", "you", """<svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"/></svg>"""),
     ]
