@@ -111,7 +111,7 @@ body {
   font-family: var(--display);
   font-weight: 800;
   font-size: 54px;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.01em;
 }
 .pill {
   font-family: var(--mono);
@@ -283,8 +283,14 @@ def build_screen_dashboard():
   font-weight: 800;
   font-size: 112px;
   line-height: 1.0;
-  letter-spacing: -0.04em;
-  margin: 12px 0 18px;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  margin: 14px 0 18px;
+}}
+.hero-amount .curr {{
+  font-size: 0.88em;
+  margin-right: 8px;
+  font-weight: 700;
 }}
 .ai-read {{
   font-size: 30px;
@@ -407,9 +413,9 @@ def build_screen_dashboard():
         <span class="mono-label">the damage so far · nov 2026</span>
         <span style="font-family:var(--mono); font-size:24px; color:var(--red); font-weight:700;">+10% vs oct</span>
       </div>
-      <div class="hero-amount">₹47,100</div>
+      <div class="hero-amount"><span class="curr">₹</span>47,100</div>
       <div class="ai-read">
-        "₹18,400 on food & swiggy — 39% of everything. bold strategy."
+        "₹18,400 on food & swiggy · 39% of everything. bold strategy."
       </div>
 
       <span class="mono-label" style="font-size:20px;">last 7 days</span>
@@ -622,7 +628,7 @@ def build_screen_feed():
   {STATUS_BAR_HTML}
   <div class="content">
     <div class="screen-header">
-      <div style="font-family:var(--display); font-weight:800; font-size:52px; letter-spacing:-0.03em;">the feed</div>
+      <div style="font-family:var(--display); font-weight:800; font-size:52px; letter-spacing:-0.01em;">the feed</div>
       <div style="display:flex; align-items:center; gap:14px;">
         <span class="mono-label" style="font-size:24px; color:var(--red);">18 HITS</span>
       </div>
@@ -784,7 +790,7 @@ def build_screen_insights():
   {STATUS_BAR_HTML}
   <div class="content">
     <div class="screen-header">
-      <div style="font-family:var(--display); font-weight:800; font-size:52px; letter-spacing:-0.03em;">the damage</div>
+      <div style="font-family:var(--display); font-weight:800; font-size:52px; letter-spacing:-0.01em;">the damage</div>
       <span class="mono-label" style="font-size:24px; color:var(--text);">&lt; NOV 2026 &gt;</span>
     </div>
 
@@ -793,7 +799,7 @@ def build_screen_insights():
       <div style="display:flex; justify-content:space-between; align-items:flex-start;">
         <div>
           <span class="mono-label">total damage · nov</span>
-          <div style="font-family:var(--display); font-weight:800; font-size:96px; margin:6px 0;">₹47,100</div>
+          <div style="font-family:var(--display); font-weight:800; font-size:96px; letter-spacing:0.02em; font-variant-numeric:tabular-nums; margin:6px 0;"><span style="font-size:0.88em; margin-right:6px;">₹</span>47,100</div>
         </div>
         <span class="pill" style="transform:rotate(-2deg); font-size:20px;">FINANCIALLY FERAL</span>
       </div>
@@ -881,6 +887,12 @@ def build_screen_budgets():
   font-family: var(--display);
   font-weight: 800;
   font-size: 72px;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}}
+.plan-num .curr {{
+  font-size: 0.88em;
+  margin-right: 4px;
 }}
 .budget-bar-bg {{
   height: 18px;
@@ -914,7 +926,7 @@ def build_screen_budgets():
   <div class="content">
     <div class="screen-header">
       <div>
-        <div style="font-family:var(--display); font-weight:800; font-size:52px; letter-spacing:-0.03em;">delusions</div>
+        <div style="font-family:var(--display); font-weight:800; font-size:52px; letter-spacing:-0.01em;">delusions</div>
         <div style="font-size:26px; color:var(--dim); margin-top:4px;">the limits you set · vs reality</div>
       </div>
       <span class="pill pill-acid">6 DAYS LEFT</span>
@@ -925,11 +937,11 @@ def build_screen_budgets():
       <div class="plan-vs-real">
         <div>
           <span class="mono-label">the plan</span>
-          <div class="plan-num" style="color:var(--text);">₹38,000</div>
+          <div class="plan-num" style="color:var(--text);"><span class="curr">₹</span>38,000</div>
         </div>
         <div style="text-align:right;">
           <span class="mono-label">the reality</span>
-          <div class="plan-num" style="color:var(--red);">₹47,100</div>
+          <div class="plan-num" style="color:var(--red);"><span class="curr">₹</span>47,100</div>
         </div>
       </div>
 
@@ -1096,7 +1108,7 @@ def build_screen_pro():
       {TALLY_MARK_SVG}
       <span class="pill" style="font-size:22px;">PRO</span>
     </div>
-    <div style="font-family:var(--display); font-weight:800; font-size:68px; letter-spacing:-0.03em;">tally pro.</div>
+    <div style="font-family:var(--display); font-weight:800; font-size:68px; letter-spacing:-0.01em;">tally pro.</div>
     <div style="font-size:30px; color:var(--dim); margin-bottom:28px;">you know it's bad. make it official.</div>
 
     <!-- Perks -->
@@ -1220,7 +1232,7 @@ def build_screen_settings():
   <div class="content">
     <div class="screen-header">
       <div>
-        <div style="font-family:var(--display); font-weight:800; font-size:52px; letter-spacing:-0.03em;">settings</div>
+        <div style="font-family:var(--display); font-weight:800; font-size:52px; letter-spacing:-0.01em;">settings</div>
         <div style="font-size:26px; color:var(--dim); margin-top:4px;">aditya@gmail.com</div>
       </div>
       <span class="pill">PRO ACTIVE</span>
@@ -1358,7 +1370,7 @@ body {{
   font-weight: 800;
   font-size: 78px;
   line-height: 1.05;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.015em;
   margin-bottom: 18px;
   color: #F2F3EC;
 }}
@@ -1454,7 +1466,7 @@ body {{
   font-family: 'Bricolage Grotesque', sans-serif;
   font-weight: 800;
   font-size: 46px;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.01em;
 }}
 .kicker {{
   font-family: 'Space Mono', monospace;
@@ -1472,7 +1484,7 @@ body {{
   font-weight: 800;
   font-size: 52px;
   line-height: 1.05;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.015em;
   margin-bottom: 16px;
 }}
 .tagline span {{
@@ -1529,7 +1541,7 @@ body {{
     <!-- Floating Card 1 -->
     <div class="floating-card card-1">
       <div style="font-family:'Space Mono'; font-size:11px; color:#63655A; text-transform:uppercase; letter-spacing:0.1em;">the damage so far</div>
-      <div style="font-family:'Bricolage Grotesque'; font-size:44px; font-weight:800; margin:4px 0 8px;">₹47,100</div>
+      <div style="font-family:'Bricolage Grotesque'; font-size:44px; font-weight:800; letter-spacing:0.02em; font-variant-numeric:tabular-nums; margin:4px 0 8px;"><span style="font-size:0.88em; margin-right:4px;">₹</span>47,100</div>
       <div style="font-size:13px; color:#9DA08F; font-style:italic;">"₹18,400 on food. you ate the rent, basically."</div>
     </div>
 

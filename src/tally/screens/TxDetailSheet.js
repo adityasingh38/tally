@@ -195,7 +195,7 @@ export default function TxDetailSheet({ visible, tx, onClose }) {
             <Rule T={T} />
             <View style={{ paddingVertical: 13 }}><Leader T={T} label="type" value={credit ? 'credit' : 'debit'} /></View>
             <Rule T={T} />
-            <View style={{ paddingVertical: 13 }}><Leader T={T} label="when" value={tx.when || '—'} /></View>
+            <View style={{ paddingVertical: 13 }}><Leader T={T} label="when" value={tx.when || '-'} /></View>
             <Rule T={T} />
           </View>
 
@@ -210,7 +210,7 @@ export default function TxDetailSheet({ visible, tx, onClose }) {
                   <View key={t.id}>
                     {i > 0 && <Rule T={T} />}
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 9 }}>
-                      <MonoLabel T={T} color={T.dim} size={10.5}>{t.when || t.txn_date?.slice(0, 10) || '—'}</MonoLabel>
+                      <MonoLabel T={T} color={T.dim} size={10.5}>{t.when || t.txn_date?.slice(0, 10) || '-'}</MonoLabel>
                       <Text style={{ fontFamily: FONTS.monoBold, fontSize: 13, color: T.text }}>−{fmtINR(t.amount)}</Text>
                     </View>
                   </View>

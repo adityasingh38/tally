@@ -12,7 +12,7 @@ Rules:
 - Return ONLY a JSON array, no explanation
 - Each item: { "index": number, "category": string, "confidence": number (0-1) }
 - confidence < 0.5 → use "other"
-- Be decisive — pick best match, never null`;
+- Be decisive: pick best match, never null`;
 
 async function callAnthropic(systemPrompt, userContent) {
   const { data, error } = await supabase.functions.invoke('anthropic-proxy', {

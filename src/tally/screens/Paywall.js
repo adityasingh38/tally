@@ -6,7 +6,7 @@ import { FONTS } from '../theme';
 import { MonoLabel, Btn, Tag, Brand } from '../ui';
 
 const PERKS = [
-  ['FULL', 'every transaction, forever — not just 30 days'],
+  ['FULL', 'every transaction, forever · not just 30 days'],
   ['AI++', 'unlimited unhinged verdicts + weekly roasts'],
   ['RECEIPT', 'hi-res shareable receipts, no watermark'],
   ['BANKS', 'connect unlimited accounts & cards'],
@@ -125,7 +125,7 @@ export default function Paywall({ visible, onClose }) {
 
             <View style={{ marginTop: 18 }}>
               <Btn T={T} accent={accent} accentInk={accentInk} onPress={handlePurchase} disabled={busy || rcLoading}>
-                {busy ? <ActivityIndicator color={accentInk} size="small" /> : 'start — first 7 days free'}
+                {busy ? <ActivityIndicator color={accentInk} size="small" /> : 'start · first 7 days free'}
               </Btn>
             </View>
 

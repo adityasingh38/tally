@@ -19,13 +19,13 @@ function buildSystemPrompt(tone, nihil) {
 Write exactly 3 verdict lines about this month's spending. Each must:
 - Reference real rupee amounts from the data
 - Be specific and personal, not generic advice
-- Be 1–2 sentences max
+- Be 1-2 sentences max
 
 Return a JSON array of exactly 3 objects:
 [{"tag": "FOOD", "line": "...", "sub": "..."}]
-- "tag": 4–6 char UPPERCASE category label (FOOD, MOVE, DOOM, SHOP, SUBS, RENT, etc.)
+- "tag": 4-6 char UPPERCASE category label (FOOD, MOVE, DOOM, SHOP, SUBS, RENT, etc.)
 - "line": the verdict sentence(s)
-- "sub": a dry 3–6 word footnote
+- "sub": a dry 3-6 word footnote
 
 Examples for dry tone:
 [
@@ -49,7 +49,7 @@ export async function askAI({ question, cats, total, income }) {
     ? `Monthly income: ₹${income.toLocaleString('en-IN')}. Spent: ₹${Math.round(total).toLocaleString('en-IN')} (${Math.round(total / income * 100)}%).`
     : `Total spent: ₹${Math.round(total).toLocaleString('en-IN')}.`;
   const catCtx = cats.slice(0, 5).map(c => `${c.label}: ₹${Math.round(c.amount).toLocaleString('en-IN')}`).join(', ');
-  const system = 'You are Tally, a personal finance AI for Indian users. Answer concisely in 2–3 sentences. Reference specific rupee amounts from the spending data. No markdown, no bullet points, no emoji.';
+  const system = 'You are Tally, a personal finance AI for Indian users. Answer concisely in 2-3 sentences. Reference specific rupee amounts from the spending data. No markdown, no bullet points, no emoji.';
   const content = `Spending data: ${incomeCtx} Categories: ${catCtx}.\n\nQuestion: ${question}`;
   try {
     return await callAnthropic(system, content);
@@ -134,7 +134,7 @@ function buildFallbackVerdict(cats, total, income, tone) {
     const c = cats[1];
     results.push(unhinged
       ? { tag: c.tag, line: `₹${fmt(c.amount)} on ${c.label.toLowerCase()} too. two-front war on your wallet.`, sub: 'the second biggest hole' }
-      : { tag: c.tag, line: `${c.label} at ₹${fmt(c.amount)} — runner-up damage.`, sub: 'second largest category' }
+      : { tag: c.tag, line: `${c.label} at ₹${fmt(c.amount)} · runner-up damage.`, sub: 'second largest category' }
     );
   }
 

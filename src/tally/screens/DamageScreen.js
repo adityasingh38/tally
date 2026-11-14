@@ -179,7 +179,7 @@ export default function DamageScreen() {
           <View style={{ paddingVertical: 16, borderBottomWidth: 1.5, borderStyle: 'dashed',
             borderBottomColor: T.lineStrong, gap: 11 }}>
             {cats.length === 0
-              ? <MonoLabel T={T} color={T.faint} size={11}>nothing logged yet — suspiciously clean.</MonoLabel>
+              ? <MonoLabel T={T} color={T.faint} size={11}>nothing logged yet · suspiciously clean.</MonoLabel>
               : cats.map((c) => {
                 const prev = prevMap[c.id] || 0;
                 const delta = prev > 0 ? Math.round((c.amount - prev) / prev * 100) : null;

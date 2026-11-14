@@ -44,7 +44,7 @@ export class ErrorBoundary extends React.Component {
           something broke.
         </Text>
         <Text style={{ color: DIM, fontSize: 14, textAlign: 'center', marginTop: 10, lineHeight: 20 }}>
-          your data's safe — this was just a display crash. tap below to try again.
+          your data's safe. this was just a display crash. tap below to try again.
         </Text>
         <Pressable onPress={this.handleReload}
           style={{ marginTop: 24, backgroundColor: ACCENT, borderRadius: 12, paddingVertical: 13, paddingHorizontal: 28 }}>

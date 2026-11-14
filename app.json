@@ -53,7 +53,7 @@
           "widgets": [
             {
               "name": "BrokeStreakWidget",
-              "label": "Tally — broke streak",
+              "label": "Tally - broke streak",
               "description": "Days under budget + today's spend, at a glance.",
               "minWidth": "180dp",
               "minHeight": "110dp",

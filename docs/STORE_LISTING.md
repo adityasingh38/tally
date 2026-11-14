@@ -1,17 +1,17 @@
-# Google Play Store Listing — Tally
+# Google Play Store Listing · Tally
 
 Voice: lowercase, deadpan, snarky. Matches landing page (`landing/index.html`)
 and in-app copy (Paywall perks: FULL / AI++ / RECEIPT / BANKS / WIDGET).
 
 Capture method is described by outcome ("auto-logs the moment it happens"),
-not by permission mechanism — avoids over-committing the listing to SMS
+not by permission mechanism, avoiding over-committing the listing to SMS
 specifically, since notification-listener is the safer primary path (see
 [PLAY_SMS_DECLARATION.md](PLAY_SMS_DECLARATION.md)).
 
 ---
 
 ## App name (30 char max)
-Tally — track the damage
+Tally · track the damage
 
 ## Short description (80 char max)
 auto-logs every spend, roasts you for it. zero manual entry.
@@ -21,13 +21,13 @@ auto-logs every spend, roasts you for it. zero manual entry.
 you know it's bad. tally just makes it official.
 
 tally watches your bank and UPI apps and logs every transaction the second
-it happens — no typing, no receipts, no "I'll add it later" that never
+it happens: no typing, no receipts, no "I'll add it later" that never
 happens. debit, credit, doesn't matter. if money moved, tally saw it.
 
 **what it does**
 - auto-logs transactions in real time, straight from your bank/UPI apps
-- sorts everything into categories automatically — food, transport,
-  shopping, the works
+- sorts everything into categories automatically (food, transport,
+  shopping, the works)
 - an AI that actually tells you the truth about your spending, not a
   cheerful chart pretending everything's fine
 - budgets with alerts before you blow past them, not after
@@ -42,7 +42,7 @@ happens. debit, credit, doesn't matter. if money moved, tally saw it.
 - home-screen widget for your live broke-streak
 
 **your data, straight**
-tally never reads or stores your messages — only the transaction details
+tally never reads or stores your messages: only the transaction details
 (amount, merchant, date) get pulled out and saved. nothing else. we don't
 sell your data, ever. full breakdown in the privacy policy, linked below.
 

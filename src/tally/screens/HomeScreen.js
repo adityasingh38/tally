@@ -13,7 +13,7 @@ import { writeWidgetCache } from '../../services/widgetSync';
 function buildRead(top, total) {
   if (!top || total <= 0) return "no damage logged yet. suspicious, honestly.";
   const pct = Math.round((top.amount / total) * 100);
-  return `${fmtINR(top.amount)} on ${top.label.toLowerCase()} — ${pct}% of everything. bold strategy.`;
+  return `${fmtINR(top.amount)} on ${top.label.toLowerCase()} · ${pct}% of everything. bold strategy.`;
 }
 
 // Local calendar-day key (not toISOString, which is UTC and rolls back to the
@@ -349,7 +349,7 @@ export default function HomeScreen({ navigation }) {
           <MonoLabel T={T} color={T.dim} size={9.5} style={{ marginTop: 3 }}>spends</MonoLabel>
         </View>
         <View style={{ flex: 1, backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 14, padding: 14 }}>
-          <Text style={{ fontFamily: FONTS.display, fontSize: 22, color: accent }}>{top ? top.tag : '—'}</Text>
+          <Text style={{ fontFamily: FONTS.display, fontSize: 22, color: accent }}>{top ? top.tag : '-'}</Text>
           <MonoLabel T={T} color={T.dim} size={9.5} style={{ marginTop: 3 }}>
             {top ? `top · ${fmtINR(top.amount)}` : 'no top yet'}
           </MonoLabel>
