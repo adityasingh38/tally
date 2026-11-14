@@ -62,8 +62,8 @@ function FeralStampOverlay({ accent }) {
       style={{
         position: 'absolute',
         top: 0,
-        left: -10,
-        right: -10,
+        left: -20,
+        right: -20,
         bottom: 0,
         alignItems: 'center',
         justifyContent: 'center',
@@ -72,21 +72,22 @@ function FeralStampOverlay({ accent }) {
         transform: [
           { translateY: stampY },
           { scale: stampScale },
-          { rotate: '-16deg' },
+          { rotate: '28deg' },
         ],
       }}
     >
-      {/* Authentic Double-Lined Rubber Ink Stamp */}
+      {/* Authentic Diagonal Corner-to-Corner Rubber Stamp */}
       <View
         style={{
-          borderWidth: 4,
+          width: 380,
+          borderWidth: 3.5,
           borderColor: stampInk,
           borderRadius: 8,
           padding: 3,
           backgroundColor: 'rgba(255, 68, 37, 0.08)',
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 6 },
-          shadowOpacity: 0.5,
+          shadowOpacity: 0.45,
           shadowRadius: 10,
           elevation: 10,
         }}
@@ -96,31 +97,19 @@ function FeralStampOverlay({ accent }) {
             borderWidth: 1.5,
             borderColor: stampInk,
             borderRadius: 5,
-            paddingVertical: 6,
+            paddingVertical: 5,
             paddingHorizontal: 16,
+            flexDirection: 'row',
             alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
           }}
         >
-          {/* Top Stamp Header */}
-          <Text
-            style={{
-              fontFamily: FONTS.monoBold,
-              fontSize: 8.5,
-              color: stampInk,
-              letterSpacing: 2,
-              textTransform: 'uppercase',
-            }}
-          >
-            ★ OFFICIAL TALLY VERDICT ★
-          </Text>
-
-          <View style={{ width: '100%', height: 1, backgroundColor: stampInk, opacity: 0.5, marginVertical: 3 }} />
-
-          {/* Main Stamp Headline */}
+          <Text style={{ color: stampInk, fontSize: 10, opacity: 0.85 }}>★</Text>
           <Text
             style={{
               fontFamily: FONTS.display,
-              fontSize: 22,
+              fontSize: 15,
               color: stampInk,
               letterSpacing: 3.5,
               fontWeight: '900',
@@ -129,21 +118,7 @@ function FeralStampOverlay({ accent }) {
           >
             FINANCIALLY FERAL
           </Text>
-
-          <View style={{ width: '100%', height: 1, backgroundColor: stampInk, opacity: 0.5, marginVertical: 3 }} />
-
-          {/* Bottom Stamp Footer */}
-          <Text
-            style={{
-              fontFamily: FONTS.monoBold,
-              fontSize: 7.5,
-              color: stampInk,
-              letterSpacing: 1.5,
-              textTransform: 'uppercase',
-            }}
-          >
-            CERTIFIED DAMAGE · 0% RECOVERY
-          </Text>
+          <Text style={{ color: stampInk, fontSize: 10, opacity: 0.85 }}>★</Text>
         </View>
       </View>
     </Animated.View>
