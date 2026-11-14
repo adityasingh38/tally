@@ -396,8 +396,7 @@ def build_screen_dashboard():
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) rotate(-27deg);
-  width: 1090px;
+  transform: translate(-50%, -50%) rotate(-15deg);
   border: 6px solid var(--red);
   border-radius: 14px;
   padding: 5px;
@@ -410,20 +409,19 @@ def build_screen_dashboard():
   box-shadow: 0 0 0 3px rgba(255, 68, 37, 0.15), inset 0 0 20px rgba(255, 68, 37, 0.1);
 }}
 .stamp-feral-inner {{
-  width: 100%;
   border: 2.5px solid var(--red);
   border-radius: 8px;
-  padding: 10px 28px;
+  padding: 14px 34px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }}
 .stamp-feral-tag {{
   font-family: var(--mono);
   font-size: 18px;
   font-weight: 700;
-  letter-spacing: 4px;
+  letter-spacing: 3px;
   color: var(--red);
   text-transform: uppercase;
 }}
@@ -435,13 +433,12 @@ def build_screen_dashboard():
 }}
 .stamp-feral-title {{
   font-family: var(--display);
-  font-size: 46px;
+  font-size: 52px;
   font-weight: 900;
-  letter-spacing: 6px;
+  letter-spacing: 5px;
   color: var(--red);
   text-transform: uppercase;
   white-space: nowrap;
-  line-height: 1.05;
 }}
 </style>
 </head>
