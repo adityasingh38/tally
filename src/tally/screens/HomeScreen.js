@@ -12,33 +12,35 @@ import { totalSpent, groupByCat, copeZone, monthlyTotals } from '../data';
 import { writeWidgetCache } from '../../services/widgetSync';
 
 function FeralStampOverlay({ accent }) {
-  const stampY = useRef(new Animated.Value(-140)).current;
-  const stampScale = useRef(new Animated.Value(2.5)).current;
+  const stampY = useRef(new Animated.Value(-200)).current;
+  const stampScale = useRef(new Animated.Value(3.0)).current;
   const stampOpacity = useRef(new Animated.Value(0)).current;
   const [visible, setVisible] = useState(true);
+
+  const stampInk = accent || '#FF4425';
 
   useEffect(() => {
     Animated.sequence([
       Animated.delay(220),
       Animated.parallel([
-        Animated.timing(stampOpacity, { toValue: 1, duration: 80, useNativeDriver: true }),
+        Animated.timing(stampOpacity, { toValue: 1, duration: 60, useNativeDriver: true }),
         Animated.timing(stampY, {
           toValue: 0,
-          duration: 260,
-          easing: Easing.out(Easing.back(1.8)),
+          duration: 240,
+          easing: Easing.out(Easing.back(1.7)),
           useNativeDriver: true,
         }),
         Animated.timing(stampScale, {
           toValue: 1,
-          duration: 260,
-          easing: Easing.out(Easing.back(1.8)),
+          duration: 240,
+          easing: Easing.out(Easing.back(1.7)),
           useNativeDriver: true,
         }),
       ]),
-      Animated.delay(750),
+      Animated.delay(850),
       Animated.timing(stampOpacity, {
         toValue: 0,
-        duration: 240,
+        duration: 260,
         easing: Easing.out(Easing.quad),
         useNativeDriver: true,
       }),
@@ -48,7 +50,7 @@ function FeralStampOverlay({ accent }) {
       try {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
       } catch (e) {}
-    }, 440);
+    }, 420);
     return () => clearTimeout(t);
   }, []);
 
@@ -60,47 +62,89 @@ function FeralStampOverlay({ accent }) {
       style={{
         position: 'absolute',
         top: 0,
-        left: 0,
-        right: 0,
+        left: -10,
+        right: -10,
         bottom: 0,
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 40,
+        zIndex: 50,
         opacity: stampOpacity,
         transform: [
           { translateY: stampY },
           { scale: stampScale },
-          { rotate: '-18deg' },
+          { rotate: '-16deg' },
         ],
       }}
     >
+      {/* Authentic Double-Lined Rubber Ink Stamp */}
       <View
         style={{
-          backgroundColor: accent || '#FF5436',
-          paddingHorizontal: 20,
-          paddingVertical: 8,
-          borderRadius: 6,
-          borderWidth: 2,
-          borderColor: '#FFA590',
+          borderWidth: 4,
+          borderColor: stampInk,
+          borderRadius: 8,
+          padding: 3,
+          backgroundColor: 'rgba(255, 68, 37, 0.08)',
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 6 },
-          shadowOpacity: 0.55,
+          shadowOpacity: 0.5,
           shadowRadius: 10,
           elevation: 10,
         }}
       >
-        <Text
+        <View
           style={{
-            fontFamily: FONTS.monoBold,
-            fontSize: 15,
-            color: '#0E0F0C',
-            letterSpacing: 2.2,
-            fontWeight: '900',
-            textTransform: 'uppercase',
+            borderWidth: 1.5,
+            borderColor: stampInk,
+            borderRadius: 5,
+            paddingVertical: 6,
+            paddingHorizontal: 16,
+            alignItems: 'center',
           }}
         >
-          FINANCIALLY FERAL
-        </Text>
+          {/* Top Stamp Header */}
+          <Text
+            style={{
+              fontFamily: FONTS.monoBold,
+              fontSize: 8.5,
+              color: stampInk,
+              letterSpacing: 2,
+              textTransform: 'uppercase',
+            }}
+          >
+            ★ OFFICIAL TALLY VERDICT ★
+          </Text>
+
+          <View style={{ width: '100%', height: 1, backgroundColor: stampInk, opacity: 0.5, marginVertical: 3 }} />
+
+          {/* Main Stamp Headline */}
+          <Text
+            style={{
+              fontFamily: FONTS.display,
+              fontSize: 22,
+              color: stampInk,
+              letterSpacing: 3.5,
+              fontWeight: '900',
+              textTransform: 'uppercase',
+            }}
+          >
+            FINANCIALLY FERAL
+          </Text>
+
+          <View style={{ width: '100%', height: 1, backgroundColor: stampInk, opacity: 0.5, marginVertical: 3 }} />
+
+          {/* Bottom Stamp Footer */}
+          <Text
+            style={{
+              fontFamily: FONTS.monoBold,
+              fontSize: 7.5,
+              color: stampInk,
+              letterSpacing: 1.5,
+              textTransform: 'uppercase',
+            }}
+          >
+            CERTIFIED DAMAGE · 0% RECOVERY
+          </Text>
+        </View>
       </View>
     </Animated.View>
   );
