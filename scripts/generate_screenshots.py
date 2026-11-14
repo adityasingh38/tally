@@ -402,9 +402,7 @@ def build_screen_dashboard():
         {TALLY_MARK_SVG}
         <b>tally</b>
       </div>
-      <div style="display:flex; align-items:center; gap:16px;">
-        <span class="pill">financially feral</span>
-      </div>
+      <span class="mono-label" style="font-size:24px; color:var(--faint);">sat, nov 14</span>
     </div>
 
     <!-- Hero Card -->

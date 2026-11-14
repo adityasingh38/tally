@@ -1,6 +1,7 @@
 // src/tally/screens/HomeScreen.js  → your "Dashboard" tab
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable, RefreshControl } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, ScrollView, Pressable, RefreshControl, Animated, Easing } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { useAuth } from '../../hooks/useAuth';
@@ -9,6 +10,101 @@ import { FONTS, fmtINR } from '../theme';
 import { MonoLabel, Rule, Btn, TxRow, Brand, MonthPicker } from '../ui';
 import { totalSpent, groupByCat, copeZone, monthlyTotals } from '../data';
 import { writeWidgetCache } from '../../services/widgetSync';
+
+function FeralStampOverlay({ accent }) {
+  const stampY = useRef(new Animated.Value(-140)).current;
+  const stampScale = useRef(new Animated.Value(2.5)).current;
+  const stampOpacity = useRef(new Animated.Value(0)).current;
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    Animated.sequence([
+      Animated.delay(220),
+      Animated.parallel([
+        Animated.timing(stampOpacity, { toValue: 1, duration: 80, useNativeDriver: true }),
+        Animated.timing(stampY, {
+          toValue: 0,
+          duration: 260,
+          easing: Easing.out(Easing.back(1.8)),
+          useNativeDriver: true,
+        }),
+        Animated.timing(stampScale, {
+          toValue: 1,
+          duration: 260,
+          easing: Easing.out(Easing.back(1.8)),
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.delay(750),
+      Animated.timing(stampOpacity, {
+        toValue: 0,
+        duration: 240,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start(() => setVisible(false));
+
+    const t = setTimeout(() => {
+      try {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      } catch (e) {}
+    }, 440);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 40,
+        opacity: stampOpacity,
+        transform: [
+          { translateY: stampY },
+          { scale: stampScale },
+          { rotate: '-18deg' },
+        ],
+      }}
+    >
+      <View
+        style={{
+          backgroundColor: accent || '#FF5436',
+          paddingHorizontal: 20,
+          paddingVertical: 8,
+          borderRadius: 6,
+          borderWidth: 2,
+          borderColor: '#FFA590',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: 0.55,
+          shadowRadius: 10,
+          elevation: 10,
+        }}
+      >
+        <Text
+          style={{
+            fontFamily: FONTS.monoBold,
+            fontSize: 15,
+            color: '#0E0F0C',
+            letterSpacing: 2.2,
+            fontWeight: '900',
+            textTransform: 'uppercase',
+          }}
+        >
+          FINANCIALLY FERAL
+        </Text>
+      </View>
+    </Animated.View>
+  );
+}
 
 function buildRead(top, total) {
   if (!top || total <= 0) return "no damage logged yet. Suspicious, honestly.";
@@ -256,60 +352,63 @@ export default function HomeScreen({ navigation }) {
       </View>
 
       {/* hero */}
-      {hasIncome ? (
-        <>
-          <MonoLabel T={T} color={T.dim} style={{ marginTop: 10 }}>left to burn</MonoLabel>
-          <Text style={{ fontFamily: FONTS.display, fontSize: 60, color: T.text, marginTop: 6 }}>{fmtINR(left)}</Text>
-          <Text style={{ fontFamily: FONTS.mono, fontSize: 12, color: T.dim, marginTop: 8 }}>
-            of {fmtINR(income)} this month
-          </Text>
-          <View style={{ marginTop: 16, height: 10, borderRadius: 999, backgroundColor: T.chip, overflow: 'hidden', flexDirection: 'row' }}>
-            <View style={{ width: `${Math.round(ratio * 100)}%`, backgroundColor: accent }} />
-          </View>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
-            <MonoLabel T={T} color={T.faint} size={10}>{Math.round(ratio * 100)}% gone</MonoLabel>
-            <MonoLabel T={T} color={T.faint} size={10}>{zone.label}</MonoLabel>
-          </View>
-          {dailyBudget != null && (
-            <View style={{ marginTop: 10, backgroundColor: T.card, borderWidth: 1, borderColor: T.line,
-              borderRadius: 10, paddingVertical: 9, paddingHorizontal: 13,
-              flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <MonoLabel T={T} color={T.dim} size={10}>daily budget to survive</MonoLabel>
-              <Text style={{ fontFamily: FONTS.monoBold, fontSize: 14, color: accent }}>{fmtINR(dailyBudget)}/day</Text>
+      <View style={{ position: 'relative' }}>
+        <FeralStampOverlay accent={accent} />
+        {hasIncome ? (
+          <>
+            <MonoLabel T={T} color={T.dim} style={{ marginTop: 10 }}>left to burn</MonoLabel>
+            <Text style={{ fontFamily: FONTS.display, fontSize: 60, color: T.text, marginTop: 6 }}>{fmtINR(left)}</Text>
+            <Text style={{ fontFamily: FONTS.mono, fontSize: 12, color: T.dim, marginTop: 8 }}>
+              of {fmtINR(income)} this month
+            </Text>
+            <View style={{ marginTop: 16, height: 10, borderRadius: 999, backgroundColor: T.chip, overflow: 'hidden', flexDirection: 'row' }}>
+              <View style={{ width: `${Math.round(ratio * 100)}%`, backgroundColor: accent }} />
             </View>
-          )}
-          {hasIncome && left === 0 && (
-            <View style={{ marginTop: 10, backgroundColor: T.card, borderWidth: 1, borderColor: T.red,
-              borderRadius: 10, paddingVertical: 9, paddingHorizontal: 13 }}>
-              <MonoLabel T={T} color={T.red} size={10}>over budget · {fmtINR(total - income)} in the hole</MonoLabel>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
+              <MonoLabel T={T} color={T.faint} size={10}>{Math.round(ratio * 100)}% gone</MonoLabel>
+              <MonoLabel T={T} color={T.faint} size={10}>{zone.label}</MonoLabel>
             </View>
-          )}
-          {hasIncome && left > 0 && isCurrentMonth && (() => {
-            const savedPct = Math.round((left / income) * 100);
-            if (savedPct < 5) return null;
-            return (
-              <View style={{ marginTop: 10, backgroundColor: T.card, borderWidth: 1, borderColor: T.creditText + '55',
+            {dailyBudget != null && (
+              <View style={{ marginTop: 10, backgroundColor: T.card, borderWidth: 1, borderColor: T.line,
                 borderRadius: 10, paddingVertical: 9, paddingHorizontal: 13,
                 flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <MonoLabel T={T} color={T.creditText} size={10}>saved so far this month</MonoLabel>
-                <Text style={{ fontFamily: FONTS.monoBold, fontSize: 13, color: T.creditText }}>
-                  {fmtINR(left)} · {savedPct}%
-                </Text>
+                <MonoLabel T={T} color={T.dim} size={10}>daily budget to survive</MonoLabel>
+                <Text style={{ fontFamily: FONTS.monoBold, fontSize: 14, color: accent }}>{fmtINR(dailyBudget)}/day</Text>
               </View>
-            );
-          })()}
-        </>
-      ) : (
-        <>
-          <MonoLabel T={T} color={T.dim} style={{ marginTop: 10 }}>spent this month</MonoLabel>
-          <Text style={{ fontFamily: FONTS.display, fontSize: 60, color: T.text, marginTop: 6 }}>{fmtINR(total)}</Text>
-          <Pressable onPress={() => navigation && navigation.navigate('Settings')}>
-            <MonoLabel T={T} color={accent} size={11} style={{ marginTop: 10 }}>
-              set your income in YOU → see what's left →
-            </MonoLabel>
-          </Pressable>
-        </>
-      )}
+            )}
+            {hasIncome && left === 0 && (
+              <View style={{ marginTop: 10, backgroundColor: T.card, borderWidth: 1, borderColor: T.red,
+                borderRadius: 10, paddingVertical: 9, paddingHorizontal: 13 }}>
+                <MonoLabel T={T} color={T.red} size={10}>over budget · {fmtINR(total - income)} in the hole</MonoLabel>
+              </View>
+            )}
+            {hasIncome && left > 0 && isCurrentMonth && (() => {
+              const savedPct = Math.round((left / income) * 100);
+              if (savedPct < 5) return null;
+              return (
+                <View style={{ marginTop: 10, backgroundColor: T.card, borderWidth: 1, borderColor: T.creditText + '55',
+                  borderRadius: 10, paddingVertical: 9, paddingHorizontal: 13,
+                  flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <MonoLabel T={T} color={T.creditText} size={10}>saved so far this month</MonoLabel>
+                  <Text style={{ fontFamily: FONTS.monoBold, fontSize: 13, color: T.creditText }}>
+                    {fmtINR(left)} · {savedPct}%
+                  </Text>
+                </View>
+              );
+            })()}
+          </>
+        ) : (
+          <>
+            <MonoLabel T={T} color={T.dim} style={{ marginTop: 10 }}>spent this month</MonoLabel>
+            <Text style={{ fontFamily: FONTS.display, fontSize: 60, color: T.text, marginTop: 6 }}>{fmtINR(total)}</Text>
+            <Pressable onPress={() => navigation && navigation.navigate('Settings')}>
+              <MonoLabel T={T} color={accent} size={11} style={{ marginTop: 10 }}>
+                set your income in YOU → see what's left →
+              </MonoLabel>
+            </Pressable>
+          </>
+        )}
+      </View>
 
       {/* credits received this month */}
       {totalCredits > 0 && credits.length > 0 && (
