@@ -396,7 +396,7 @@ def build_screen_dashboard():
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) rotate(-37deg);
+  transform: translate(-50%, -50%) rotate(-41deg);
   border: 6px solid var(--red);
   border-radius: 14px;
   padding: 5px;

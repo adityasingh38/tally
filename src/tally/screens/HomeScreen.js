@@ -72,7 +72,7 @@ function FeralStampOverlay({ accent }) {
         transform: [
           { translateY: stampY },
           { scale: stampScale },
-          { rotate: '-37deg' },
+          { rotate: '-41deg' },
         ],
       }}
     >
