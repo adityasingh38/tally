@@ -392,6 +392,62 @@ def build_screen_dashboard():
   font-weight: 700;
   font-size: 34px;
 }}
+.stamp-feral {{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-15deg);
+  border: 6px solid var(--red);
+  border-radius: 14px;
+  padding: 5px;
+  background: rgba(255, 68, 37, 0.08);
+  pointer-events: none;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 3px rgba(255, 68, 37, 0.15), inset 0 0 20px rgba(255, 68, 37, 0.1);
+}}
+.stamp-feral-inner {{
+  border: 2.5px solid var(--red);
+  border-radius: 8px;
+  padding: 14px 34px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}}
+.stamp-feral-tag {{
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--red);
+  text-transform: uppercase;
+}}
+.stamp-feral-rule {{
+  width: 100%;
+  height: 2px;
+  background: var(--red);
+  opacity: 0.6;
+}}
+.stamp-feral-title {{
+  font-family: var(--display);
+  font-size: 52px;
+  font-weight: 900;
+  letter-spacing: 5px;
+  color: var(--red);
+  text-transform: uppercase;
+  white-space: nowrap;
+}}
+.stamp-feral-sub {{
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: var(--red);
+  text-transform: uppercase;
+}}
 </style>
 </head>
 <body>
@@ -406,7 +462,16 @@ def build_screen_dashboard():
     </div>
 
     <!-- Hero Card -->
-    <div class="card-hero">
+    <div class="card-hero" style="position:relative; overflow:hidden;">
+      <div class="stamp-feral">
+        <div class="stamp-feral-inner">
+          <div class="stamp-feral-tag">★ OFFICIAL TALLY VERDICT ★</div>
+          <div class="stamp-feral-rule"></div>
+          <div class="stamp-feral-title">FINANCIALLY FERAL</div>
+          <div class="stamp-feral-rule"></div>
+          <div class="stamp-feral-sub">CERTIFIED DAMAGE · 0% RECOVERY</div>
+        </div>
+      </div>
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <span class="mono-label">the damage so far · nov 2026</span>
         <span style="font-family:var(--mono); font-size:24px; color:var(--red); font-weight:700;">+10% vs oct</span>
