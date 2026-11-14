@@ -49,7 +49,7 @@ function FeralStampOverlay({ accent }) {
     const t = setTimeout(() => {
       try {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-      } catch (e) {}
+      } catch (e) { }
     }, 420);
     return () => clearTimeout(t);
   }, []);
@@ -183,8 +183,10 @@ function SevenDayBars({ T, accent, allTxs }) {
           const barH = d.total > 0 ? Math.max(4, Math.round(36 * (d.total / max))) : 2;
           return (
             <View key={d.key} style={{ flex: 1, alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
-              <View style={{ width: '100%', height: barH, borderRadius: 2,
-                backgroundColor: d.isToday ? accent : d.total > 0 ? T.lineStrong : T.chip }} />
+              <View style={{
+                width: '100%', height: barH, borderRadius: 2,
+                backgroundColor: d.isToday ? accent : d.total > 0 ? T.lineStrong : T.chip
+              }} />
               <MonoLabel T={T} color={d.isToday ? accent : T.faint} size={8}>{d.label}</MonoLabel>
             </View>
           );
@@ -234,13 +236,15 @@ function TrendBars({ T, accent, allTxs }) {
           const fmt = b.total >= 100000
             ? `${(b.total / 100000).toFixed(1)}L`
             : b.total >= 1000
-            ? `${Math.round(b.total / 1000)}k`
-            : b.total > 0 ? String(Math.round(b.total)) : '';
+              ? `${Math.round(b.total / 1000)}k`
+              : b.total > 0 ? String(Math.round(b.total)) : '';
           return (
             <View key={b.key} style={{ flex: 1, alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
               <MonoLabel T={T} color={isCurrent ? accent : T.faint} size={9}>{fmt}</MonoLabel>
-              <View style={{ width: '100%', height: barH, borderRadius: 3,
-                backgroundColor: isCurrent ? accent : T.chip }} />
+              <View style={{
+                width: '100%', height: barH, borderRadius: 3,
+                backgroundColor: isCurrent ? accent : T.chip
+              }} />
               <MonoLabel T={T} color={isCurrent ? T.text : T.faint} size={9}>{b.label}</MonoLabel>
             </View>
           );
@@ -321,15 +325,15 @@ export default function HomeScreen({ navigation }) {
   const SALARY_RE = /\b(sal(?:ary)?|neft|imps|salary credit|payroll|empl(?:oyee)?)\b/i;
   const salaryCandidate = !income && !salaryDismissed
     ? (() => {
-        const credits = txs.filter(t => t.type === 'credit' && t.amount >= 10000);
-        if (!credits.length) return null;
-        credits.sort((a, b) => b.amount - a.amount);
-        const top2 = credits[0];
-        // prefer ones with salary keyword; fall back to largest credit >= 20k
-        const salaryMatch = credits.find(t => SALARY_RE.test(t.merchant || ''));
-        const best = salaryMatch || (top2.amount >= 20000 ? top2 : null);
-        return best || null;
-      })()
+      const credits = txs.filter(t => t.type === 'credit' && t.amount >= 10000);
+      if (!credits.length) return null;
+      credits.sort((a, b) => b.amount - a.amount);
+      const top2 = credits[0];
+      // prefer ones with salary keyword; fall back to largest credit >= 20k
+      const salaryMatch = credits.find(t => SALARY_RE.test(t.merchant || ''));
+      const best = salaryMatch || (top2.amount >= 20000 ? top2 : null);
+      return best || null;
+    })()
     : null;
 
   // spending streak — consecutive days (going back from yesterday) under rough daily limit
@@ -400,16 +404,20 @@ export default function HomeScreen({ navigation }) {
               <MonoLabel T={T} color={T.faint} size={10}>{zone.label}</MonoLabel>
             </View>
             {dailyBudget != null && (
-              <View style={{ marginTop: 10, backgroundColor: T.card, borderWidth: 1, borderColor: T.line,
+              <View style={{
+                marginTop: 10, backgroundColor: T.card, borderWidth: 1, borderColor: T.line,
                 borderRadius: 10, paddingVertical: 9, paddingHorizontal: 13,
-                flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'
+              }}>
                 <MonoLabel T={T} color={T.dim} size={10}>daily budget to survive</MonoLabel>
                 <Text style={{ fontFamily: FONTS.monoBold, fontSize: 14, color: accent }}>{fmtINR(dailyBudget)}/day</Text>
               </View>
             )}
             {hasIncome && left === 0 && (
-              <View style={{ marginTop: 10, backgroundColor: T.card, borderWidth: 1, borderColor: T.red,
-                borderRadius: 10, paddingVertical: 9, paddingHorizontal: 13 }}>
+              <View style={{
+                marginTop: 10, backgroundColor: T.card, borderWidth: 1, borderColor: T.red,
+                borderRadius: 10, paddingVertical: 9, paddingHorizontal: 13
+              }}>
                 <MonoLabel T={T} color={T.red} size={10}>over budget · {fmtINR(total - income)} in the hole</MonoLabel>
               </View>
             )}
@@ -417,9 +425,11 @@ export default function HomeScreen({ navigation }) {
               const savedPct = Math.round((left / income) * 100);
               if (savedPct < 5) return null;
               return (
-                <View style={{ marginTop: 10, backgroundColor: T.card, borderWidth: 1, borderColor: T.creditText + '55',
+                <View style={{
+                  marginTop: 10, backgroundColor: T.card, borderWidth: 1, borderColor: T.creditText + '55',
                   borderRadius: 10, paddingVertical: 9, paddingHorizontal: 13,
-                  flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'
+                }}>
                   <MonoLabel T={T} color={T.creditText} size={10}>saved so far this month</MonoLabel>
                   <Text style={{ fontFamily: FONTS.monoBold, fontSize: 13, color: T.creditText }}>
                     {fmtINR(left)} · {savedPct}%
@@ -455,8 +465,10 @@ export default function HomeScreen({ navigation }) {
 
       {/* new user empty state */}
       {isNewUser && (
-        <View style={{ marginTop: 28, backgroundColor: T.card, borderWidth: 1, borderColor: T.line,
-          borderRadius: 18, padding: 22, alignItems: 'center', gap: 12 }}>
+        <View style={{
+          marginTop: 28, backgroundColor: T.card, borderWidth: 1, borderColor: T.line,
+          borderRadius: 18, padding: 22, alignItems: 'center', gap: 12
+        }}>
           <Text style={{ fontFamily: FONTS.display, fontSize: 26, color: T.text, textAlign: 'center' }}>
             no damage yet.
           </Text>
@@ -496,9 +508,11 @@ export default function HomeScreen({ navigation }) {
 
       {/* streak card */}
       {streak >= 3 && (
-        <View style={{ marginTop: 10, backgroundColor: T.card, borderWidth: 1, borderColor: T.line,
+        <View style={{
+          marginTop: 10, backgroundColor: T.card, borderWidth: 1, borderColor: T.line,
           borderRadius: 14, paddingVertical: 12, paddingHorizontal: 14,
-          flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'
+        }}>
           <MonoLabel T={T} color={T.dim} size={10}>days under {fmtINR(roughDailyLimit)}</MonoLabel>
           <Text style={{ fontFamily: FONTS.monoBold, fontSize: 16, color: T.creditText }}>
             {streak} day{streak !== 1 ? 's' : ''} clean
@@ -521,9 +535,11 @@ export default function HomeScreen({ navigation }) {
 
       {/* spending forecast */}
       {projectedSpend != null && (
-        <View style={{ marginTop: 14, backgroundColor: T.card, borderWidth: 1,
+        <View style={{
+          marginTop: 14, backgroundColor: T.card, borderWidth: 1,
           borderColor: projectedOver ? T.red : T.line, borderRadius: 14,
-          padding: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          padding: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'
+        }}>
           <MonoLabel T={T} color={T.dim} size={10}>at this pace, month total →</MonoLabel>
           <Text style={{ fontFamily: FONTS.monoBold, fontSize: 14, color: projectedOver ? T.red : T.text }}>
             {fmtINR(projectedSpend)}
@@ -537,10 +553,12 @@ export default function HomeScreen({ navigation }) {
           <MonoLabel T={T} color={T.dim}>budget alerts</MonoLabel>
           {budgetWarnings.map(({ cat, spent, limit, pct, blown }) => (
             <Pressable key={cat} onPress={() => navigation && navigation.navigate('Budget')}
-              style={{ backgroundColor: T.card, borderWidth: 1,
+              style={{
+                backgroundColor: T.card, borderWidth: 1,
                 borderColor: blown ? T.red : T.line, borderRadius: 14,
                 paddingVertical: 12, paddingHorizontal: 14,
-                flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'
+              }}>
               <View>
                 <Text style={{ fontFamily: FONTS.sansSemi, fontSize: 14, color: blown ? T.red : T.text }}>
                   {cat}
@@ -559,8 +577,10 @@ export default function HomeScreen({ navigation }) {
 
       {/* salary detection nudge */}
       {salaryCandidate && (
-        <View style={{ marginTop: 14, backgroundColor: T.card, borderWidth: 1, borderColor: accent + '55',
-          borderRadius: 14, padding: 14 }}>
+        <View style={{
+          marginTop: 14, backgroundColor: T.card, borderWidth: 1, borderColor: accent + '55',
+          borderRadius: 14, padding: 14
+        }}>
           <MonoLabel T={T} color={accent} size={10} style={{ marginBottom: 4 }}>income detected</MonoLabel>
           <Text style={{ fontFamily: FONTS.sansMed, fontSize: 14, color: T.text, marginBottom: 10 }}>
             Set {fmtINR(salaryCandidate.amount)} as monthly income? Unlocks burn rate, streak, and savings tracking.
