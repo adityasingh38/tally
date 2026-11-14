@@ -16,11 +16,33 @@ function FeralStampOverlay({ accent }) {
   const stampScale = useRef(new Animated.Value(3.0)).current;
   const stampOpacity = useRef(new Animated.Value(0)).current;
   const [visible, setVisible] = useState(true);
+  const animRef = useRef(null);
 
   const stampInk = accent || '#FF4425';
 
+  const vanish = () => {
+    if (animRef.current) animRef.current.stop();
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (e) {}
+    Animated.parallel([
+      Animated.timing(stampOpacity, {
+        toValue: 0,
+        duration: 220,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(stampScale, {
+        toValue: 0.94,
+        duration: 220,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start(() => setVisible(false));
+  };
+
   useEffect(() => {
-    Animated.sequence([
+    animRef.current = Animated.sequence([
       Animated.delay(220),
       Animated.parallel([
         Animated.timing(stampOpacity, { toValue: 1, duration: 60, useNativeDriver: true }),
@@ -37,28 +59,42 @@ function FeralStampOverlay({ accent }) {
           useNativeDriver: true,
         }),
       ]),
-      Animated.delay(850),
-      Animated.timing(stampOpacity, {
-        toValue: 0,
-        duration: 260,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-    ]).start(() => setVisible(false));
+      Animated.delay(1200),
+      Animated.parallel([
+        Animated.timing(stampOpacity, {
+          toValue: 0,
+          duration: 320,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(stampScale, {
+          toValue: 0.94,
+          duration: 320,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]),
+    ]);
+
+    animRef.current.start(({ finished }) => {
+      if (finished) setVisible(false);
+    });
 
     const t = setTimeout(() => {
       try {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
       } catch (e) {}
     }, 420);
-    return () => clearTimeout(t);
+    return () => {
+      clearTimeout(t);
+      if (animRef.current) animRef.current.stop();
+    };
   }, []);
 
   if (!visible) return null;
 
   return (
     <Animated.View
-      pointerEvents="none"
       style={{
         position: 'absolute',
         top: 0,
@@ -76,8 +112,9 @@ function FeralStampOverlay({ accent }) {
         ],
       }}
     >
-      {/* Authentic Rubber Stamp (All 4 corners touch card border) */}
-      <View
+      {/* Authentic Rubber Stamp (All 4 corners touch card border, tap to vanish) */}
+      <Pressable
+        onPress={vanish}
         style={{
           width: 330,
           height: 74,
@@ -138,7 +175,7 @@ function FeralStampOverlay({ accent }) {
             FINANCIALLY FERAL
           </Text>
         </View>
-      </View>
+      </Pressable>
     </Animated.View>
   );
 }
