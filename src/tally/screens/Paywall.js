@@ -92,7 +92,7 @@ export default function Paywall({ visible, onClose }) {
               see the whole carnage.
             </Text>
             <Text style={{ fontFamily: FONTS.sans, fontSize: 14.5, lineHeight: 22, color: T.dim, marginTop: 12 }}>
-              free shows you the last 30 days. the damage goes back further. you know it does.
+              free shows you the last 30 days. The damage goes back further. You know it does.
             </Text>
 
             <View style={{ marginTop: 22, gap: 14 }}>

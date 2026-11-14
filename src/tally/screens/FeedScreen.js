@@ -161,7 +161,7 @@ export default function FeedScreen({ navigation }) {
         <View style={{ alignItems: 'center', paddingVertical: 60 }}>
           <Text style={{ fontFamily: FONTS.display, fontSize: 28, color: T.faint }}>₹0</Text>
           <MonoLabel T={T} color={T.faint} size={11} style={{ marginTop: 10, textAlign: 'center' }}>
-            {query ? 'no matches.' : filter === 'in' ? 'no money in. shocking.' : 'no spends here. quiet month? doubt it.'}
+            {query ? 'no matches.' : filter === 'in' ? 'no money in. Shocking.' : 'no spends here. Quiet month? Doubt it.'}
           </MonoLabel>
         </View>
       )}

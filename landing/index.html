@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>tally · track the damage</title>
 <meta name="description" content="A snarky AI money manager that reads your bank SMS, logs every spend, and tells you how badly you blew it. Coming soon." />
-<meta property="og:title" content="tally · track the damage. financially feral." />
+<meta property="og:title" content="tally · track the damage. Financially feral." />
 <meta property="og:description" content="The money app for people who already know it's bad and want to watch anyway." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -94,14 +94,14 @@
   </header>
 
   <section class="hero">
-    <h1>track the damage.<br><span class="red">financially feral.</span></h1>
+    <h1>track the damage.<br><span class="red">Financially feral.</span></h1>
     <p>A snarky AI money manager that reads your bank SMS, logs every spend, and is deeply unbothered about your feelings.</p>
 
     <form id="waitlist">
       <input id="email" type="email" placeholder="your@email.com" required autocomplete="email" />
       <button id="submit" type="submit">join the waitlist</button>
     </form>
-    <div class="note">no spam. just the occasional roast.</div>
+    <div class="note">no spam. Just the occasional roast.</div>
     <div class="msg" id="msg"></div>
   </section>
 
@@ -135,7 +135,7 @@
       <rect x="14" y="22" width="11" height="72" rx="4"/><rect x="36" y="22" width="11" height="72" rx="4"/>
       <rect x="58" y="22" width="11" height="72" rx="4"/><rect x="80" y="22" width="11" height="72" rx="4"/>
       <rect x="47" y="9" width="11" height="98" rx="4" transform="rotate(56 52.5 58)"/></g></svg>
-    <div class="mono">we never store your texts. we just judge them.</div>
+    <div class="mono">we never store your texts. We just judge them.</div>
     <div class="foot-links">
       <a href="#">instagram</a><a href="#">x / twitter</a><a href="./privacy.html">privacy</a>
     </div>
@@ -173,17 +173,17 @@
       });
       if (res.ok) {
         form.style.display = 'none';
-        msg.textContent = "you're on the list. brace yourself.";
+        msg.textContent = "you're on the list. Brace yourself.";
         msg.className = 'msg ok';
       } else if (res.status === 409) {
-        msg.textContent = "already on the list. eager.";
+        msg.textContent = "already on the list. Eager.";
         msg.className = 'msg ok';
         form.style.display = 'none';
       } else {
         throw new Error('http ' + res.status);
       }
     } catch (err) {
-      msg.textContent = 'something broke. try again.';
+      msg.textContent = 'something broke. Try again.';
       msg.className = 'msg err';
       btn.disabled = false; btn.textContent = 'join the waitlist';
     }

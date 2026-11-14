@@ -11,9 +11,9 @@ import { totalSpent, groupByCat, copeZone, monthlyTotals } from '../data';
 import { writeWidgetCache } from '../../services/widgetSync';
 
 function buildRead(top, total) {
-  if (!top || total <= 0) return "no damage logged yet. suspicious, honestly.";
+  if (!top || total <= 0) return "no damage logged yet. Suspicious, honestly.";
   const pct = Math.round((top.amount / total) * 100);
-  return `${fmtINR(top.amount)} on ${top.label.toLowerCase()}, ${pct}% of everything. bold strategy.`;
+  return `${fmtINR(top.amount)} on ${top.label.toLowerCase()}, ${pct}% of everything. Bold strategy.`;
 }
 
 // Local calendar-day key (not toISOString, which is UTC and rolls back to the
@@ -331,7 +331,7 @@ export default function HomeScreen({ navigation }) {
             no damage yet.
           </Text>
           <Text style={{ fontFamily: FONTS.sans, fontSize: 14, lineHeight: 21, color: T.dim, textAlign: 'center' }}>
-            tally reads your bank SMS to auto-log spends. or add one manually to get started.
+            tally reads your bank SMS to auto-log spends. Or add one manually to get started.
           </Text>
           <Pressable onPress={openAdd}
             style={{ backgroundColor: accent, borderRadius: 10, paddingHorizontal: 24, paddingVertical: 12, marginTop: 4 }}>
@@ -459,7 +459,7 @@ export default function HomeScreen({ navigation }) {
         <Rule T={T} />
         {recent.length === 0 && (
           <MonoLabel T={T} color={T.faint} size={11} style={{ paddingVertical: 16 }}>
-            nothing logged this month. either budgeting or lying.
+            nothing logged this month. Either budgeting or lying.
           </MonoLabel>
         )}
         {recent.map((tx) => (

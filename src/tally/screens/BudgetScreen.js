@@ -98,7 +98,7 @@ export default function BudgetScreen() {
         <View style={{ marginTop: 24, backgroundColor: T.card, borderWidth: 1, borderColor: T.line, borderRadius: 16, padding: 20 }}>
           <MonoLabel T={T} color={T.dim} size={10.5}>no delusions set yet.</MonoLabel>
           <Text style={{ fontFamily: FONTS.sans, fontSize: 14, lineHeight: 20, color: T.dim, marginTop: 8 }}>
-            set a monthly limit for any category below. we'll tell you when you're about to blow it, and when you already have.
+            set a monthly limit for any category below. We'll tell you when you're about to blow it, and when you already have.
           </Text>
         </View>
       )}

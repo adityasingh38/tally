@@ -38,16 +38,16 @@ export const SEED_TXS = [
   { id: 't2',  merchant: 'BookMyShow',       amount: 920,  type: 'debit',  category: 'entertainment', when: "y'day",  note: 'F1 tickets, solo', sms: true },
   { id: 't3',  merchant: 'Zepto',            amount: 312,  type: 'debit',  category: 'food',          when: "y'day",  note: '1 maggi, 1 redbull', sms: true },
   { id: 't4',  merchant: 'Myntra',           amount: 2750, type: 'debit',  category: 'shopping',      when: '2 days', note: 'the cart finally won', sms: true },
-  { id: 't5',  merchant: 'Uber',             amount: 218,  type: 'debit',  category: 'transport',     when: '3 days', note: '1.2km. it was raining', sms: true },
+  { id: 't5',  merchant: 'Uber',             amount: 218,  type: 'debit',  category: 'transport',     when: '3 days', note: '1.2km. It was raining', sms: true },
   { id: 't6',  merchant: 'Cult.fit',         amount: 1499, type: 'debit',  category: 'health',        when: '5 days', note: '0 visits so far', sms: true },
   { id: 't7',  merchant: 'Starbucks',        amount: 465,  type: 'debit',  category: 'food',          when: '5 days', note: 'for the wifi', sms: true },
   { id: 't8',  merchant: 'Steam',            amount: 1099, type: 'debit',  category: 'entertainment', when: '1 wk',   note: "won't play it", sms: true },
   { id: 't9',  merchant: 'Zomato',           amount: 642,  type: 'debit',  category: 'food',          when: '1 wk',   note: '2am biryani', sms: true },
-  { id: 't10', merchant: 'Amazon',           amount: 2199, type: 'debit',  category: 'shopping',      when: '1 wk',   note: 'need? no. want? yes', sms: true },
+  { id: 't10', merchant: 'Amazon',           amount: 2199, type: 'debit',  category: 'shopping',      when: '1 wk',   note: 'need? No. Want? Yes', sms: true },
   { id: 't11', merchant: 'Blinkit',          amount: 540,  type: 'debit',  category: 'food',          when: '1 wk',   note: '₹540 of snacks', sms: true },
   { id: 't12', merchant: 'Netflix',          amount: 649,  type: 'debit',  category: 'utilities',     when: '1 wk',   note: "haven't opened it", sms: true },
   { id: 't13', merchant: 'Nykaa',            amount: 1860, type: 'debit',  category: 'shopping',      when: '2 wks',  note: 'self care, allegedly', sms: true },
-  { id: 't14', merchant: 'MakeMyTrip',       amount: 3200, type: 'debit',  category: 'entertainment', when: '2 wks',  note: 'goa. for the plot', sms: true },
+  { id: 't14', merchant: 'MakeMyTrip',       amount: 3200, type: 'debit',  category: 'entertainment', when: '2 wks',  note: 'goa. For the plot', sms: true },
   { id: 't15', merchant: 'Apple Store',      amount: 4999, type: 'debit',  category: 'shopping',      when: '2 wks',  note: 'the airpods broke', sms: true },
   { id: 't16', merchant: 'Landlord',         amount: 18000,type: 'debit',  category: 'rent',          when: 'Jun 1',  note: 'the monthly heist', sms: true },
   { id: 't17', merchant: 'iCloud',           amount: 75,   type: 'debit',  category: 'utilities',     when: 'Jun 1',  note: '50GB of screenshots', sms: true },
@@ -78,10 +78,10 @@ export const VOICE = {
     { big: 'SUBS',  line: '₹2,540 on subscriptions you forgot you had.', sub: '4 of 6 unused' },
   ],
   unhinged: [
-    { big: 'FOOD', line: "₹4,200 on Swiggy alone. you don't have a kitchen, you have a charging dock.", sub: 'cook once. as a treat.' },
-    { big: 'RENT', line: '₹18k for a room you only sleep in. shelter is a scam but ok king 🫡', sub: '28% of income, gone' },
-    { big: 'DOOM', line: "you spent 80% of your income. the other 20% is also gone, you just don't know it yet.", sub: '₹1,130 to payday' },
-    { big: 'GYM',  line: '₹1,499 to Cult.fit. 0 visits. you bought the *idea* of being healthy.', sub: 'the dream lives' },
+    { big: 'FOOD', line: "₹4,200 on Swiggy alone. You don't have a kitchen, you have a charging dock.", sub: 'cook once. As a treat.' },
+    { big: 'RENT', line: '₹18k for a room you only sleep in. Shelter is a scam but ok king 🫡', sub: '28% of income, gone' },
+    { big: 'DOOM', line: "you spent 80% of your income. The other 20% is also gone, you just don't know it yet.", sub: '₹1,130 to payday' },
+    { big: 'GYM',  line: '₹1,499 to Cult.fit. 0 visits. You bought the *idea* of being healthy.', sub: 'the dream lives' },
   ],
 };
 export function verdictsFor(tone, nihil) {
@@ -90,7 +90,7 @@ export function verdictsFor(tone, nihil) {
 
 const COPE_ZONES = [
   { max: 0.45, label: 'locked in',         note: 'genuinely who is this' },
-  { max: 0.65, label: 'coping',            note: 'holding it together. barely.' },
+  { max: 0.65, label: 'coping',            note: 'holding it together. Barely.' },
   { max: 0.85, label: 'spiraling',         note: 'the vibes are recession-core' },
   { max: 2.0,  label: 'financially feral', note: 'respectfully, what are you doing' },
 ];
@@ -98,8 +98,8 @@ export function copeZone(ratio) {
   return COPE_ZONES.find((z) => ratio <= z.max) || COPE_ZONES[COPE_ZONES.length - 1];
 }
 export function damageVerdict(nihil) {
-  if (nihil <= 1) return 'could be worse. could be better. mostly worse.';
-  if (nihil === 2) return "it's giving 'declined'. respectfully.";
+  if (nihil <= 1) return 'could be worse. Could be better. Mostly worse.';
+  if (nihil === 2) return "it's giving 'declined'. Respectfully.";
   return "you're not broke, you're pre-rich. (you're broke.)";
 }
 

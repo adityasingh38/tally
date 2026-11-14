@@ -11,7 +11,7 @@ import { FONTS } from '../theme';
 import { MonoLabel, Btn, Brand } from '../ui';
 
 const FEATURES = [
-  ['AUTO', 'reads your bank SMS, logs every spend. no typing, no lying to yourself.'],
+  ['AUTO', 'reads your bank SMS, logs every spend. No typing, no lying to yourself.'],
   ['VERDICT', "an AI that's deeply unbothered about your feelings."],
   ['RECEIPT', 'a shareable receipt of the monthly carnage.'],
 ];
@@ -153,7 +153,7 @@ export default function OnboardingScreen({ onDone }) {
             )}
             <Btn T={T} accent={accent} accentInk={accentInk} variant="ghost" onPress={finish}>i'll log it manually</Btn>
             <MonoLabel T={T} color={T.faint} size={9.5} style={{ textAlign: 'center', marginTop: 8 }}>
-              we never store your texts. we just judge them.
+              we never store your texts. We just judge them.
             </MonoLabel>
           </>
         )}

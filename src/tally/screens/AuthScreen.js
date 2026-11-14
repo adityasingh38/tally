@@ -57,7 +57,7 @@ export default function AuthScreen() {
             </Text>
           </View>
           <MonoLabel T={T} color={T.dim} size={13} style={{ marginTop: 16, marginBottom: 44 }}>
-            track the damage. financially feral.
+            track the damage. Financially feral.
           </MonoLabel>
 
           <View style={{ gap: 12 }}>

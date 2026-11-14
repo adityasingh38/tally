@@ -415,7 +415,7 @@ def build_screen_dashboard():
       </div>
       <div class="hero-amount"><span class="curr">₹</span>47,100</div>
       <div class="ai-read">
-        "₹18,400 on food & swiggy, 39% of everything. bold strategy."
+        "₹18,400 on food & swiggy, 39% of everything. Bold strategy."
       </div>
 
       <span class="mono-label" style="font-size:20px;">last 7 days</span>
@@ -820,7 +820,7 @@ def build_screen_insights():
       </div>
 
       <div style="font-family:var(--sans); font-size:28px; color:var(--dim); font-style:italic;">
-        "you spent 72% of your income. the rest is also gone, you just don't know it yet."
+        "you spent 72% of your income. The rest is also gone, you just don't know it yet."
       </div>
     </div>
 
@@ -835,13 +835,13 @@ def build_screen_insights():
 
     <div class="roast-card">
       <div class="roast-tag">SHELTER</div>
-      <div class="roast-line">₹18k for a room you only sleep in. shelter is a scam but ok king 🫡</div>
+      <div class="roast-line">₹18k for a room you only sleep in. Shelter is a scam but ok king 🫡</div>
       <div class="roast-sub">28% of total income · rent hike incoming</div>
     </div>
 
     <div class="roast-card">
       <div class="roast-tag">GYM &amp; HEALTH</div>
-      <div class="roast-line">₹1,499 to Cult.fit. 0 visits. you bought the idea of being healthy.</div>
+      <div class="roast-line">₹1,499 to Cult.fit. 0 visits. You bought the idea of being healthy.</div>
       <div class="roast-sub">cost per workout: ∞ · the dream lives on</div>
     </div>
 
@@ -1109,13 +1109,13 @@ def build_screen_pro():
       <span class="pill" style="font-size:22px;">PRO</span>
     </div>
     <div style="font-family:var(--display); font-weight:800; font-size:68px; letter-spacing:-0.01em;">tally pro.</div>
-    <div style="font-size:30px; color:var(--dim); margin-bottom:28px;">you know it's bad. make it official.</div>
+    <div style="font-size:30px; color:var(--dim); margin-bottom:28px;">you know it's bad. Make it official.</div>
 
     <!-- Perks -->
     <div style="margin-bottom:30px;">
       <div class="perk-row">
         <span class="perk-tag">FULL HISTORY</span>
-        <span class="perk-desc">every transaction forever, not just 30 days. remember every mistake.</span>
+        <span class="perk-desc">every transaction forever, not just 30 days. Remember every mistake.</span>
       </div>
       <div class="perk-row">
         <span class="perk-tag">AI++ ROASTS</span>
@@ -1127,7 +1127,7 @@ def build_screen_pro():
       </div>
       <div class="perk-row">
         <span class="perk-tag">AUTO-CAPTURE</span>
-        <span class="perk-desc">reads bank &amp; UPI notifications in background. zero manual logging.</span>
+        <span class="perk-desc">reads bank &amp; UPI notifications in background. Zero manual logging.</span>
       </div>
     </div>
 
@@ -1533,7 +1533,7 @@ body {{
       <span class="brand-name">tally</span>
       <span class="kicker">coming soon</span>
     </div>
-    <div class="tagline">track the damage.<br><span>financially feral.</span></div>
+    <div class="tagline">track the damage.<br><span>Financially feral.</span></div>
     <div class="desc">A snarky AI money manager that reads your bank SMS, logs every spend, and is deeply unbothered about your feelings.</div>
   </div>
 
@@ -1542,7 +1542,7 @@ body {{
     <div class="floating-card card-1">
       <div style="font-family:'Space Mono'; font-size:11px; color:#63655A; text-transform:uppercase; letter-spacing:0.1em;">the damage so far</div>
       <div style="font-family:'Bricolage Grotesque'; font-size:44px; font-weight:800; letter-spacing:0.02em; font-variant-numeric:tabular-nums; margin:4px 0 8px;"><span style="font-size:0.88em; margin-right:4px;">₹</span>47,100</div>
-      <div style="font-size:13px; color:#9DA08F; font-style:italic;">"₹18,400 on food. you ate the rent, basically."</div>
+      <div style="font-size:13px; color:#9DA08F; font-style:italic;">"₹18,400 on food. You ate the rent, basically."</div>
     </div>
 
     <!-- Floating Card 2 -->

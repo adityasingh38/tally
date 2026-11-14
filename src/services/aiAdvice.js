@@ -36,8 +36,8 @@ Examples for dry tone:
 
 Examples for unhinged tone:
 [
-  {"tag":"FOOD","line":"₹8,400 on swiggy alone. you don't have a kitchen, you have a wifi password for a restaurant.","sub":"cook once. as a treat 🫡"},
-  {"tag":"DOOM","line":"you spent 78% of your income and it's the 15th. the rest of the month is a vibe.","sub":"₹2k left to pretend"},
+  {"tag":"FOOD","line":"₹8,400 on swiggy alone. You don't have a kitchen, you have a wifi password for a restaurant.","sub":"cook once. As a treat 🫡"},
+  {"tag":"DOOM","line":"you spent 78% of your income and it's the 15th. The rest of the month is a vibe.","sub":"₹2k left to pretend"},
   {"tag":"SHOP","line":"₹5,200 on things that seemed necessary at 2am.","sub":"they were not necessary"}
 ]
 
@@ -54,7 +54,7 @@ export async function askAI({ question, cats, total, income }) {
   try {
     return await callAnthropic(system, content);
   } catch {
-    return "couldn't reach tally AI right now. try again in a moment.";
+    return "couldn't reach tally AI right now. Try again in a moment.";
   }
 }
 
@@ -116,7 +116,7 @@ function buildFallbackVerdict(cats, total, income, tone) {
     const c = cats[0];
     const pct = Math.round(c.amount / total * 100);
     results.push(unhinged
-      ? { tag: c.tag, line: `₹${fmt(c.amount)} on ${c.label.toLowerCase()}. you live here now.`, sub: `${pct}% of everything gone` }
+      ? { tag: c.tag, line: `₹${fmt(c.amount)} on ${c.label.toLowerCase()}. You live here now.`, sub: `${pct}% of everything gone` }
       : { tag: c.tag, line: `₹${fmt(c.amount)} on ${c.label.toLowerCase()}. Leads the damage report.`, sub: `${pct}% of total spend` }
     );
   }
@@ -125,7 +125,7 @@ function buildFallbackVerdict(cats, total, income, tone) {
   if (pctIncome !== null) {
     const left = Math.max(0, income - total);
     results.push(unhinged
-      ? { tag: 'DOOM', line: `${pctIncome}% of your income is already gone. the rest is vibes and anxiety.`, sub: `₹${fmt(left)} remains` }
+      ? { tag: 'DOOM', line: `${pctIncome}% of your income is already gone. The rest is vibes and anxiety.`, sub: `₹${fmt(left)} remains` }
       : { tag: 'RATIO', line: `${pctIncome}% of income spent. Month isn't over.`, sub: `₹${fmt(left)} remaining` }
     );
   }
@@ -133,13 +133,13 @@ function buildFallbackVerdict(cats, total, income, tone) {
   if (cats[1]) {
     const c = cats[1];
     results.push(unhinged
-      ? { tag: c.tag, line: `₹${fmt(c.amount)} on ${c.label.toLowerCase()} too. two-front war on your wallet.`, sub: 'the second biggest hole' }
+      ? { tag: c.tag, line: `₹${fmt(c.amount)} on ${c.label.toLowerCase()} too. Two-front war on your wallet.`, sub: 'the second biggest hole' }
       : { tag: c.tag, line: `${c.label} at ₹${fmt(c.amount)} · runner-up damage.`, sub: 'second largest category' }
     );
   }
 
   while (results.length < 3) {
-    results.push({ tag: 'MISC', line: 'spending logged. consequences pending.', sub: 'tally is watching' });
+    results.push({ tag: 'MISC', line: 'spending logged. Consequences pending.', sub: 'tally is watching' });
   }
 
   return results.slice(0, 3);

@@ -14,15 +14,15 @@ specifically, since notification-listener is the safer primary path (see
 Tally · track the damage
 
 ## Short description (80 char max)
-auto-logs every spend, roasts you for it. zero manual entry.
+auto-logs every spend, roasts you for it. Zero manual entry.
 
 ## Full description (4000 char max)
 
-you know it's bad. tally just makes it official.
+you know it's bad. Tally just makes it official.
 
 tally watches your bank and UPI apps and logs every transaction the second
 it happens: no typing, no receipts, no "I'll add it later" that never
-happens. debit, credit, doesn't matter. if money moved, tally saw it.
+happens. Debit, credit, doesn't matter. If money moved, tally saw it.
 
 **what it does**
 - auto-logs transactions in real time, straight from your bank/UPI apps
@@ -43,11 +43,11 @@ happens. debit, credit, doesn't matter. if money moved, tally saw it.
 
 **your data, straight**
 tally never reads or stores your messages: only the transaction details
-(amount, merchant, date) get pulled out and saved. nothing else. we don't
-sell your data, ever. full breakdown in the privacy policy, linked below.
+(amount, merchant, date) get pulled out and saved. Nothing else. We don't
+sell your data, ever. Full breakdown in the privacy policy, linked below.
 
-built by one person who also hates checking their bank balance. track the
-damage. financially feral.
+built by one person who also hates checking their bank balance. Track the
+damage. Financially feral.
 
 ## Data safety form (reference answers)
 
