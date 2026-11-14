@@ -72,18 +72,18 @@ function FeralStampOverlay({ accent }) {
         transform: [
           { translateY: stampY },
           { scale: stampScale },
-          { rotate: '-28deg' },
+          { rotate: '-27deg' },
         ],
       }}
     >
       {/* Authentic Diagonal Corner-to-Corner Rubber Stamp (Bottom-Left to Top-Right) */}
       <View
         style={{
-          width: 380,
-          borderWidth: 3.5,
+          width: 390,
+          borderWidth: 4,
           borderColor: stampInk,
-          borderRadius: 8,
-          padding: 3,
+          borderRadius: 10,
+          padding: 3.5,
           backgroundColor: 'rgba(255, 68, 37, 0.08)',
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 6 },
@@ -94,37 +94,37 @@ function FeralStampOverlay({ accent }) {
       >
         <View
           style={{
-            borderWidth: 1.5,
+            borderWidth: 1.8,
             borderColor: stampInk,
-            borderRadius: 5,
-            paddingVertical: 5,
-            paddingHorizontal: 16,
+            borderRadius: 6,
+            paddingVertical: 6,
+            paddingHorizontal: 18,
             alignItems: 'center',
-            gap: 2,
+            gap: 2.5,
           }}
         >
           {/* Top Stamp Header */}
           <Text
             style={{
               fontFamily: FONTS.monoBold,
-              fontSize: 8,
+              fontSize: 8.5,
               color: stampInk,
-              letterSpacing: 2,
+              letterSpacing: 2.2,
               textTransform: 'uppercase',
             }}
           >
             ★ OFFICIAL TALLY VERDICT ★
           </Text>
 
-          <View style={{ width: '100%', height: 1, backgroundColor: stampInk, opacity: 0.5, marginVertical: 2 }} />
+          <View style={{ width: '100%', height: 1.2, backgroundColor: stampInk, opacity: 0.55, marginVertical: 2 }} />
 
           {/* Main Stamp Headline */}
           <Text
             style={{
               fontFamily: FONTS.display,
-              fontSize: 16,
+              fontSize: 19,
               color: stampInk,
-              letterSpacing: 3.5,
+              letterSpacing: 3.2,
               fontWeight: '900',
               textTransform: 'uppercase',
             }}
