@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     backgroundColor: RED,
     borderRadius: 4,
   },
-  word: { fontFamily: FONTS.display, fontSize: 40, color: TEXT, letterSpacing: -1.5, marginTop: 34 },
+  word: { fontFamily: FONTS.display, fontSize: 40, color: TEXT, letterSpacing: -1.5, marginTop: 14 },
   tag: {
     fontFamily: FONTS.mono, fontSize: 11, color: DIM, letterSpacing: 2,
     textTransform: 'uppercase', marginTop: 10,
