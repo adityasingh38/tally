@@ -186,8 +186,8 @@ body {
   color: var(--text);
 }
 .tab-icon {
-  width: 44px;
-  height: 44px;
+  width: 58px;
+  height: 58px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -246,11 +246,11 @@ TALLY_MARK_SVG = """
 
 def get_tab_bar_html(active_tab):
     tabs = [
-        ("Dashboard", "home", """<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="4"/></svg>"""),
-        ("Transactions", "feed", """<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>"""),
-        ("Insights", "damage", f"""<svg width="36" height="36" viewBox="0 0 100 116"><g fill="{'#FF5436' if active_tab == 'damage' else '#63655A'}"><rect x="14" y="22" width="11" height="72" rx="4"/><rect x="36" y="22" width="11" height="72" rx="4"/><rect x="58" y="22" width="11" height="72" rx="4"/><rect x="80" y="22" width="11" height="72" rx="4"/><rect x="47" y="9" width="11" height="98" rx="4" transform="rotate(56 52.5 58)"/></g></svg>"""),
-        ("Budget", "budget", """<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/></svg>"""),
-        ("Settings", "you", """<svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"/></svg>"""),
+        ("Dashboard", "home", """<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 20v-9.5z"/><path d="M9 21v-7h6v7"/></svg>"""),
+        ("Transactions", "feed", """<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2.5-1.5L9 22l2.5-1.5L14 22l2.5-1.5L19 22l2-1.5V2l-2 1.5L16.5 2 14 3.5 11.5 2 9 3.5 6.5 2 4 3.5z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg>"""),
+        ("Insights", "damage", f"""<svg width="48" height="54" viewBox="0 0 100 116"><g fill="{'#FF5436' if active_tab == 'damage' else '#63655A'}"><rect x="14" y="22" width="11" height="72" rx="4"/><rect x="36" y="22" width="11" height="72" rx="4"/><rect x="58" y="22" width="11" height="72" rx="4"/><rect x="80" y="22" width="11" height="72" rx="4"/><rect x="47" y="9" width="11" height="98" rx="4" transform="rotate(56 52.5 58)"/></g></svg>"""),
+        ("Budget", "budget", """<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>"""),
+        ("Settings", "you", """<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>"""),
     ]
     items = []
     for name, key, icon in tabs:
