@@ -44,3 +44,7 @@ supabase/.branches/
 .tmp/
 src.zip
 *.zip
+
+# IDE & Agent local metadata
+.vscode/
+.claude/

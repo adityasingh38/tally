@@ -62,9 +62,20 @@ damage. financially feral.
   no separate request needed), full cascade delete.
 - **Privacy policy URL**: https://adityasingh38.github.io/tally/PRIVACY_POLICY.html
 
-## Still needed (not writable without assets/access)
-- Screenshots (needs a running build on device/emulator)
-- Feature graphic (1024×500)
-- App icon already exists at `assets/icon.png` / `assets/adaptive-icon.png`
-- Category: Finance
-- Content rating questionnaire (Play Console, in-app process)
+## Graphics & Screenshots (Generated)
+- **Feature graphic (1024×500)**: [docs/screenshots/feature_graphic.png](screenshots/feature_graphic.png)
+- **Play Store showcase slides (1080×2280)**:
+  - Slide 1: [docs/screenshots/store/store_01_dashboard.png](screenshots/store/store_01_dashboard.png)
+  - Slide 2: [docs/screenshots/store/store_02_feed.png](screenshots/store/store_02_feed.png)
+  - Slide 3: [docs/screenshots/store/store_03_insights.png](screenshots/store/store_03_insights.png)
+  - Slide 4: [docs/screenshots/store/store_04_budgets.png](screenshots/store/store_04_budgets.png)
+  - Slide 5: [docs/screenshots/store/store_05_pro.png](screenshots/store/store_05_pro.png)
+  - Slide 6: [docs/screenshots/store/store_06_settings.png](screenshots/store/store_06_settings.png)
+- **Raw device screenshots (1080×2400)**: located in [docs/screenshots/raw/](screenshots/raw/)
+- **App icon**: exists at `assets/icon.png` / `assets/adaptive-icon.png`
+
+## Play Console Setup Checklist
+- [x] Screenshots & feature graphic generated
+- [ ] Category: Finance
+- [ ] Content rating questionnaire (Play Console, in-app process)
+- [ ] Upload AAB (via EAS build production profile)
