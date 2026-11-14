@@ -72,11 +72,11 @@ function FeralStampOverlay({ accent }) {
         transform: [
           { translateY: stampY },
           { scale: stampScale },
-          { rotate: '-15deg' },
+          { rotate: '-32deg' },
         ],
       }}
     >
-      {/* Authentic Rubber Stamp (Version C Proportions without bottom line) */}
+      {/* Authentic Rubber Stamp (Version C Proportions touching top-right & bottom-left corners) */}
       <View
         style={{
           borderWidth: 3.5,
