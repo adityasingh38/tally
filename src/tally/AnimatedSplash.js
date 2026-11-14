@@ -14,11 +14,11 @@ const RED = '#FF5436';
 const TEXT = '#F2F3EC';
 const DIM = '#63655A';
 
-const H = 92;
-const SW = 13;
-const GAP = 17;
+const H = 72;
+const SW = 11;
+const GAP = 11;
 const ROW_W = 4 * SW + 3 * GAP;
-const SLASH_H = H * 1.36;
+const SLASH_H = 98;
 
 const slashHaptic = () => {
   try {
@@ -78,7 +78,6 @@ export default function AnimatedSplash({ onDone }) {
               {
                 marginLeft: i ? GAP : 0,
                 opacity: v,
-                transformOrigin: 'center bottom',
                 transform: [
                   { translateY: v.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) },
                   { scaleY: v.interpolate({ inputRange: [0, 1], outputRange: [0.82, 1] }) },
@@ -95,7 +94,6 @@ export default function AnimatedSplash({ onDone }) {
             styles.slash,
             {
               opacity: slash.interpolate({ inputRange: [0, 0.15, 1], outputRange: [0, 1, 1] }),
-              transformOrigin: 'center bottom',
               transform: [{ rotate: '56deg' }, { scaleY: slash.interpolate({ inputRange: [0, 1], outputRange: [0, 1] }) }],
             },
           ]}
@@ -115,7 +113,7 @@ export default function AnimatedSplash({ onDone }) {
 const styles = StyleSheet.create({
   fill: { backgroundColor: INK, alignItems: 'center', justifyContent: 'center' },
   markRow: { flexDirection: 'row', alignItems: 'flex-end', width: ROW_W, height: H, position: 'relative' },
-  bar: { width: SW, height: H, backgroundColor: RED, borderRadius: 3 },
+  bar: { width: SW, height: H, backgroundColor: RED, borderRadius: 4 },
   slash: {
     position: 'absolute',
     left: (ROW_W - SW) / 2,   // horizontally centred on the bar group
@@ -123,7 +121,7 @@ const styles = StyleSheet.create({
     width: SW,
     height: SLASH_H,
     backgroundColor: RED,
-    borderRadius: 3,
+    borderRadius: 4,
   },
   word: { fontFamily: FONTS.display, fontSize: 40, color: TEXT, letterSpacing: -1.5, marginTop: 34 },
   tag: {
