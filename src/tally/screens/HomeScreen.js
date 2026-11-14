@@ -13,7 +13,7 @@ import { writeWidgetCache } from '../../services/widgetSync';
 function buildRead(top, total) {
   if (!top || total <= 0) return "no damage logged yet. suspicious, honestly.";
   const pct = Math.round((top.amount / total) * 100);
-  return `${fmtINR(top.amount)} on ${top.label.toLowerCase()} · ${pct}% of everything. bold strategy.`;
+  return `${fmtINR(top.amount)} on ${top.label.toLowerCase()}, ${pct}% of everything. bold strategy.`;
 }
 
 // Local calendar-day key (not toISOString, which is UTC and rolls back to the

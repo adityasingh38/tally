@@ -415,7 +415,7 @@ def build_screen_dashboard():
       </div>
       <div class="hero-amount"><span class="curr">₹</span>47,100</div>
       <div class="ai-read">
-        "₹18,400 on food & swiggy · 39% of everything. bold strategy."
+        "₹18,400 on food & swiggy, 39% of everything. bold strategy."
       </div>
 
       <span class="mono-label" style="font-size:20px;">last 7 days</span>
