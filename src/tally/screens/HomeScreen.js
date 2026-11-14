@@ -62,8 +62,8 @@ function FeralStampOverlay({ accent }) {
       style={{
         position: 'absolute',
         top: 0,
-        left: -20,
-        right: -20,
+        left: 0,
+        right: 0,
         bottom: 0,
         alignItems: 'center',
         justifyContent: 'center',
@@ -72,18 +72,22 @@ function FeralStampOverlay({ accent }) {
         transform: [
           { translateY: stampY },
           { scale: stampScale },
-          { rotate: '-41deg' },
+          { rotate: '-28deg' },
         ],
       }}
     >
-      {/* Authentic Rubber Stamp (Version C Proportions touching top-right & bottom-left corners) */}
+      {/* Authentic Rubber Stamp (All 4 corners touch card border) */}
       <View
         style={{
+          width: 330,
+          height: 74,
           borderWidth: 3.5,
           borderColor: stampInk,
           borderRadius: 10,
           padding: 3,
           backgroundColor: 'rgba(255, 68, 37, 0.08)',
+          justifyContent: 'center',
+          alignItems: 'center',
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 6 },
           shadowOpacity: 0.45,
@@ -93,12 +97,15 @@ function FeralStampOverlay({ accent }) {
       >
         <View
           style={{
+            width: '100%',
+            height: '100%',
             borderWidth: 1.5,
             borderColor: stampInk,
             borderRadius: 6,
-            paddingVertical: 8,
-            paddingHorizontal: 20,
+            paddingVertical: 5,
+            paddingHorizontal: 14,
             alignItems: 'center',
+            justifyContent: 'center',
             gap: 3,
           }}
         >
