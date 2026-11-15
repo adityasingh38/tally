@@ -29,6 +29,7 @@ import TxDetailSheet from './screens/TxDetailSheet';
 // keep your existing real auth hook
 import { useAuth } from '../hooks/useAuth';
 import { useTransactions } from '../hooks/useTransactions';
+import { supabase } from '../services/supabase';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -45,8 +46,36 @@ export function routeFromPressAction(pressActionId) {
   else navigationRef.navigate('Main');
 }
 
-function handleDeepLink(url) {
-  if (!url || !navigationRef.isReady()) return;
+async function handleDeepLink(url) {
+  if (!url) return;
+
+  // Handle OAuth callback (e.g. tally://auth-callback#access_token=... or ?code=...)
+  if (url.includes('auth-callback') || url.includes('access_token=') || url.includes('code=')) {
+    try {
+      if (url.includes('#')) {
+        const hash = url.split('#')[1];
+        const params = Object.fromEntries(new URLSearchParams(hash));
+        if (params.access_token && params.refresh_token) {
+          await supabase.auth.setSession({
+            access_token: params.access_token,
+            refresh_token: params.refresh_token,
+          });
+          return;
+        }
+      } else if (url.includes('?')) {
+        const query = url.split('?')[1];
+        const params = Object.fromEntries(new URLSearchParams(query));
+        if (params.code) {
+          await supabase.auth.exchangeCodeForSession(params.code);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('OAuth deep link exchange failed:', e);
+    }
+  }
+
+  if (!navigationRef.isReady()) return;
   if (url.includes('tally://insights')) navigationRef.navigate('Main', { screen: 'Insights' });
   else if (url.includes('tally://log')) {
     // navigate home then open add sheet
