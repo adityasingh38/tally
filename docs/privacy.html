@@ -98,7 +98,7 @@
     <div class="highlight-card">
       <div class="label">How Alerts Are Processed</div>
       <p style="margin:0; font-size:14px; color:var(--text);">
-        <strong>Full raw alert bodies are not stored as transaction records.</strong> Transaction details are stored in your account. If local rules cannot categorise an alert, its merchant and up to 100 characters of alert text are sent through our Supabase Edge Function to Anthropic. This excerpt can contain information in the alert, such as masked account details. Alerts outside the bank/transaction filters are ignored by Tally.
+        <strong>Full raw alert bodies are not stored as transaction records.</strong> Transaction details are stored in your account. If local rules cannot categorise an alert, its merchant and up to 100 characters of alert text are sent through our Supabase Edge Function to our AI provider (Google Gemini API or Anthropic). This excerpt can contain information in the alert, such as masked account details. Alerts outside the bank/transaction filters are ignored by Tally.
       </p>
     </div>
 
@@ -120,7 +120,7 @@
     <p>We <strong>do not sell your personal data</strong>, and we do not use your information for targeted advertising.</p>
 
     <h2>4. AI Processing</h2>
-    <p>To categorise ambiguous alerts, the merchant and up to 100 characters of alert text are sent to <strong>Anthropic</strong> via our Supabase Edge Function. AI commentary may also send category totals, spending totals, income you entered, and a question you ask Tally. If you request a purchase plan, we also send the item, price and timeframe you enter. Purchase plans are displayed in the app and are not saved to your account. We do not use this data to build advertising profiles. See Anthropic's privacy terms for its handling of API data.</p>
+    <p>To categorise ambiguous alerts, the merchant and up to 100 characters of alert text are sent to our AI backend via our Supabase Edge Function (powered by <strong>Google Gemini API</strong> and/or <strong>Anthropic</strong>). AI commentary may also send category totals, spending totals, income you entered, and a question you ask Tally. If you request a purchase plan, we also send the item, price and timeframe you enter. Purchase plans are displayed in the app and are not saved to your account. We do not use this data to build advertising profiles. See Google's and Anthropic's privacy terms for their handling of API data.</p>
 
     <h2>5. Permissions We Request (Android)</h2>
     <ul>
@@ -136,7 +136,7 @@
     <p>We share data exclusively with trusted infrastructure service providers required to deliver the service:</p>
     <ul>
       <li><strong>Supabase</strong> — Database hosting, authentication, and encrypted storage.</li>
-      <li><strong>Anthropic</strong> — Server-side AI categorisation and financial commentary.</li>
+      <li><strong>Google (Gemini API) / Anthropic</strong> — Server-side AI categorisation and financial commentary.</li>
       <li><strong>RevenueCat & Google Play</strong> — In-app subscription validation.</li>
     </ul>
     <p>We do not sell, rent, or trade your data with any data broker or advertiser.</p>

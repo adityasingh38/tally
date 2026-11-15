@@ -31,7 +31,8 @@ Contact: **adityasuper38@gmail.com**.
   the bank name and its **last four digits** for account grouping.
 - Full raw alert bodies are not stored as transaction records. For alerts that
   cannot be categorised by local rules, Tally sends the merchant and up to 100
-  characters of alert text through our Supabase Edge Function to Anthropic.
+  characters of alert text through our Supabase Edge Function to our AI provider
+  (Google Gemini API or Anthropic).
   This short excerpt can contain information present in the alert, such as
   masked account details. Do not grant access if you do not want this processing.
 - Alerts that do not match the bank/transaction filters are ignored by Tally.
@@ -60,12 +61,13 @@ advertising.
 
 ## 4. AI processing
 To categorise ambiguous alerts, the merchant and up to 100 characters of alert
-text are sent to **Anthropic** via our Supabase Edge Function. AI commentary may
+text are sent to our AI backend via our Supabase Edge Function (powered by
+**Google Gemini API** and/or **Anthropic**). AI commentary may
 also send category totals, spending totals, income you entered, and a question
 you ask Tally. If you request a purchase plan, we also send the item, price and
 timeframe you enter. Purchase plans are displayed in the app and are not saved
 to your account. We do not use this data to build advertising profiles. See
-Anthropic's privacy terms for its handling of API data.
+Google's and Anthropic's privacy terms for their handling of API data.
 
 ## 5. Permissions we request (Android)
 - **SMS (READ_SMS / RECEIVE_SMS)** — to read bank transaction SMS and
@@ -84,7 +86,7 @@ Anthropic's privacy terms for its handling of API data.
 ## 7. Data sharing
 We share data only with the service providers needed to run Tally:
 - **Supabase** — database and authentication.
-- **Anthropic** — AI categorisation/insights (limited transaction context).
+- **Google (Gemini API) / Anthropic** — AI categorisation/insights (limited transaction context).
 - **RevenueCat / app stores** — subscription management.
 - Legal authorities, only where required by applicable law.
 

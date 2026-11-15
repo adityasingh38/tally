@@ -1,9 +1,9 @@
-// Supabase Edge Function — proxies Anthropic Messages API so the API key
+// Supabase Edge Function — proxies Gemini / Anthropic API so the API key
 // never ships inside the mobile bundle, with a per-user daily rate limit.
 //
 // Deploy:
 //   supabase functions deploy anthropic-proxy
-//   supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
+//   supabase secrets set GEMINI_API_KEY=AIzaSy... (or ANTHROPIC_API_KEY=sk-ant-...)
 // (SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are injected automatically.)
 //
 // JWT verification is on by default, so only authenticated app users can call it
@@ -12,10 +12,12 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { hasProEntitlement, revenueCatConfigured } from '../_shared/revenuecat.ts';
 
+const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-const MODEL = "claude-haiku-4-5-20251001";
+const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.0-flash";
+const ANTHROPIC_MODEL = "claude-haiku-4-5-20251001";
 const MAX_TOKENS = 512;
 const FREE_DAILY_LIMIT = 10;
 const PRO_DAILY_LIMIT = 50;
@@ -28,7 +30,9 @@ const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
 
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
-  if (!ANTHROPIC_API_KEY) return json({ error: "ANTHROPIC_API_KEY not configured" }, 500);
+  if (!GEMINI_API_KEY && !ANTHROPIC_API_KEY) {
+    return json({ error: "AI API key not configured (set GEMINI_API_KEY or ANTHROPIC_API_KEY)" }, 500);
+  }
 
   // Identify the caller from their JWT.
   const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
@@ -121,32 +125,88 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const upstream = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: MAX_TOKENS,
-        system,
-        messages: [{ role: "user", content }],
-      }),
-    });
-
-    const data = await upstream.json();
-    if (!upstream.ok) {
-      return json({ error: data?.error?.message ?? "Upstream error" }, 502);
+    let text: string;
+    if (GEMINI_API_KEY) {
+      try {
+        text = await callGemini(system, content, kind === 'categorization');
+      } catch (geminiErr) {
+        if (ANTHROPIC_API_KEY) {
+          text = await callAnthropic(system, content);
+        } else {
+          throw geminiErr;
+        }
+      }
+    } else {
+      text = await callAnthropic(system, content);
     }
-
-    const text = (data?.content?.[0]?.text ?? "").trim();
     return json({ text });
   } catch (e) {
-    return json({ error: String(e) }, 500);
+    return json({ error: e instanceof Error ? e.message : String(e) }, 502);
   }
 });
+
+async function callGemini(system: string | undefined, content: string, jsonMode: boolean): Promise<string> {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+  const body: Record<string, unknown> = {
+    contents: [
+      {
+        role: "user",
+        parts: [{ text: content }],
+      },
+    ],
+    generationConfig: {
+      temperature: jsonMode ? 0.1 : 0.3,
+      maxOutputTokens: MAX_TOKENS,
+      ...(jsonMode ? { responseMimeType: "application/json" } : {}),
+    },
+  };
+  if (system) {
+    body.system_instruction = {
+      parts: [{ text: system }],
+    };
+  }
+
+  const upstream = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  const data = await upstream.json();
+  if (!upstream.ok) {
+    throw new Error(data?.error?.message ?? `Gemini error (HTTP ${upstream.status})`);
+  }
+
+  const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (typeof rawText !== "string") {
+    throw new Error("Empty candidate response from Gemini");
+  }
+  return rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+}
+
+async function callAnthropic(system: string | undefined, content: string): Promise<string> {
+  const upstream = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": ANTHROPIC_API_KEY,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: ANTHROPIC_MODEL,
+      max_tokens: MAX_TOKENS,
+      system,
+      messages: [{ role: "user", content }],
+    }),
+  });
+
+  const data = await upstream.json();
+  if (!upstream.ok) {
+    throw new Error(data?.error?.message ?? `Anthropic error (HTTP ${upstream.status})`);
+  }
+
+  return (data?.content?.[0]?.text ?? "").trim();
+}
 
 function json(payload: unknown, status = 200): Response {
   return new Response(JSON.stringify(payload), {

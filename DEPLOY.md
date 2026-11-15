@@ -9,10 +9,12 @@ Project ref: `gjrmpiauvreudygyvdhx` (Supabase dashboard name: Focal)
    in order. Do not run the base schema and its migrations on the same project.
 2. **Auth** — Authentication → Providers → Email: enabled. For testing, disable
    "Confirm email".
-3. **Secrets** — set `ANTHROPIC_API_KEY` and `REVENUECAT_SECRET_API_KEY`
-   as Supabase Edge Function secrets. The latter is a RevenueCat **secret**
-   API key, used by `anthropic-proxy` to verify the signed-in user's Pro
-   entitlement. Never place it in the app or EAS environment.
+3. **Secrets** — set `GEMINI_API_KEY` (or `ANTHROPIC_API_KEY`) and `REVENUECAT_SECRET_API_KEY`
+   as Supabase Edge Function secrets. For free tier AI, generate a Gemini key at
+   https://aistudio.google.com/app/apikey (free, no credit card required).
+   `anthropic-proxy` supports Gemini 2.0 Flash / 1.5 Flash natively with Claude fallback.
+   `REVENUECAT_SECRET_API_KEY` is a RevenueCat **secret** API key, used by `anthropic-proxy`
+   to verify the signed-in user's Pro entitlement. Never place secrets in the app or EAS environment.
 4. **Functions** — deploy all three:
    ```
    supabase functions deploy anthropic-proxy
@@ -49,12 +51,14 @@ needed client-side.
 - [x] Deploy `account-profile` (version 1) for the account-label feature. Its one-account
       free limit is enforced in the database; additional labels require a
       server-verified `Tally Pro` entitlement.
-- [ ] Replace the invalid `ANTHROPIC_API_KEY` server secret and rerun
-      `node scripts/smoke_categorization.mjs --live`. The 2026-11-15
-      authenticated test reached Anthropic but received `invalid x-api-key`;
-      its disposable account was deleted. Google AI Pro consumer membership
-      does not supply a Gemini API key. Changing providers also requires an
-      Edge Function and privacy-copy update.
+- [ ] Set `GEMINI_API_KEY` (or renew `ANTHROPIC_API_KEY`) server secret:
+      ```bash
+      npx supabase secrets set GEMINI_API_KEY=your_key --project-ref gjrmpiauvreudygyvdhx
+      npx supabase functions deploy anthropic-proxy --project-ref gjrmpiauvreudygyvdhx
+      ```
+      Then rerun `node scripts/smoke_categorization.mjs --live`.
+      Gemini API keys are free from Google AI Studio (https://aistudio.google.com/app/apikey).
+      Note: Google AI Pro / Gemini Advanced consumer subscription does not provide API keys.
 - [ ] Confirm `REVENUECAT_SECRET_API_KEY` with a Pro entitlement test.
 - [ ] Run the private category accuracy study on a real Android device; the
       workspace has no connected Android device or completed worksheet.
