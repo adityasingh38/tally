@@ -1,28 +1,20 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:tools="http://schemas.android.com/tools">
-
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
   <uses-permission android:name="android.permission.INTERNET"/>
   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
   <uses-permission android:name="android.permission.VIBRATE"/>
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" tools:replace="android:maxSdkVersion"/>
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32" tools:replace="android:maxSdkVersion"/>
-  <!-- SMS permissions for auto transaction logging -->
   <uses-permission android:name="android.permission.READ_SMS"/>
   <uses-permission android:name="android.permission.RECEIVE_SMS"/>
-  <!-- Push notifications -->
   <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-  <!-- Background SMS processing (Headless JS) -->
   <uses-permission android:name="android.permission.WAKE_LOCK"/>
-
   <queries>
-    <!-- Support checking for http(s) links via the Linking API -->
     <intent>
-      <action android:name="android.intent.action.VIEW" />
-      <category android:name="android.intent.category.BROWSABLE" />
-      <data android:scheme="https" />
+      <action android:name="android.intent.action.VIEW"/>
+      <category android:name="android.intent.category.BROWSABLE"/>
+      <data android:scheme="https"/>
     </intent>
   </queries>
-
   <application android:name=".MainApplication" android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:allowBackup="false" android:theme="@style/AppTheme" android:supportsRtl="true">
     <activity android:name=".MainActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|uiMode|smallestScreenSize" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:theme="@style/Theme.App.SplashScreen" android:exported="true">
       <intent-filter>
@@ -37,36 +29,23 @@
       </intent-filter>
       <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts"/>
     </activity>
-
-    <!-- Live bank-SMS auto-logging. BROADCAST_SMS permission means only the OS can trigger it. -->
-    <receiver
-      android:name=".SmsReceiver"
-      android:exported="true"
-      android:permission="android.permission.BROADCAST_SMS">
+    <receiver android:name=".SmsReceiver" android:exported="true" android:permission="android.permission.BROADCAST_SMS">
       <intent-filter android:priority="999">
         <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
       </intent-filter>
     </receiver>
-
-    <service
-      android:name=".HeadlessSmsService"
-      android:exported="false" />
-
-    <!-- Play-safe alternative to READ_SMS: read bank/UPI app notifications.
-         BIND_NOTIFICATION_LISTENER_SERVICE means only the OS can bind it; the
-         user grants access via Settings (NotificationAccess.openSettings). -->
-    <service
-      android:name=".TallyNotificationListenerService"
-      android:exported="false"
-      android:label="@string/app_name"
-      android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+    <service android:name=".HeadlessSmsService" android:exported="false"/>
+    <service android:name=".TallyNotificationListenerService" android:exported="false" android:label="@string/app_name" android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
       <intent-filter>
         <action android:name="android.service.notification.NotificationListenerService"/>
       </intent-filter>
     </service>
-
-    <service
-      android:name=".HeadlessNotifService"
-      android:exported="false" />
+    <service android:name=".HeadlessNotifService" android:exported="false"/>
+    <meta-data android:name="expo.modules.updates.ENABLED" android:value="true"/>
+    <meta-data android:name="expo.modules.updates.EXPO_UPDATES_CHECK_ON_LAUNCH" android:value="ALWAYS"/>
+    <meta-data android:name="expo.modules.updates.EXPO_UPDATES_LAUNCH_WAIT_MS" android:value="0"/>
+    <meta-data android:name="expo.modules.updates.EXPO_UPDATE_URL" android:value="https://u.expo.dev/6d5141af-cb22-4e25-b1db-5a9f83a0c262"/>
+    <meta-data android:name="expo.modules.updates.ENABLE_BSDIFF_PATCH_SUPPORT" android:value="true"/>
+    <meta-data android:name="expo.modules.updates.EXPO_RUNTIME_VERSION" android:value="@string/expo_runtime_version"/>
   </application>
 </manifest>
