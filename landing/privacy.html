@@ -77,7 +77,7 @@
     <div class="meta">
       <span>EFFECTIVE DATE: 9 JUNE 2026</span>
       <span>•</span>
-      <span>LAST UPDATED: 14 NOVEMBER 2026</span>
+      <span>LAST UPDATED: 15 NOVEMBER 2026</span>
     </div>
 
     <p class="intro">
@@ -93,17 +93,17 @@
     <p>Email address and authentication credentials (handled securely by our auth provider, Supabase). Used solely to create, authenticate, and secure your account.</p>
 
     <h3>b) Transaction Data</h3>
-    <p>Tally parses transaction alerts <strong>only</strong> from known bank and UPI senders. From those alerts, we extract: transaction <strong>amount</strong>, <strong>type</strong> (debit/credit), <strong>merchant name</strong>, masked account/card digits, <strong>date/time</strong>, and sender identifier.</p>
+    <p>With SMS permission, Tally checks sender IDs and message content for bank transaction alerts. With notification access, Android grants access to notifications, but Tally's listener processes alerts only from its supported bank/UPI app list. From matching alerts, we extract: transaction <strong>amount</strong>, <strong>type</strong> (debit/credit), <strong>merchant name</strong>, <strong>date/time</strong>, and sender identifier. When an alert includes a masked account or card identifier, we also save its bank name and last four digits for account grouping.</p>
     
     <div class="highlight-card">
-      <div class="label">On-Device Parsing Guarantee</div>
+      <div class="label">How Alerts Are Processed</div>
       <p style="margin:0; font-size:14px; color:var(--text);">
-        <strong>The raw body of your messages and notifications is parsed entirely on your device and is NEVER uploaded or stored on our servers.</strong> Only the extracted transaction fields (amount, merchant, category, date) are stored in your secure account. Personal, non-bank messages are filtered out locally and never read or processed.
+        <strong>Full raw alert bodies are not stored as transaction records.</strong> Transaction details are stored in your account. If local rules cannot categorise an alert, its merchant and up to 100 characters of alert text are sent through our Supabase Edge Function to Anthropic. This excerpt can contain information in the alert, such as masked account details. Alerts outside the bank/transaction filters are ignored by Tally.
       </p>
     </div>
 
     <h3>c) App Data You Provide</h3>
-    <p>Monthly budgets, category corrections, and display preferences. Preferences are stored locally on your device; budgets and categorised transactions are stored in your private account.</p>
+    <p>Monthly budgets, category corrections, account labels (bank name, last four digits and nickname), and display preferences. Preferences are stored locally on your device; account labels, budgets and categorised transactions are stored in your private account. We do not ask for or store full card numbers or PINs.</p>
 
     <h3>d) Subscription Data</h3>
     <p>If you purchase Tally Pro, subscription status is managed by Google Play Billing via RevenueCat. We never receive, process, or store your credit card or banking credentials.</p>
@@ -120,12 +120,12 @@
     <p>We <strong>do not sell your personal data</strong>, and we do not use your information for targeted advertising.</p>
 
     <h2>4. AI Processing</h2>
-    <p>To categorise ambiguous transactions and generate spending commentary, limited transaction context (such as the merchant name and amount) is sent to our AI provider, <strong>Anthropic</strong>, via server-side API. This data is processed transiently and is never used to build advertising profiles.</p>
+    <p>To categorise ambiguous alerts, the merchant and up to 100 characters of alert text are sent to <strong>Anthropic</strong> via our Supabase Edge Function. AI commentary may also send category totals, spending totals, income you entered, and a question you ask Tally. If you request a purchase plan, we also send the item, price and timeframe you enter. Purchase plans are displayed in the app and are not saved to your account. We do not use this data to build advertising profiles. See Anthropic's privacy terms for its handling of API data.</p>
 
     <h2>5. Permissions We Request (Android)</h2>
     <ul>
-      <li><strong>Notifications / Notification Listener Service</strong>: Used to capture transactional bank alerts in real time so transactions appear automatically with zero manual entry.</li>
-      <li><strong>SMS (READ_SMS / RECEIVE_SMS)</strong>: Used on supported configurations to parse transactional bank SMS locally. You may decline and use manual entry or notification capture.</li>
+      <li><strong>Notification access</strong>: Android grants access to notifications; Tally's listener processes alerts from supported bank/UPI apps. You may decline and use SMS or manual entry.</li>
+      <li><strong>SMS (READ_SMS / RECEIVE_SMS)</strong>: Used to parse bank transaction SMS and import past alerts. You may decline and use manual entry or notification capture.</li>
       <li><strong>Post Notifications & Vibrate</strong>: To send you budget alerts and weekly spending summaries.</li>
     </ul>
 
@@ -161,7 +161,7 @@
   </main>
 
   <footer>
-    <div class="mono">we never store your texts. We just judge them.</div>
+    <div class="mono">transaction details saved · full alerts not stored</div>
     <div class="mono" style="color:#3a3b34">© 2026 tally · All rights reserved</div>
   </footer>
 

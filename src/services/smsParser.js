@@ -1,4 +1,5 @@
-import { BANK_SENDER_IDS } from '../constants';
+import { BANK_SENDER_IDS } from '../constants/index.js';
+import { accountIdentityFromAlert } from './accounts.js';
 
 // Amount in either order: "Rs.1,250.50" / "INR 200" / "₹45" / "799 INR".
 const AMOUNT_RE = /(?:Rs\.?|INR|₹)\s*(\d[\d,]*(?:\.\d{1,2})?)|(?<![A-Za-z0-9])(\d[\d,]*(?:\.\d{1,2})?)\s*(?:Rs\.?|INR|₹)/gi;
@@ -55,6 +56,7 @@ export function parseSMS(smsBody, address) {
     merchant: merchant || 'Unknown',
     merchant_tail: merchantTail,
     source: address,
+    ...accountIdentityFromAlert(smsBody, address),
     raw_sms: smsBody,
     needs_ai_categorisation: !merchant,
   };
@@ -96,7 +98,7 @@ function extractType(body) {
   return null;
 }
 
-const MERCHANT_BOUNDARY = '(?=\\s+(?:on|ref|avl|avbl|txn|dt|using|info|via|upi|not|call|to\\s+block)\\b|[.,;:\\n]|\\s+\\d|$)';
+const MERCHANT_BOUNDARY = '(?=\\s+(?:on|ref|avl|avbl|bal|balance|txn|dt|using|with|info|via|upi|not|call|to\\s+block|successfully|successful|debited|credited|from|for|towards|paid|sent)\\b|[.,;:\\n]|\\s+\\d|$)';
 const MERCHANT_CHARS = "[A-Za-z][A-Za-z0-9&'.\\- ]{1,28}?";
 
 const MERCHANT_PATTERNS = [
@@ -106,8 +108,10 @@ const MERCHANT_PATTERNS = [
   new RegExp(`\\bat\\s+(${MERCHANT_CHARS})${MERCHANT_BOUNDARY}`, 'i'),
   // UPI/transfer: "to MERCHANT".
   new RegExp(`\\bto\\s+(${MERCHANT_CHARS})${MERCHANT_BOUNDARY}`, 'i'),
-  // UPI ref path: "UPI/txnid/MERCHANT" (ICICI and similar).
-  /\bUPI\/[^\s/]+\/([A-Z][A-Za-z0-9&'.\- ]{1,20})/i,
+  // UPI ref path: "UPI/txnid/MERCHANT" (ICICI, HDFC, SBI).
+  new RegExp(`\\bUPI\\/[^\\s/]+\\/(${MERCHANT_CHARS})${MERCHANT_BOUNDARY}`, 'i'),
+  // NEFT / RTGS / IMPS: "NEFT-MERCHANT" or "IMPS/txnid/MERCHANT".
+  new RegExp(`\\b(?:NEFT|RTGS|IMPS)[-/\\s]+(?:\\d+[-/\\s]+)?(${MERCHANT_CHARS})${MERCHANT_BOUNDARY}`, 'i'),
   // "MERCHANT credited" (payee side of a debit).
   /[;,]\s*([A-Za-z][A-Za-z0-9&'.\- ]{1,28}?)\s+credited\b/i,
   // Bare merchant between amount and date: "INR 799 NETFLIX 05-06-26".

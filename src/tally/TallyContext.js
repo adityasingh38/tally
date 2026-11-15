@@ -8,6 +8,7 @@ import { THEMES, resolveAccent } from './theme';
 import { SEED_TXS } from './data';
 import { deleteTransaction, updateTransactionCategory, updateTransaction } from '../services/supabase';
 import { usePremium } from '../hooks/usePremium';
+import { useAuth } from '../hooks/useAuth';
 
 const FREE_HISTORY_DAYS = 30;
 
@@ -30,7 +31,8 @@ export function TallyProvider({ children }) {
   // read this from context instead of calling usePremium() again, since a
   // second independent hook instance never learns about a purchase made
   // through the first one (isPremium there stays stale until app restart).
-  const premium = usePremium();
+  const { user } = useAuth();
+  const premium = usePremium(user?.id);
   const { isPremium } = premium;
   const [prefs, setPrefs] = useState(DEFAULT_PREFS);
   const [reactions, setReactions] = useState({});
@@ -82,6 +84,9 @@ export function TallyProvider({ children }) {
 
   const setRealTransactions = useCallback((list) => {
     setRealTxs(list || []);
+    setLocalTxs(prev => prev
+      ? [...prev.filter(tx => String(tx.id).startsWith('u')), ...(list || [])]
+      : prev);
     setTxsLoaded(true);
     setRefreshing(false);
   }, []);
@@ -127,9 +132,10 @@ export function TallyProvider({ children }) {
       const { error } = await updateTransactionCategory(tx.id, category);
       if (error) return { success: false, error };
     }
-    const patch = (list) => list.map(t => t.id === tx.id ? { ...t, category } : t);
+    const patch = (list) => list.map(t => t.id === tx.id ? { ...t, category, category_status: 'done' } : t);
     setLocalTxs(prev => prev ? patch(prev) : patch(txsLoaded ? realTxs : SEED_TXS));
     if (!isLocal) setRealTxs(prev => patch(prev));
+    setSelectedTx(prev => prev?.id === tx.id ? { ...prev, category, category_status: 'done' } : prev);
     return { success: true };
   }, [realTxs, txsLoaded]);
 

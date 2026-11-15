@@ -8,11 +8,12 @@ import { useAuth } from '../../hooks/useAuth';
 import { totalSpent } from '../data';
 import { syncHistoricalSMS } from '../../services/smsSync';
 import { notifAccessAvailable, isNotifAccessEnabled, openNotifAccessSettings } from '../../services/notificationAccess';
-import { getTransactions, deleteAccount } from '../../services/supabase';
+import { getAllTransactions, deleteAccount } from '../../services/supabase';
 import { exportToCSV } from '../../services/export';
 import { requestNotificationPermission } from '../../services/budgetAlerts';
 import { FONTS, fmtINR } from '../theme';
 import { MonoLabel, Rule, ScreenHeader, Brand } from '../ui';
+import AccountsSheet from './AccountsSheet';
 
 function Toggle({ T, accent, on, onChange }) {
   return (
@@ -62,6 +63,7 @@ export default function SettingsScreen() {
   const [incomeInput, setIncomeInput] = useState('');
   const [notifAccess, setNotifAccess] = useState(false);
   const [restoring, setRestoring] = useState(false);
+  const [showAccounts, setShowAccounts] = useState(false);
 
   // Reflect the live notification-access grant (user may toggle it in system
   // Settings and return). Re-checked on mount; openSettings sets it optimistic.
@@ -103,7 +105,8 @@ export default function SettingsScreen() {
   async function handleExport() {
     setExporting(true);
     try {
-      const { data } = await getTransactions({ userId: user.id, limit: 5000, fromDate: new Date(0) });
+      const { data, error } = await getAllTransactions({ userId: user.id });
+      if (error) throw error;
       if (!data?.length) { Alert.alert('No data', 'No transactions to export yet.'); return; }
       await exportToCSV(data);
     } catch (e) {
@@ -158,6 +161,7 @@ export default function SettingsScreen() {
   const memberDays = earliest ? Math.max(1, Math.round((Date.now() - new Date(earliest).getTime()) / 86400000)) : null;
 
   return (
+    <>
     <ScrollView style={{ flex: 1, backgroundColor: T.bg }}
       contentContainerStyle={{ paddingHorizontal: 18, paddingTop: insets.top + 14, paddingBottom: 120 }}>
       <ScreenHeader T={T} accent={accent} title="you" />
@@ -230,7 +234,7 @@ export default function SettingsScreen() {
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
           <View style={{ flex: 1 }}>
             <Text style={{ fontFamily: FONTS.display, fontSize: 19, color: T.bg, lineHeight: 23 }}>go Pro → unlock the carnage</Text>
-            <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: T.bg, opacity: 0.7, marginTop: 7 }}>full history · receipts · ₹199/mo</Text>
+            <Text style={{ fontFamily: FONTS.mono, fontSize: 11, color: T.bg, opacity: 0.7, marginTop: 7 }}>full history · broke-streak widget</Text>
           </View>
           <Text style={{ fontSize: 20, color: T.bg }}>↗</Text>
         </View>
@@ -256,6 +260,10 @@ export default function SettingsScreen() {
 
       {/* data */}
       <MonoLabel T={T} color={T.faint} style={{ marginTop: 28, marginBottom: 4 }}>data</MonoLabel>
+      <Rule T={T} />
+      <Row T={T} label="Account labels" sub="bank + last four digits · group captured alerts"
+        onPress={() => setShowAccounts(true)}
+        control={<MonoLabel T={T} color={accent} size={11}>manage →</MonoLabel>} />
       <Rule T={T} />
       <Row T={T} label={syncing ? 'Syncing…' : 'Sync SMS history'} sub="re-scan bank texts for missed spends"
         onPress={syncing ? undefined : handleSync}
@@ -309,5 +317,7 @@ export default function SettingsScreen() {
         <MonoLabel T={T} color={T.faint} size={10}>v1.0 · made it worse, beautifully</MonoLabel>
       </View>
     </ScrollView>
+    <AccountsSheet visible={showAccounts} onClose={() => setShowAccounts(false)} />
+    </>
   );
 }

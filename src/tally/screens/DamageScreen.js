@@ -10,6 +10,7 @@ import { MonoLabel, Rule, Leader, ReceiptShell, Btn, Tag, Brand, MonthPicker, Tx
 import { totalSpent, groupByCat, copeZone, fmtMonthLabel } from '../data';
 import { getAIVerdict, askAI } from '../../services/aiAdvice';
 import { getBudgets } from '../../services/supabase';
+import { FREEMIUM } from '../../constants';
 import { useAuth } from '../../hooks/useAuth';
 
 function VerdictSkeleton({ T }) {
@@ -30,7 +31,7 @@ function VerdictSkeleton({ T }) {
 
 
 export default function DamageScreen() {
-  const { T, accent, accentInk, income, store, prefs, selectedMonth, setSelectedMonth, openTx, refreshing, refreshTxs } = useTally();
+  const { T, accent, accentInk, income, store, prefs, selectedMonth, setSelectedMonth, openTx, refreshing, refreshTxs, isPremium, openPaywall } = useTally();
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const receiptRef = useRef(null);
@@ -133,6 +134,7 @@ export default function DamageScreen() {
   }
 
   async function handleShare() {
+    if (!isPremium) { openPaywall(); return; }
     if (!receiptRef.current) return;
     setSharing(true);
     try {
@@ -288,6 +290,11 @@ export default function DamageScreen() {
                   <Text style={{ fontFamily: FONTS.sans, fontSize: 13, lineHeight: 19, color: T.text }}>{askAnswer}</Text>
                 </View>
               )}
+              {!isPremium && (
+                <Pressable onPress={openPaywall} style={{ marginTop: 10 }}>
+                  <MonoLabel T={T} color={accent} size={9.5}>pro gets {FREEMIUM.PREMIUM_AI_DAILY_LIMIT} AI insights & answers a day · free gets {FREEMIUM.FREE_AI_DAILY_LIMIT} · alert categorisation stays free ↗</MonoLabel>
+                </Pressable>
+              )}
             </View>
           )}
 
@@ -352,7 +359,7 @@ export default function DamageScreen() {
 
         <View style={{ marginTop: 18 }}>
           <Btn T={T} accent={accent} accentInk={accentInk} variant="ink" onPress={handleShare} disabled={sharing}>
-            {sharing ? 'capturing…' : 'print & share ↗'}
+            {sharing ? 'capturing…' : isPremium ? 'print & share ↗' : 'print & share · pro ↗'}
           </Btn>
         </View>
       </ScrollView>

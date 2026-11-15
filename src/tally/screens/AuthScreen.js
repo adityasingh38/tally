@@ -92,7 +92,7 @@ export default function AuthScreen() {
         </View>
 
         <MonoLabel T={T} color={T.faint} size={10} style={{ textAlign: 'center', paddingBottom: 28 }}>
-          we never store your texts · we just judge them
+          transaction details saved · full alerts not stored
         </MonoLabel>
       </KeyboardAvoidingView>
     </View>

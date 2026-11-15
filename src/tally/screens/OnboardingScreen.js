@@ -11,9 +11,9 @@ import { FONTS } from '../theme';
 import { MonoLabel, Btn, Brand } from '../ui';
 
 const FEATURES = [
-  ['AUTO', 'reads your bank SMS, logs every spend. No typing, no lying to yourself.'],
+  ['AUTO', 'reads supported bank and UPI alerts to log transactions for you.'],
   ['VERDICT', "an AI that's deeply unbothered about your feelings."],
-  ['RECEIPT', 'a shareable receipt of the monthly carnage.'],
+  ['RECEIPT', 'a shareable receipt of the monthly carnage with Tally Pro.'],
 ];
 
 export default function OnboardingScreen({ onDone }) {
@@ -85,6 +85,7 @@ export default function OnboardingScreen({ onDone }) {
       }
     } catch (e) {
       console.error('SMS sync failed:', e);
+      Alert.alert('SMS import failed', 'Your history was not fully imported. You can retry from Settings.');
     }
     setSyncing(false);
     onDone && onDone();
@@ -145,6 +146,9 @@ export default function OnboardingScreen({ onDone }) {
           </View>
         ) : (
           <>
+            <Text style={{ fontFamily: FONTS.sans, fontSize: 12, lineHeight: 18, color: T.dim, textAlign: 'center' }}>
+              With your permission, Tally reads bank SMS or supported app notifications to find transactions. It saves transaction details, not full alerts. If an alert needs AI categorisation, up to 100 characters of its text may be sent to our AI provider.
+            </Text>
             <Btn T={T} accent={accent} accentInk={accentInk} onPress={handleAllow}>allow SMS access</Btn>
             {notifAccessAvailable() && (
               <Btn T={T} accent={accent} accentInk={accentInk} variant="ghost" onPress={handleNotifAccess}>
@@ -152,9 +156,10 @@ export default function OnboardingScreen({ onDone }) {
               </Btn>
             )}
             <Btn T={T} accent={accent} accentInk={accentInk} variant="ghost" onPress={finish}>i'll log it manually</Btn>
-            <MonoLabel T={T} color={T.faint} size={9.5} style={{ textAlign: 'center', marginTop: 8 }}>
-              we never store your texts. We just judge them.
-            </MonoLabel>
+            <Text onPress={() => Linking.openURL('https://adityasingh38.github.io/tally/privacy.html').catch(() => {})}
+              style={{ fontFamily: FONTS.mono, fontSize: 10, color: accent, textAlign: 'center', marginTop: 8 }}>
+              read the privacy policy
+            </Text>
           </>
         )}
       </View>

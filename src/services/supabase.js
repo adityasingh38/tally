@@ -19,6 +19,7 @@ export async function getTransactions({ userId, limit = 50, offset = 0, fromDate
     .select('*')
     .eq('user_id', userId)
     .order('txn_date', { ascending: false })
+    .order('id', { ascending: false })
     .range(offset, offset + limit - 1);
 
   if (fromDate) {
@@ -26,6 +27,17 @@ export async function getTransactions({ userId, limit = 50, offset = 0, fromDate
   }
 
   return query;
+}
+
+export async function getAllTransactions({ userId, fromDate }) {
+  const pageSize = 500;
+  const all = [];
+  for (let offset = 0; ; offset += pageSize) {
+    const { data, error } = await getTransactions({ userId, fromDate, limit: pageSize, offset });
+    if (error) return { data: null, error };
+    all.push(...(data || []));
+    if (!data || data.length < pageSize) return { data: all, error: null };
+  }
 }
 
 export async function insertTransaction(tx) {
@@ -75,7 +87,10 @@ export async function insertTransactionIfNew(tx) {
     p_merchant: tx.merchant,
     p_merchant_tail: tx.merchant_tail,
     p_category: tx.category,
+    p_category_status: tx.category_status ?? 'done',
     p_source: tx.source,
+    p_account_bank_key: tx.account_bank_key ?? null,
+    p_account_last4: tx.account_last4 ?? null,
     p_txn_date: tx.txn_date,
     p_note: tx.note ?? null,
   });
@@ -85,8 +100,38 @@ export async function deleteAccount() {
   return supabase.functions.invoke('delete-account', { body: {} });
 }
 
+export async function getAccountProfiles(userId) {
+  return supabase.from('account_profiles').select('id, bank_key, last4, label')
+    .eq('user_id', userId).order('created_at', { ascending: true });
+}
+
+export async function insertAccountProfile(profile) {
+  return supabase.functions.invoke('account-profile', {
+    body: { bank_key: profile.bank_key, last4: profile.last4, label: profile.label },
+  });
+}
+
+export async function deleteAccountProfile(id) {
+  return supabase.from('account_profiles').delete().eq('id', id);
+}
+
 export async function updateTransactionCategory(id, category) {
-  return supabase.from('transactions').update({ category }).eq('id', id);
+  return supabase.from('transactions').update({ category, category_status: 'done' }).eq('id', id);
+}
+
+export async function getPendingCategoryTransactions(userId) {
+  return supabase.from('transactions')
+    .select('id, user_id, merchant, category, category_attempts, amount, type, source')
+    .eq('user_id', userId)
+    .eq('category_status', 'pending')
+    .lte('category_retry_at', new Date().toISOString())
+    .order('category_retry_at', { ascending: true })
+    .limit(20);
+}
+
+export async function updateCategoryRetry(id, userId, fields) {
+  return supabase.from('transactions').update(fields)
+    .eq('id', id).eq('user_id', userId).eq('category_status', 'pending');
 }
 
 export async function updateTransaction(id, fields) {

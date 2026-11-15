@@ -1,0 +1,1 @@
+case_id,source,bank_or_app,eligible,event_at,expected_type,expected_amount,expected_merchant,expected_category,observed_count,visible_at,observed_type,observed_amount,observed_merchant,observed_category,category_status,category_resolved_at,notes

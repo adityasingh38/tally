@@ -10,13 +10,17 @@
 // (supabase-js attaches the user's access token automatically via functions.invoke).
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { hasProEntitlement, revenueCatConfigured } from '../_shared/revenuecat.ts';
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const MODEL = "claude-haiku-4-5-20251001";
 const MAX_TOKENS = 512;
-const DAILY_LIMIT = 50; // AI calls per user per day
+const FREE_DAILY_LIMIT = 10;
+const PRO_DAILY_LIMIT = 50;
+const CATEGORIZATION_DAILY_LIMIT = 100;
+const CATEGORY_IDS = 'food, transport, shopping, entertainment, health, utilities, rent, transfer, investment, other';
 
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { autoRefreshToken: false, persistSession: false },
@@ -31,26 +35,90 @@ Deno.serve(async (req) => {
   const { data: { user }, error: userErr } = await admin.auth.getUser(token);
   if (userErr || !user) return json({ error: "Unauthorized" }, 401);
 
-  // Rate limit.
-  const { data: underLimit, error: rlErr } = await admin.rpc("increment_api_usage", {
-    p_user: user.id,
-    p_limit: DAILY_LIMIT,
-  });
-  if (rlErr) return json({ error: "Rate-limit check failed" }, 500);
-  if (!underLimit) return json({ error: "Daily AI limit reached. Try again tomorrow." }, 429);
-
-  let body: { system?: unknown; content?: unknown };
+  let body: Record<string, unknown>;
   try {
     body = await req.json();
   } catch {
     return json({ error: "Invalid JSON body" }, 400);
   }
-
-  const content = body.content;
-  if (typeof content !== "string" || content.length === 0) {
-    return json({ error: "`content` (string) is required" }, 400);
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return json({ error: 'Expected a JSON object' }, 400);
   }
-  const system = typeof body.system === "string" ? body.system : undefined;
+
+  const kind = body.kind === 'categorization' ? 'categorization'
+    : body.kind === 'purchase_plan' ? 'purchase_plan' : 'general';
+  let content: string;
+  let system: string | undefined;
+  if (kind === 'categorization') {
+    const rows = body.transactions;
+    if (!Array.isArray(rows) || rows.length < 1 || rows.length > 20 ||
+      !rows.every(row => row && typeof row.merchant === 'string' &&
+        typeof row.sms === 'string' && row.merchant.length <= 80 && row.sms.length <= 100)) {
+      return json({ error: 'Provide 1–20 short transactions' }, 400);
+    }
+    system = `Categorise Indian transactions. Allowed categories: ${CATEGORY_IDS}. Return ONLY a JSON array of {"index": number, "category": string, "confidence": number}. Keep indexes in input order. If uncertain, choose other.`;
+    content = rows.map((row, index) => `${index}: merchant=${JSON.stringify(row.merchant)} sms=${JSON.stringify(row.sms)}`).join('\n');
+  } else if (kind === 'purchase_plan') {
+    const goal = typeof body.goal === 'string' ? body.goal.trim() : '';
+    const cost = Number(body.cost);
+    const months = Number(body.months);
+    const income = body.income == null ? null : Number(body.income);
+    const spent = Number(body.spent);
+    if (!goal || goal.length > 80 || !Number.isFinite(cost) || cost <= 0 || cost > 1e9 ||
+      !Number.isInteger(months) || months < 1 || months > 60 ||
+      (income !== null && (!Number.isFinite(income) || income < 0 || income > 1e9)) ||
+      !Number.isFinite(spent) || spent < 0 || spent > 1e9 ||
+      !Array.isArray(body.categories) || body.categories.length > 10) {
+      return json({ error: 'Invalid purchase goal or spending summary' }, 400);
+    }
+    const categories = body.categories.filter((row): row is { label: string; amount: number } =>
+      !!row && typeof row.label === 'string' && row.label.length <= 40 &&
+      typeof row.amount === 'number' && Number.isFinite(row.amount) && row.amount >= 0);
+    if (categories.length !== body.categories.length) return json({ error: 'Invalid spending categories' }, 400);
+    const monthlyNeeded = Math.ceil(cost / months);
+    system = `You are Tally's purchase planner for Indian users. Use only the supplied figures. Give a practical plan in 4 short numbered steps. Mention the monthly saving target and whether the supplied income and spending suggest a shortfall. Suggest cuts in flexible categories only; do not suggest missing bills or claim to know savings or debts. If income is missing, say affordability cannot be confirmed. Do not recommend borrowing or financial products. Plain text, no markdown.`;
+    content = JSON.stringify({ goal, cost, months, monthlyNeeded, income, spentThisMonth: spent, categories });
+  } else {
+    if (typeof body.content !== 'string' || body.content.length === 0 || body.content.length > 4000) {
+      return json({ error: '`content` (1–4000 characters) is required' }, 400);
+    }
+    content = body.content;
+    system = typeof body.system === 'string' ? body.system.slice(0, 4000) : undefined;
+  }
+
+  // Categorisation is available to every user and has its own abuse cap.
+  // It never consumes the interactive AI quota.
+  if (kind === 'categorization') {
+    const { data: allowed, error } = await admin.rpc('increment_categorization_usage', {
+      p_user: user.id, p_limit: CATEGORIZATION_DAILY_LIMIT,
+    });
+    if (error) return json({ error: 'Categorisation limit check failed' }, 500);
+    if (!allowed) return json({ error: 'Daily categorisation limit reached' }, 429);
+  }
+
+  // The client cannot choose its tier. RevenueCat is queried by the verified
+  // Supabase user ID, which is also the SDK's App User ID.
+  let isPro = false;
+  if (kind !== 'categorization' && revenueCatConfigured()) {
+    try {
+      isPro = await hasProEntitlement(user.id);
+    } catch {
+      return json({ error: "Subscription check unavailable" }, 503);
+    }
+  }
+
+  if (kind === 'purchase_plan' && !isPro) {
+    return json({ error: 'Tally Pro is required for purchase plans' }, 403);
+  }
+
+  if (kind !== 'categorization') {
+    const dailyLimit = isPro ? PRO_DAILY_LIMIT : FREE_DAILY_LIMIT;
+    const { data: underLimit, error: rlErr } = await admin.rpc("increment_api_usage", {
+      p_user: user.id, p_limit: dailyLimit,
+    });
+    if (rlErr) return json({ error: "Rate-limit check failed" }, 500);
+    if (!underLimit) return json({ error: `Daily AI limit reached (${dailyLimit} requests). Try again tomorrow.` }, 429);
+  }
 
   try {
     const upstream = await fetch("https://api.anthropic.com/v1/messages", {

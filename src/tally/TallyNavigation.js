@@ -13,6 +13,7 @@ import NetInfo from '@react-native-community/netinfo';
 import { TallyProvider, useTally } from './TallyContext';
 import TallyTabBar from './TallyTabBar';
 import { flushPendingTransactions } from '../services/offlineQueue';
+import { retryPendingCategories } from '../services/categoryRetry';
 
 import HomeScreen from './screens/HomeScreen';
 import FeedScreen from './screens/FeedScreen';
@@ -73,14 +74,6 @@ function MainTabs() {
 // Real-data bridge. Mounted INSIDE the navigator (so useFocusEffect is legal) —
 // pushes your Supabase transactions into the Tally store. When there are no real
 // transactions the store falls back to demo seed data automatically.
-// Load 365 days: free tier gates display to 30 days in TallyContext already,
-// but having more data improves trend analysis, lifetime stats, and salary detection.
-const fromDate365 = (() => {
-  const d = new Date();
-  d.setFullYear(d.getFullYear() - 1);
-  return d;
-})();
-
 // Map a Supabase row onto the shape the Tally screens expect:
 // they read tx.when (date label) and tx.sms (source flag), which the DB lacks.
 function toTallyTx(tx) {
@@ -89,13 +82,19 @@ function toTallyTx(tx) {
     when: tx.txn_date
       ? new Date(tx.txn_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
       : '',
-    sms: tx.source ? tx.source === 'sms' : true,
+    sms: !!tx.source && tx.source !== 'manual',
   };
 }
 
 function TxBridge({ userId }) {
-  const { setRealTransactions, registerRefetch } = useTally();
-  const { transactions, loading, refetch } = useTransactions(userId, { fromDate: fromDate365, limit: 500 });
+  const { setRealTransactions, registerRefetch, isPremium } = useTally();
+  const fromDate = React.useMemo(() => {
+    if (isPremium) return undefined;
+    const d = new Date();
+    d.setDate(d.getDate() - 30);
+    return d;
+  }, [isPremium]);
+  const { transactions, loading, refetch } = useTransactions(userId, { fromDate, all: true });
 
   React.useEffect(() => { registerRefetch(refetch); }, [refetch, registerRefetch]);
 
@@ -125,6 +124,7 @@ function Inner() {
   // Your real auth gate (kept intact). If you don't have AuthScreen wired yet,
   // you can temporarily replace this with `const user = true, hasOnboarded = true;`
   const { user, loading, hasOnboarded, completeOnboarding } = useAuth();
+  const { refreshTxs } = useTally();
 
   React.useEffect(() => {
     const sub = Linking.addEventListener('url', ({ url }) => handleDeepLink(url));
@@ -135,11 +135,16 @@ function Inner() {
   // the moment connectivity actually returns (not just next headless event).
   React.useEffect(() => {
     if (!user?.id) return;
-    const unsubscribe = NetInfo.addEventListener((state) => {
-      if (state.isConnected) flushPendingTransactions(user.id).catch(() => {});
-    });
-    return unsubscribe;
-  }, [user?.id]);
+    const flush = () => flushPendingTransactions(user.id)
+      .then(() => retryPendingCategories(user.id))
+      .then(changed => { if (changed) refreshTxs(); })
+      .catch(() => {});
+    const unsubscribe = NetInfo.addEventListener(state => { if (state.isConnected) flush(); });
+    const timer = setInterval(() => {
+      NetInfo.fetch().then(state => { if (state.isConnected) flush(); }).catch(() => {});
+    }, 5 * 60_000);
+    return () => { unsubscribe(); clearInterval(timer); };
+  }, [user?.id, refreshTxs]);
 
   if (loading) return <View style={{ flex: 1, backgroundColor: '#0E0F0C' }} />;
 

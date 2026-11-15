@@ -19,7 +19,7 @@ function hasPremium(info) {
   return !!info?.entitlements?.active?.[ENTITLEMENT];
 }
 
-export function usePremium() {
+export function usePremium(userId) {
   const [isPremium, setIsPremium] = useState(false);
   const [loading, setLoading] = useState(true);
   const [offerings, setOfferings] = useState(null);
@@ -40,18 +40,32 @@ export function usePremium() {
       return;
     }
 
+    if (!userId) {
+      setIsPremium(false);
+      setLoading(false);
+      return;
+    }
+
     initRevenueCat();
 
-    Purchases.getCustomerInfo()
-      .then(info => setIsPremium(hasPremium(info)))
-      .catch(() => setIsPremium(false))
-      .finally(() => setLoading(false));
+    let active = true;
+    setIsPremium(false);
+    setLoading(true);
+    // Use the Supabase user ID as RevenueCat's App User ID so the server can
+    // verify this account's entitlement before applying the Pro AI quota.
+    Purchases.logIn(userId)
+      .then(({ customerInfo }) => { if (active) setIsPremium(hasPremium(customerInfo)); })
+      .catch(() => { if (active) setIsPremium(false); })
+      .finally(() => { if (active) setLoading(false); });
 
     refreshOfferings();
-  }, []);
+    return () => { active = false; };
+  }, [userId]);
 
   async function purchase(packageToBuy) {
     try {
+      if (!userId) return { success: false, error: 'Sign in before purchasing Pro.' };
+      await Purchases.logIn(userId);
       const { customerInfo } = await Purchases.purchasePackage(packageToBuy);
       const active = hasPremium(customerInfo);
       setIsPremium(active);
@@ -68,6 +82,8 @@ export function usePremium() {
 
   async function restore() {
     try {
+      if (!userId) return false;
+      await Purchases.logIn(userId);
       const info = await Purchases.restorePurchases();
       const active = hasPremium(info);
       setIsPremium(active);

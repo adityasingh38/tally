@@ -14,37 +14,44 @@ specifically, since notification-listener is the safer primary path (see
 Tally · track the damage
 
 ## Short description (80 char max)
-auto-logs every spend, roasts you for it. Zero manual entry.
+logs supported bank alerts, roasts your spending. Less manual entry.
 
 ## Full description (4000 char max)
 
 you know it's bad. Tally just makes it official.
 
-tally watches your bank and UPI apps and logs every transaction the second
-it happens: no typing, no receipts, no "I'll add it later" that never
-happens. Debit, credit, doesn't matter. If money moved, tally saw it.
+tally can read supported bank SMS and bank/UPI app notifications, then turn
+transaction alerts into a spending feed. You can also add or correct entries
+yourself. Capture depends on your permissions and the alerts your bank sends.
 
 **what it does**
-- auto-logs transactions in real time, straight from your bank/UPI apps
+- captures supported transaction alerts from bank SMS and bank/UPI apps
 - sorts everything into categories automatically (food, transport,
   shopping, the works)
 - an AI that actually tells you the truth about your spending, not a
   cheerful chart pretending everything's fine
 - budgets with alerts before you blow past them, not after
-- clean, shareable spend receipts
+- a monthly damage receipt in the insights screen
+- group captured transactions by bank name and last four digits when alerts include them
 - export your full history to CSV whenever you want it
-- works with every major Indian bank and UPI app
+- supports alerts from selected Indian banks and UPI apps
 
 **tally pro**
 - full history, not just the last 30 days
-- unlimited AI roasts and weekly summaries
-- unlimited linked accounts
+- purchase plans for things you want to buy, with monthly savings targets
+- 50 interactive AI requests per day instead of 10 on free; alert categorisation is free
+- share your monthly damage receipt
+- group more than one account's captured transactions (one label on free)
 - home-screen widget for your live broke-streak
 
 **your data, straight**
-tally never reads or stores your messages: only the transaction details
-(amount, merchant, date) get pulled out and saved. Nothing else. We don't
-sell your data, ever. Full breakdown in the privacy policy, linked below.
+with your permission, tally reads bank SMS or supported app notifications
+to identify transactions. It stores transaction details, not full alerts.
+Account grouping uses bank names and last four digits, not full card numbers;
+it does not connect directly to your bank.
+For an alert that needs AI categorisation, its merchant and up to 100
+characters of text may be sent to our AI provider. We don't sell your data.
+Full breakdown in the privacy policy, linked below.
 
 built by one person who also hates checking their bank balance. Track the
 damage. Financially feral.
@@ -55,14 +62,18 @@ damage. Financially feral.
   date. Not sold. Shared only with Anthropic (AI categorisation, transient),
   Supabase (storage), RevenueCat (subscription status).
 - **Personal info collected**: email (account/auth only).
-- **Data NOT collected**: contacts, precise location, call logs, raw message
-  content, photos.
+- **Data NOT stored as transaction records**: full raw SMS or notification
+  bodies. Limited alert text may be sent for AI categorisation.
 - **Encryption in transit**: yes (HTTPS/TLS).
 - **User can request deletion**: yes — Settings → Delete account (in-app,
   no separate request needed), full cascade delete.
 - **Privacy policy URL**: https://adityasingh38.github.io/tally/PRIVACY_POLICY.html
 
-## Graphics & Screenshots (Generated)
+## Graphics & Screenshots (Generated; review before publishing)
+
+The Pro slide currently describes benefits that are not implemented as paid
+features. Regenerate it from the live paywall before submission. Check every
+other slide against the release build and the capture validation results.
 - **Feature graphic (1024×500)**: [docs/screenshots/feature_graphic.png](screenshots/feature_graphic.png)
 - **Play Store showcase slides (1080×2280)**:
   - Slide 1: [docs/screenshots/store/store_01_dashboard.png](screenshots/store/store_01_dashboard.png)

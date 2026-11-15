@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { getTransactions, getSpendingByCategory } from '../services/supabase';
+import { getTransactions, getAllTransactions, getSpendingByCategory } from '../services/supabase';
 import { CATEGORIES } from '../constants';
 
-export function useTransactions(userId, { fromDate, limit = 50 } = {}) {
+export function useTransactions(userId, { fromDate, limit = 50, all = false } = {}) {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -11,11 +11,13 @@ export function useTransactions(userId, { fromDate, limit = 50 } = {}) {
   const fetch = useCallback(async () => {
     if (!userId) { setLoading(false); return; }
     setLoading(true);
-    const { data, error } = await getTransactions({ userId, limit, fromDate });
+    const { data, error } = all
+      ? await getAllTransactions({ userId, fromDate })
+      : await getTransactions({ userId, limit, fromDate });
     if (error) setError(error.message);
     else setTransactions(data || []);
     setLoading(false);
-  }, [userId, fromDate, limit]);
+  }, [userId, fromDate, limit, all]);
 
   // Refetch whenever the screen regains focus (covers live SMS inserts,
   // post-sync data, and edits made on other screens).

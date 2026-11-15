@@ -4,6 +4,7 @@ import { categoriseTransactions } from './categoriser';
 import { supabase, insertTransactions, checkDuplicate, insertTransactionIfNew } from './supabase';
 import { checkBudgetAlerts } from './budgetAlerts';
 import { enqueuePending, flushPendingTransactions } from './offlineQueue';
+import { retryPendingCategories } from './categoryRetry';
 
 const BATCH_SIZE = 20;
 
@@ -13,67 +14,72 @@ export async function syncHistoricalSMS(userId, onProgress) {
       JSON.stringify({ box: 'inbox', maxCount: 500 }),
       reject,
       async (count, smsList) => {
-        const messages = JSON.parse(smsList);
-        // Match by known sender ID, or fall back to content for unlisted banks.
-        const bankMessages = messages.filter(
-          sms => isBankSMS(sms.address) || looksLikeBankSMS(sms.body)
-        );
+        try {
+          const messages = JSON.parse(smsList);
+          // Match by known sender ID, or fall back to content for unlisted banks.
+          const bankMessages = messages.filter(
+            sms => isBankSMS(sms.address) || looksLikeBankSMS(sms.body)
+          );
 
-        onProgress?.({ total: bankMessages.length, processed: 0 });
+          onProgress?.({ total: bankMessages.length, processed: 0 });
 
-        const parsed = bankMessages
-          .map(sms => {
-            const result = parseSMS(sms.body, sms.address);
-            if (!result) return null;
-            return {
-              ...result,
-              txn_date: new Date(parseInt(sms.date)).toISOString(),
-              user_id: userId,
-            };
-          })
-          .filter(Boolean);
+          const parsed = bankMessages
+            .map(sms => {
+              const result = parseSMS(sms.body, sms.address);
+              if (!result) return null;
+              return {
+                ...result,
+                txn_date: new Date(parseInt(sms.date)).toISOString(),
+                user_id: userId,
+              };
+            })
+            .filter(Boolean);
 
-        // Deduplicate and categorise in batches
-        let inserted = 0;
-        for (let i = 0; i < parsed.length; i += BATCH_SIZE) {
-          const batch = parsed.slice(i, i + BATCH_SIZE);
+          // Deduplicate and categorise in batches.
+          let inserted = 0;
+          for (let i = 0; i < parsed.length; i += BATCH_SIZE) {
+            const batch = parsed.slice(i, i + BATCH_SIZE);
 
-          // Filter duplicates
-          const fresh = [];
-          for (const tx of batch) {
-            const isDup = await checkDuplicate({
-              userId,
+            const fresh = [];
+            for (const tx of batch) {
+              const isDup = await checkDuplicate({
+                userId,
+                amount: tx.amount,
+                type: tx.type,
+                txnDate: new Date(tx.txn_date),
+                merchantTail: tx.merchant_tail,
+              });
+              if (!isDup) fresh.push(tx);
+            }
+
+            if (fresh.length === 0) continue;
+
+            const categorised = await categoriseTransactions(fresh);
+            const toInsert = categorised.map(tx => ({
+              user_id: tx.user_id,
               amount: tx.amount,
               type: tx.type,
-              txnDate: new Date(tx.txn_date),
-              merchantTail: tx.merchant_tail,
-            });
-            if (!isDup) fresh.push(tx);
+              merchant: tx.merchant,
+              merchant_tail: tx.merchant_tail,
+              category: tx.category,
+              category_status: tx.category_status,
+              source: tx.source,
+              account_bank_key: tx.account_bank_key,
+              account_last4: tx.account_last4,
+              txn_date: tx.txn_date,
+            }));
+
+            const { error } = await insertTransactions(toInsert);
+            if (error) throw error;
+            inserted += toInsert.length;
+            onProgress?.({ total: bankMessages.length, processed: i + batch.length, inserted });
           }
 
-          if (fresh.length === 0) continue;
-
-          const categorised = await categoriseTransactions(fresh);
-          const toInsert = categorised.map(tx => ({
-            user_id: tx.user_id,
-            amount: tx.amount,
-            type: tx.type,
-            merchant: tx.merchant,
-            merchant_tail: tx.merchant_tail,
-            category: tx.category,
-            source: tx.source,
-            txn_date: tx.txn_date,
-          }));
-
-          await insertTransactions(toInsert);
-          inserted += toInsert.length;
-          onProgress?.({ total: bankMessages.length, processed: i + batch.length, inserted });
+          if (inserted > 0) checkBudgetAlerts(userId).catch(() => {});
+          resolve({ total: bankMessages.length, inserted });
+        } catch (error) {
+          reject(error);
         }
-
-        if (inserted > 0) {
-          checkBudgetAlerts(userId).catch(() => {});
-        }
-        resolve({ total: bankMessages.length, inserted });
       }
     );
   });
@@ -98,6 +104,7 @@ export async function handleHeadlessSms({ originatingAddress, messageBody, times
   // Opportunistic retry of anything queued from a previous offline capture —
   // this may be the first headless invocation since connectivity returned.
   await flushPendingTransactions(userId).catch(() => {});
+  await retryPendingCategories(userId).catch(() => {});
 
   // Real SMS timestamp from the native receiver, not the time this headless
   // task happened to run (Android can defer it minutes under Doze).
@@ -112,7 +119,10 @@ export async function handleHeadlessSms({ originatingAddress, messageBody, times
     merchant: categorised.merchant,
     merchant_tail: categorised.merchant_tail,
     category: categorised.category,
+    category_status: categorised.category_status,
     source: categorised.source,
+    account_bank_key: categorised.account_bank_key,
+    account_last4: categorised.account_last4,
     txn_date: categorised.txn_date,
   };
   // Atomic dedup+insert — closes the race between this and the notification
@@ -146,6 +156,7 @@ export async function handleHeadlessNotification({ packageName, body, postTime }
   if (!userId) return;
 
   await flushPendingTransactions(userId).catch(() => {});
+  await retryPendingCategories(userId).catch(() => {});
 
   // Real notification post time, not headless-task-execution time.
   const txnDate = postTime ? new Date(postTime) : new Date();
@@ -159,7 +170,10 @@ export async function handleHeadlessNotification({ packageName, body, postTime }
     merchant: categorised.merchant,
     merchant_tail: categorised.merchant_tail,
     category: categorised.category,
+    category_status: categorised.category_status,
     source: categorised.source,
+    account_bank_key: categorised.account_bank_key,
+    account_last4: categorised.account_last4,
     txn_date: categorised.txn_date,
   };
   // Atomic dedup+insert — see handleHeadlessSms for why this replaced

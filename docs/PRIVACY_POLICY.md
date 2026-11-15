@@ -1,10 +1,11 @@
 # Privacy Policy — Tally
 
 **Effective date:** 9 June 2026
-**Last updated:** 9 June 2026
+**Last updated:** 15 November 2026
 
-Tally ("Tally", "we", "us") is a personal expense-tracking app that reads your
-bank transaction SMS to automatically log your spending and show you insights.
+Tally ("Tally", "we", "us") is a personal expense-tracking app that reads bank
+SMS and supported bank/UPI app notifications, with your permission, to log
+transactions and show you insights.
 This policy explains what we collect, why, how we handle it, and your rights.
 
 ---
@@ -19,21 +20,27 @@ Contact: **adityasuper38@gmail.com**.
 - Email address and authentication credentials (handled by our auth provider,
   Supabase). Used to create and secure your account.
 
-**b) Transaction data derived from SMS**
-- Tally reads SMS **only** from known bank/UPI sender IDs (and messages that
-  clearly look like bank transaction alerts). From those it extracts:
+**b) Transaction data derived from alerts**
+- If you grant SMS access, Tally checks SMS sender IDs and message content for
+  bank transaction alerts. If you grant notification access, Android grants
+  access to notifications, but Tally's listener processes alerts only from its
+  supported bank/UPI app list. From matching alerts it extracts:
   transaction **amount**, **type** (debit/credit), **merchant name**, the last
   characters of the merchant identifier, **date/time**, and the **sender ID**.
-- **The raw text of your SMS is parsed on your device and is NOT uploaded or
-  stored on our servers.** Only the extracted transaction fields above are
-  stored.
-- Non-bank, personal SMS are ignored beyond a sender/keyword check and are never
-  read in full, uploaded, or stored.
+  When an alert contains a masked account or card identifier, Tally also saves
+  the bank name and its **last four digits** for account grouping.
+- Full raw alert bodies are not stored as transaction records. For alerts that
+  cannot be categorised by local rules, Tally sends the merchant and up to 100
+  characters of alert text through our Supabase Edge Function to Anthropic.
+  This short excerpt can contain information present in the alert, such as
+  masked account details. Do not grant access if you do not want this processing.
+- Alerts that do not match the bank/transaction filters are ignored by Tally.
 
 **c) App data you provide**
-- Budgets and monthly limits, your stated money goal, category corrections, and
-  display preferences. Preferences and your goal are stored locally on the
-  device; budgets and categorised transactions are stored in your account.
+- Budgets and monthly limits, your stated money goal, category corrections,
+  account labels (bank name, last four digits and nickname), and display
+  preferences. Preferences and your goal are stored locally on the device;
+  account labels, budgets and categorised transactions are stored in your account.
 
 **d) Subscription data**
 - If you purchase Tally Pro, subscription status is managed by our payments
@@ -52,24 +59,27 @@ We do **not** sell your personal data, and we do **not** use it for third-party
 advertising.
 
 ## 4. AI processing
-To categorise transactions and generate spending insights, limited transaction
-context (such as the merchant name and transaction text) is sent to our AI
-provider, **Anthropic**, via its API. This data is processed to return a
-category or insight and is not used by us to build advertising profiles. See
-Anthropic's privacy terms for their handling of API data.
+To categorise ambiguous alerts, the merchant and up to 100 characters of alert
+text are sent to **Anthropic** via our Supabase Edge Function. AI commentary may
+also send category totals, spending totals, income you entered, and a question
+you ask Tally. If you request a purchase plan, we also send the item, price and
+timeframe you enter. Purchase plans are displayed in the app and are not saved
+to your account. We do not use this data to build advertising profiles. See
+Anthropic's privacy terms for its handling of API data.
 
 ## 5. Permissions we request (Android)
 - **SMS (READ_SMS / RECEIVE_SMS)** — to read bank transaction SMS and
-  auto-log spending. This is the app's core function. SMS bodies are parsed
-  on-device; raw content is not stored on our servers. You may decline and use
-  the app with manual entry instead.
-- **Notifications** — to send budget alerts and your weekly summary.
+  auto-log spending, including importing past alerts. You may decline and use
+  notification capture or manual entry instead.
+- **Notification access** — to capture transaction notifications from supported
+  bank/UPI apps. Android grants broad notification access; Tally's listener
+  filters by app package. You can decline and use SMS or manual entry instead.
+- **Post notifications** — to send budget alerts and spending summaries.
 
 ## 6. Where your data is stored
 - Account and transaction records are stored with **Supabase** (managed
   PostgreSQL). Data is transmitted over encrypted connections (HTTPS/TLS).
-- Some data (preferences, goal, the vendor/queue and crypto material if
-  applicable) is stored locally on your device.
+- Preferences and some pending transactions are stored locally on your device.
 
 ## 7. Data sharing
 We share data only with the service providers needed to run Tally:
@@ -101,7 +111,7 @@ any request; we respond within the timeframe required by law.
 
 ## 10. Security
 We use encrypted transport, scoped access controls, and on-device parsing of
-SMS to minimise the data that leaves your phone. No system is perfectly secure;
+alerts to minimise the data that leaves your phone. No system is perfectly secure;
 we cannot guarantee absolute security but work to protect your data.
 
 ## 11. Children

@@ -1,8 +1,12 @@
 // src/tally/screens/FeedScreen.js  → your "Transactions" tab
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, Text, ScrollView, Pressable, RefreshControl, TextInput } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
+import { useAuth } from '../../hooks/useAuth';
+import { getAccountProfiles } from '../../services/supabase';
+import { matchAccount } from '../../services/accounts';
 import { FONTS, fmtINR } from '../theme';
 import { MonoLabel, ScreenHeader, MonthPicker, Rule } from '../ui';
 import { catMeta, REACTIONS } from '../data';
@@ -44,11 +48,26 @@ export default function FeedScreen({ navigation }) {
   const { T, accent, accentInk, store, refreshing, refreshTxs, openTx,
     selectedMonth, setSelectedMonth, isPremium, openPaywall } = useTally();
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
   const [filter, setFilter] = useState('all');
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState('date'); // 'date' | 'amount'
   const [catFilter, setCatFilter] = useState(null); // category id or null
   const [allTime, setAllTime] = useState(false);
+  const [accounts, setAccounts] = useState([]);
+  const [accountFilter, setAccountFilter] = useState(null);
+
+  useFocusEffect(useCallback(() => {
+    if (!user?.id) return;
+    let active = true;
+    getAccountProfiles(user.id).then(({ data }) => {
+      if (active && data) {
+        setAccounts(data);
+        setAccountFilter(current => current && !data.some(item => item.id === current) ? null : current);
+      }
+    });
+    return () => { active = false; };
+  }, [user?.id]));
 
   const sourceTxs = allTime ? store.allTxs : store.txs;
 
@@ -57,7 +76,8 @@ export default function FeedScreen({ navigation }) {
     const queryOk = !query || (tx.merchant || '').toLowerCase().includes(query.toLowerCase())
       || (tx.note || '').toLowerCase().includes(query.toLowerCase());
     const catOk = !catFilter || tx.category === catFilter;
-    return typeOk && queryOk && catOk;
+    const accountOk = !accountFilter || matchAccount(tx, accounts)?.id === accountFilter;
+    return typeOk && queryOk && catOk && accountOk;
   });
 
   // unique categories present in current view (before cat filter applied)
@@ -118,6 +138,24 @@ export default function FeedScreen({ navigation }) {
         })}
       </View>
 
+      {accounts.length > 0 && (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
+          <View style={{ flexDirection: 'row', gap: 6 }}>
+            {[{ id: null, label: 'all accounts' }, ...accounts].map(account => {
+              const on = accountFilter === account.id;
+              return (
+                <Pressable key={account.id || 'all'} onPress={() => setAccountFilter(account.id)}
+                  style={{ paddingVertical: 6, paddingHorizontal: 10, borderRadius: 999,
+                    borderWidth: 1, borderColor: on ? accent : T.line,
+                    backgroundColor: on ? accent + '22' : 'transparent' }}>
+                  <MonoLabel T={T} color={on ? accent : T.dim} size={9}>{account.label}</MonoLabel>
+                </Pressable>
+              );
+            })}
+          </View>
+        </ScrollView>
+      )}
+
       {/* category filter chips — shown only when there are multiple categories */}
       {activeCats.length > 1 && (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: -10, marginBottom: 14 }}>
@@ -175,6 +213,7 @@ export default function FeedScreen({ navigation }) {
               const m = catMeta(tx.category);
               const credit = tx.type === 'credit';
               const picked = store.reactions[tx.id];
+              const account = matchAccount(tx, accounts);
               return (
                 <View key={tx.id}>
                   {i > 0 && <Rule T={T} dashed={false} />}
@@ -187,6 +226,9 @@ export default function FeedScreen({ navigation }) {
                           ? <Text style={{ fontFamily: FONTS.sans, fontStyle: 'italic', fontSize: 12.5, color: T.dim, marginTop: 3 }}>"{tx.note}"</Text>
                           : <MonoLabel T={T} color={T.faint} size={10} style={{ marginTop: 3 }}>{m.tag}{tx.sms ? ' · sms' : ' · manual'}</MonoLabel>
                         }
+                        {account && <MonoLabel T={T} color={accent} size={9} style={{ marginTop: 3 }}>{account.label}</MonoLabel>}
+                        {tx.category_status === 'pending' && <MonoLabel T={T} color={accent} size={9} style={{ marginTop: 3 }}>category pending · retrying</MonoLabel>}
+                        {tx.category_status === 'review' && <MonoLabel T={T} color={accent} size={9} style={{ marginTop: 3 }}>check category ↗</MonoLabel>}
                       </View>
                       <Text style={{ fontFamily: FONTS.monoBold, fontSize: 16, color: credit ? T.creditText : T.text }}>
                         {credit ? '+' : '−'}{fmtINR(tx.amount)}

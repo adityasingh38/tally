@@ -47,7 +47,9 @@ export default function TxDetailSheet({ visible, tx, onClose }) {
   }
 
   async function handleRecategorize(newCat) {
-    if (newCat === tx.category) { setEditingCat(false); return; }
+    if (newCat === tx.category && (tx.category_status || 'done') === 'done') {
+      setEditingCat(false); return;
+    }
     setSaving(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const { success, error } = await store.updateTxCategory(tx, newCat);
@@ -163,6 +165,16 @@ export default function TxDetailSheet({ visible, tx, onClose }) {
 
           <View style={{ marginTop: 20 }}>
             <Rule T={T} />
+            {tx.category_status === 'pending' && (
+              <MonoLabel T={T} color={accent} size={10} style={{ marginTop: 12 }}>
+                category pending · Tally will retry automatically
+              </MonoLabel>
+            )}
+            {tx.category_status === 'review' && (
+              <MonoLabel T={T} color={accent} size={10} style={{ marginTop: 12 }}>
+                category needs review · choose the right one below
+              </MonoLabel>
+            )}
             <Pressable onPress={() => setEditingCat(v => !v)}
               style={{ paddingVertical: 13, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
               <View style={{ flex: 1 }}>

@@ -9,18 +9,24 @@ import { getBudgets, upsertBudget, deleteBudget } from '../../services/supabase'
 import { FONTS, fmtINR } from '../theme';
 import { MonoLabel, ScreenHeader, Tag } from '../ui';
 import { groupByCat, CAT_META } from '../data';
+import { createPurchasePlan } from '../../services/aiAdvice';
 
 // Categories you can set a "delusion" (budget) on — skip transfers/other/investment.
 const BUDGETABLE = ['rent', 'food', 'shopping', 'entertainment', 'utilities', 'transport', 'health'];
 
 export default function BudgetScreen() {
-  const { T, accent, accentInk, store } = useTally();
+  const { T, accent, accentInk, store, income, isPremium, openPaywall } = useTally();
   const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const [budgets, setBudgets] = useState({});   // { category: monthly_limit }
   const [editing, setEditing] = useState(null);
   const [inputVal, setInputVal] = useState('');
   const [saving, setSaving] = useState(false);
+  const [goal, setGoal] = useState('');
+  const [goalCost, setGoalCost] = useState('');
+  const [goalMonths, setGoalMonths] = useState('');
+  const [plan, setPlan] = useState(null);
+  const [planning, setPlanning] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -67,10 +73,91 @@ export default function BudgetScreen() {
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const daysLeft = daysInMonth - dayOfMonth;
 
+  async function makePlan() {
+    if (!isPremium) { openPaywall(); return; }
+    const name = goal.trim();
+    const cost = Number(goalCost.replace(/[,\s₹]/g, ''));
+    const months = Number(goalMonths);
+    if (!name || name.length > 80 || !Number.isFinite(cost) || cost <= 0 || cost > 1e9 ||
+      !Number.isInteger(months) || months < 1 || months > 60) {
+      Alert.alert('Check your goal', 'Add an item, a positive price, and a timeframe from 1 to 60 months.');
+      return;
+    }
+    const currentTxs = store.allTxs.filter(tx => {
+      if (!tx.txn_date) return false;
+      const date = new Date(tx.txn_date);
+      return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+    });
+    const categories = groupByCat(currentTxs).slice(0, 10)
+      .map(cat => ({ label: cat.label, amount: Math.round(cat.amount) }));
+    const spent = currentTxs.filter(tx => tx.type !== 'credit')
+      .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+    setPlanning(true);
+    setPlan(null);
+    try {
+      const text = await createPurchasePlan({ goal: name, cost, months,
+        income: income || null, spent: Math.round(spent), categories });
+      setPlan({ goal: name, cost, months, text });
+    } catch (error) {
+      Alert.alert('Plan unavailable', error.message);
+    } finally {
+      setPlanning(false);
+    }
+  }
+
   return (
     <ScrollView style={{ flex: 1, backgroundColor: T.bg }}
       contentContainerStyle={{ paddingHorizontal: 18, paddingTop: insets.top + 14, paddingBottom: 120 }}>
       <ScreenHeader T={T} accent={accent} title="delusions" sub="the limits you set · vs reality" />
+
+      <View style={{ marginTop: 18, padding: 18, backgroundColor: T.card,
+        borderWidth: 1, borderColor: T.line, borderRadius: 16 }}>
+        <MonoLabel T={T} color={accent} size={10}>TALLY PRO · PURCHASE PLAN</MonoLabel>
+        <Text style={{ fontFamily: FONTS.display, fontSize: 25, color: T.text, marginTop: 8 }}>
+          want to buy something?
+        </Text>
+        <Text style={{ fontFamily: FONTS.sans, fontSize: 13, lineHeight: 19,
+          color: T.dim, marginTop: 5, marginBottom: 14 }}>
+          Tell Tally what it is, the price and when you want it. Get a monthly savings target and a plan based on your spending.
+        </Text>
+        <TextInput value={goal} onChangeText={value => { setGoal(value); setPlan(null); }}
+          maxLength={80} placeholder="what do you want to buy?" accessibilityLabel="Item to buy"
+          placeholderTextColor={T.faint}
+          style={{ backgroundColor: T.bg, borderWidth: 1, borderColor: T.line,
+            borderRadius: 8, padding: 11, color: T.text, fontFamily: FONTS.sans, marginBottom: 8 }} />
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <TextInput value={goalCost} onChangeText={value => { setGoalCost(value); setPlan(null); }}
+            keyboardType="numeric" placeholder="price ₹" accessibilityLabel="Purchase price in rupees"
+            placeholderTextColor={T.faint}
+            style={{ flex: 1, backgroundColor: T.bg, borderWidth: 1, borderColor: T.line,
+              borderRadius: 8, padding: 11, color: T.text, fontFamily: FONTS.mono, minWidth: 0 }} />
+          <TextInput value={goalMonths} onChangeText={value => { setGoalMonths(value); setPlan(null); }}
+            keyboardType="number-pad" placeholder="months" accessibilityLabel="Months to save"
+            placeholderTextColor={T.faint}
+            style={{ flex: 1, backgroundColor: T.bg, borderWidth: 1, borderColor: T.line,
+              borderRadius: 8, padding: 11, color: T.text, fontFamily: FONTS.mono, minWidth: 0 }} />
+        </View>
+        {Number(goalCost.replace(/[,\s₹]/g, '')) > 0 && Number(goalMonths) > 0 && (
+          <MonoLabel T={T} color={T.dim} size={10} style={{ marginTop: 10 }}>
+            target: {fmtINR(Math.ceil(Number(goalCost.replace(/[,\s₹]/g, '')) / Number(goalMonths)))} per month
+          </MonoLabel>
+        )}
+        <Pressable onPress={makePlan} disabled={planning}
+          style={{ marginTop: 14, padding: 12, borderRadius: 8, backgroundColor: accent,
+            alignItems: 'center', opacity: planning ? 0.6 : 1 }}>
+          {planning ? <ActivityIndicator color={accentInk} size="small" />
+            : <Text style={{ color: accentInk, fontFamily: FONTS.monoBold, fontSize: 12 }}>
+                {isPremium ? 'MAKE MY PLAN' : 'UNLOCK PLAN WITH PRO ↗'}
+              </Text>}
+        </Pressable>
+        {plan && (
+          <View style={{ marginTop: 14, padding: 13, borderRadius: 8, backgroundColor: T.bg }}>
+            <MonoLabel T={T} color={accent} size={10}>{plan.goal} · {fmtINR(plan.cost)} · {plan.months} months</MonoLabel>
+            <Text style={{ color: T.text, fontFamily: FONTS.sans, fontSize: 13,
+              lineHeight: 20, marginTop: 8 }}>{plan.text}</Text>
+          </View>
+        )}
+      </View>
 
       {/* summary — only when at least one budget is set */}
       {totalLimit > 0 && (

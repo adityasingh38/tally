@@ -4,12 +4,14 @@ import { View, Text, ScrollView, Pressable, Modal, Alert, ActivityIndicator, Lin
 import { useTally } from '../TallyContext';
 import { FONTS } from '../theme';
 import { MonoLabel, Btn, Tag, Brand } from '../ui';
+import { FREEMIUM } from '../../constants';
 
 const PERKS = [
   ['FULL', 'every transaction, forever · not just 30 days'],
-  ['AI++', 'unlimited unhinged verdicts + weekly roasts'],
-  ['RECEIPT', 'hi-res shareable receipts, no watermark'],
-  ['BANKS', 'connect unlimited accounts & cards'],
+  ['AI++', `${FREEMIUM.PREMIUM_AI_DAILY_LIMIT} AI insights and answers a day · free gets ${FREEMIUM.FREE_AI_DAILY_LIMIT}`],
+  ['PLAN', 'turn a purchase into a monthly savings plan'],
+  ['RECEIPT', 'share your monthly damage receipt'],
+  ['BANKS', 'group more than one bank or card from captured alerts'],
   ['WIDGET', 'the broke-streak widget for your home screen'],
 ];
 // Package types shortcut off the RevenueCat Offering object (offerings.monthly,

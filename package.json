@@ -60,9 +60,10 @@
   },
   "private": true,
   "jest": {
-    "preset": "jest-expo"
+    "preset": "jest-expo/node"
   },
   "devDependencies": {
+    "@react-native/jest-preset": "0.85.3",
     "babel-plugin-transform-inline-environment-variables": "^0.4.4",
     "jest": "~29.7.0",
     "jest-expo": "~56.0.5",

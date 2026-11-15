@@ -10,6 +10,11 @@ create table if not exists transactions (
   merchant_tail text,
   category text not null default 'other',
   source text,
+  account_bank_key text,
+  account_last4 text check (account_last4 is null or account_last4 ~ '^[0-9]{4}$'),
+  category_status text not null default 'done' check (category_status in ('done', 'pending', 'review')),
+  category_attempts integer not null default 0 check (category_attempts between 0 and 4),
+  category_retry_at timestamptz not null default now(),
   txn_date timestamptz not null,
   created_at timestamptz default now()
 );
@@ -20,6 +25,11 @@ alter table transactions drop column if exists raw_sms;
 
 -- Optional note/label on a transaction (manually added or recategorisation note).
 alter table transactions add column if not exists note text;
+alter table transactions add column if not exists account_bank_key text;
+alter table transactions add column if not exists account_last4 text;
+alter table transactions add column if not exists category_status text not null default 'done';
+alter table transactions add column if not exists category_attempts integer not null default 0;
+alter table transactions add column if not exists category_retry_at timestamptz not null default now();
 
 -- Index for fast per-user queries
 create index if not exists idx_transactions_user_date on transactions(user_id, txn_date desc);
@@ -27,6 +37,9 @@ create index if not exists idx_transactions_user_category on transactions(user_i
 
 -- Dedup index
 create index if not exists idx_transactions_dedup on transactions(user_id, amount, merchant_tail, txn_date);
+create index if not exists idx_transactions_account_identity on transactions(user_id, account_bank_key, account_last4);
+create index if not exists idx_transactions_category_retry on transactions(user_id, category_retry_at)
+  where category_status = 'pending';
 
 -- Budgets table
 create table if not exists budgets (
@@ -39,9 +52,20 @@ create table if not exists budgets (
   unique(user_id, category)
 );
 
+create table if not exists account_profiles (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  bank_key text not null check (bank_key ~ '^[A-Z]{2,20}$'),
+  last4 text not null check (last4 ~ '^[0-9]{4}$'),
+  label text not null check (char_length(label) between 1 and 60),
+  created_at timestamptz not null default now(),
+  unique(user_id, bank_key, last4)
+);
+
 -- Row Level Security
 alter table transactions enable row level security;
 alter table budgets enable row level security;
+alter table account_profiles enable row level security;
 
 drop policy if exists "Users see own transactions" on transactions;
 create policy "Users see own transactions"
@@ -54,6 +78,41 @@ create policy "Users see own budgets"
   on budgets for all
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
+
+drop policy if exists "Users read own account profiles" on account_profiles;
+create policy "Users read own account profiles" on account_profiles
+  for select to authenticated using ((select auth.uid()) = user_id);
+drop policy if exists "Users create own account profiles" on account_profiles;
+drop policy if exists "Users update own account profiles" on account_profiles;
+drop policy if exists "Users delete own account profiles" on account_profiles;
+create policy "Users delete own account profiles" on account_profiles
+  for delete to authenticated using ((select auth.uid()) = user_id);
+revoke insert, update on account_profiles from authenticated, anon;
+grant select, delete on account_profiles to authenticated;
+
+create or replace function create_account_profile(
+  p_user_id uuid, p_bank_key text, p_last4 text, p_label text, p_is_pro boolean
+)
+returns uuid
+language plpgsql
+security invoker
+as $$
+declare new_id uuid;
+begin
+  perform pg_advisory_xact_lock(hashtext(p_user_id::text));
+  if not p_is_pro and (select count(*) from account_profiles where user_id = p_user_id) >= 1 then
+    raise exception 'FREE_ACCOUNT_LIMIT';
+  end if;
+  insert into account_profiles (user_id, bank_key, last4, label)
+  values (p_user_id, p_bank_key, p_last4, p_label)
+  returning id into new_id;
+  return new_id;
+end;
+$$;
+revoke execute on function create_account_profile(uuid, text, text, text, boolean)
+  from public, anon, authenticated;
+grant execute on function create_account_profile(uuid, text, text, text, boolean)
+  to service_role;
 
 -- Monthly spending summary view (used by Insights screen)
 create or replace view spending_by_month
@@ -77,7 +136,7 @@ create table if not exists api_usage (
 );
 alter table api_usage enable row level security;
 
--- Atomic increment; returns true if still within the limit. Only callable by
+-- Atomic increment only while below the limit. Only callable by
 -- the service role (the anthropic-proxy edge function) — see grant below.
 -- Without the revoke, PostgREST exposes this to any authenticated client,
 -- letting one user inflate another's count by passing an arbitrary p_user.
@@ -89,13 +148,48 @@ as $$
 declare cur int;
 begin
   insert into api_usage (user_id, day, count) values (p_user, current_date, 1)
-  on conflict (user_id, day) do update set count = api_usage.count + 1
+  on conflict (user_id, day) do update
+    set count = api_usage.count + 1
+    where api_usage.count < p_limit
   returning count into cur;
-  return cur <= p_limit;
+  return cur is not null and cur <= p_limit;
 end;
 $$;
 revoke execute on function increment_api_usage(uuid, int) from public, anon, authenticated;
 grant execute on function increment_api_usage(uuid, int) to service_role;
+
+-- Free alert categorisation has a separate cap and never consumes the
+-- interactive AI request allowance.
+create table if not exists categorization_usage (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  day date not null,
+  count int not null default 0,
+  primary key (user_id, day)
+);
+alter table categorization_usage enable row level security;
+revoke all on categorization_usage from public, anon, authenticated;
+
+create or replace function increment_categorization_usage(p_user uuid, p_limit int)
+returns boolean
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare cur int;
+begin
+  insert into public.categorization_usage (user_id, day, count)
+  values (p_user, current_date, 1)
+  on conflict (user_id, day) do update
+    set count = categorization_usage.count + 1
+    where categorization_usage.count < p_limit
+  returning count into cur;
+  return cur is not null and cur <= p_limit;
+end;
+$$;
+revoke execute on function increment_categorization_usage(uuid, int)
+  from public, anon, authenticated;
+grant execute on function increment_categorization_usage(uuid, int)
+  to service_role;
 
 -- Atomic dedup+insert: closes a TOCTOU race between the SMS and notification
 -- capture paths, which used to each run a plain SELECT (checkDuplicate) then
@@ -136,6 +230,95 @@ begin
   return query select new_id, true;
 end;
 $$;
+
+-- Account-aware overload used by current app builds. The older signature stays
+-- available for installed clients that do not yet send account identity.
+create or replace function insert_transaction_if_new(
+  p_user_id uuid, p_amount numeric, p_type text, p_merchant text,
+  p_merchant_tail text, p_category text, p_source text, p_txn_date timestamptz,
+  p_note text, p_account_bank_key text, p_account_last4 text
+)
+returns table (id uuid, inserted boolean)
+language plpgsql
+security invoker
+as $$
+declare new_id uuid;
+begin
+  perform pg_advisory_xact_lock(hashtext(p_user_id::text));
+  if exists (
+    select 1 from transactions
+    where user_id = p_user_id
+      and amount = p_amount
+      and (p_type is null or type = p_type)
+      and (p_merchant_tail is null or p_merchant_tail = '' or merchant_tail = p_merchant_tail)
+      and (p_account_last4 is null or account_last4 is null or account_last4 = p_account_last4)
+      and (p_account_bank_key is null or account_bank_key is null or account_bank_key = p_account_bank_key)
+      and txn_date between p_txn_date - interval '60 seconds' and p_txn_date + interval '60 seconds'
+  ) then
+    return query select null::uuid, false;
+    return;
+  end if;
+  insert into transactions
+    (user_id, amount, type, merchant, merchant_tail, category, source, txn_date,
+     note, account_bank_key, account_last4)
+  values
+    (p_user_id, p_amount, p_type, p_merchant, p_merchant_tail, p_category,
+     p_source, p_txn_date, p_note, p_account_bank_key, p_account_last4)
+  returning transactions.id into new_id;
+  return query select new_id, true;
+end;
+$$;
+revoke execute on function insert_transaction_if_new(
+  uuid, numeric, text, text, text, text, text, timestamptz, text, text, text
+) from public, anon;
+grant execute on function insert_transaction_if_new(
+  uuid, numeric, text, text, text, text, text, timestamptz, text, text, text
+) to authenticated;
+
+-- Current capture builds also pass whether categorisation needs a retry.
+create or replace function insert_transaction_if_new(
+  p_user_id uuid, p_amount numeric, p_type text, p_merchant text,
+  p_merchant_tail text, p_category text, p_source text, p_txn_date timestamptz,
+  p_note text, p_account_bank_key text, p_account_last4 text,
+  p_category_status text
+)
+returns table (id uuid, inserted boolean)
+language plpgsql
+security invoker
+as $$
+declare new_id uuid;
+begin
+  perform pg_advisory_xact_lock(hashtext(p_user_id::text));
+  if exists (
+    select 1 from transactions
+    where user_id = p_user_id
+      and amount = p_amount
+      and (p_type is null or type = p_type)
+      and (p_merchant_tail is null or p_merchant_tail = '' or merchant_tail = p_merchant_tail)
+      and (p_account_last4 is null or account_last4 is null or account_last4 = p_account_last4)
+      and (p_account_bank_key is null or account_bank_key is null or account_bank_key = p_account_bank_key)
+      and txn_date between p_txn_date - interval '60 seconds' and p_txn_date + interval '60 seconds'
+  ) then
+    return query select null::uuid, false;
+    return;
+  end if;
+  insert into transactions
+    (user_id, amount, type, merchant, merchant_tail, category, source, txn_date,
+     note, account_bank_key, account_last4, category_status)
+  values
+    (p_user_id, p_amount, p_type, p_merchant, p_merchant_tail, p_category,
+     p_source, p_txn_date, p_note, p_account_bank_key, p_account_last4,
+     p_category_status)
+  returning transactions.id into new_id;
+  return query select new_id, true;
+end;
+$$;
+revoke execute on function insert_transaction_if_new(
+  uuid, numeric, text, text, text, text, text, timestamptz, text, text, text, text
+) from public, anon;
+grant execute on function insert_transaction_if_new(
+  uuid, numeric, text, text, text, text, text, timestamptz, text, text, text, text
+) to authenticated;
 
 -- Server-side category aggregation for an arbitrary date range.
 -- Replaces client-side summing, which silently capped at Supabase's 1000-row

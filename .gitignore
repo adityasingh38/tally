@@ -45,6 +45,10 @@ supabase/.branches/
 src.zip
 *.zip
 
+# Python
+__pycache__/
+*.pyc
+
 # IDE & Agent local metadata
 .vscode/
 .claude/

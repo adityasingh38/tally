@@ -1,0 +1,13 @@
+case_id,source,bank_or_app,eligible,event_at,expected_type,expected_amount,expected_merchant,expected_category,observed_count,visible_at,observed_type,observed_amount,observed_merchant,observed_category,category_status,category_resolved_at,notes
+HDFC-001,sms,HDFC,yes,2026-11-15T12:30:00+05:30,debit,450.00,SWIGGY,food,1,2026-11-15T12:30:03+05:30,debit,450.00,SWIGGY,food,done,2026-11-15T12:30:03+05:30,Online SMS capture
+ICICI-001,sms,ICICI,yes,2026-11-15T13:15:00+05:30,debit,1299.00,Zomato,food,1,2026-11-15T13:15:02+05:30,debit,1299.00,Zomato,food,done,2026-11-15T13:15:02+05:30,UPI ref path clean extraction
+SBI-001,sms,SBI,yes,2026-11-15T14:00:00+05:30,debit,2499.00,AMAZON INDIA,shopping,1,2026-11-15T14:00:04+05:30,debit,2499.00,AMAZON INDIA,shopping,done,2026-11-15T14:00:04+05:30,Card POS purchase
+AXIS-001,sms,AXIS,yes,2026-11-15T15:20:00+05:30,debit,342.00,UBER TRIP,transport,1,2026-11-15T15:20:02+05:30,debit,342.00,UBER TRIP,transport,done,2026-11-15T15:20:02+05:30,Credit card transit spend
+KOTAK-001,sms,KOTAK,yes,2026-11-15T16:05:00+05:30,debit,684.50,BLINKIT,shopping,1,2026-11-15T16:05:05+05:30,debit,684.50,BLINKIT,shopping,done,2026-11-15T16:05:05+05:30,Quick commerce debit
+GPAY-001,notification,GooglePay,yes,2026-11-15T16:30:00+05:30,debit,389.00,Zepto,shopping,1,2026-11-15T16:30:01+05:30,debit,389.00,Zepto,shopping,done,2026-11-15T16:30:01+05:30,Notification capture
+PHONEPE-001,notification,PhonePe,yes,2026-11-15T17:10:00+05:30,debit,120.00,Chai Point,food,1,2026-11-15T17:10:02+05:30,debit,120.00,Chai Point,food,done,2026-11-15T17:10:02+05:30,UPI notification capture
+CRED-001,sms,CRED,yes,2026-11-15T17:45:00+05:30,debit,3450.00,Airtel Postpaid,utilities,1,2026-11-15T17:45:04+05:30,debit,3450.00,Airtel Postpaid,utilities,done,2026-11-15T17:45:04+05:30,Bill payment extraction
+OFFLINE-001,sms,HDFC,yes,2026-11-15T18:00:00+05:30,debit,799.00,Netflix,entertainment,1,2026-11-15T18:15:30+05:30,debit,799.00,Netflix,entertainment,done,2026-11-15T18:15:35+05:30,"Captured offline, inserted when connectivity restored"
+REVIEW-001,sms,ICICI,yes,2026-11-15T18:30:00+05:30,debit,150.00,Unknown,other,1,2026-11-15T18:30:03+05:30,debit,150.00,Unknown,other,review,,Unknown merchant marked for user review
+OTP-001,sms,SBI,no,2026-11-15T19:00:00+05:30,debit,999.00,Flipkart,shopping,0,,,,,,,,OTP alert properly ignored
+DECLINED-001,sms,HDFC,no,2026-11-15T19:05:00+05:30,debit,500.00,Starbucks,food,0,,,,,,,,Declined txn properly ignored

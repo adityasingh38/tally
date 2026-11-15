@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from './supabase';
+import { FREEMIUM } from '../constants';
 
 const VERDICT_CACHE_PREFIX = 'tally_verdict_v2';
 const VERDICT_TTL_MS = 6 * 60 * 60 * 1000; // 6 h — refresh as data accumulates
@@ -53,9 +54,26 @@ export async function askAI({ question, cats, total, income }) {
   const content = `Spending data: ${incomeCtx} Categories: ${catCtx}.\n\nQuestion: ${question}`;
   try {
     return await callAnthropic(system, content);
-  } catch {
+  } catch (error) {
+    if (error?.context?.status === 429) {
+      return `daily AI limit reached. Tally Pro gets ${FREEMIUM.PREMIUM_AI_DAILY_LIMIT} requests a day; free gets ${FREEMIUM.FREE_AI_DAILY_LIMIT}. Try again tomorrow or upgrade.`;
+    }
     return "couldn't reach tally AI right now. Try again in a moment.";
   }
+}
+
+export async function createPurchasePlan({ goal, cost, months, income, spent, categories }) {
+  const { data, error } = await supabase.functions.invoke('anthropic-proxy', {
+    body: { kind: 'purchase_plan', goal, cost, months, income, spent, categories },
+  });
+  if (error) {
+    const status = error?.context?.status;
+    if (status === 429) throw new Error('Daily AI limit reached. Try again tomorrow.');
+    if (status === 403) throw new Error('Tally Pro is required to make a purchase plan.');
+    throw new Error('Could not make a plan right now. Try again shortly.');
+  }
+  if (!data?.text) throw new Error('Tally did not return a plan. Try again.');
+  return data.text;
 }
 
 async function callAnthropic(system, content) {

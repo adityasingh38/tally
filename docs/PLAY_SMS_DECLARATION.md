@@ -1,83 +1,32 @@
-# Google Play — SMS Permissions Declaration (Tally)
+# Google Play SMS permission review — Tally
 
-> ⚠️ **READ THIS FIRST — be realistic about the outcome.**
->
-> Google Play's **SMS & Call Log Permissions policy** only allows `READ_SMS` /
-> `RECEIVE_SMS` for a **short, fixed list of approved use cases** (default SMS
-> handler, backup/restore, sync, etc.). **"Reading bank SMS to track expenses"
-> is NOT on that approved list.** Google removed the financial-SMS exception
-> years ago — this is exactly why Walnut, MoneyView and similar India expense
-> apps **stopped reading SMS** and moved to other methods.
->
-> So: you can submit the declaration below, but expect a **high chance of
-> rejection**. Do not bet the launch timeline on it. The two real paths are in
-> the "If rejected" section — and you should start the Notification-Listener
-> migration **in parallel**, not after a rejection.
+Checked 15 November 2026 against [Google Play's SMS and Call Log permissions guidance](https://support.google.com/googleplay/android-developer/answer/10208820).
 
----
+Google Play lists **SMS-based money management** (including apps that track and manage budgets) as an eligible exception for `READ_SMS` and `RECEIVE_SMS`. This is **subject to Google Play review and approval**; eligibility is not approval. The app must declare these permissions in Play Console, make the use central and prominent in its listing, and meet the user data and disclosure requirements. Recheck the policy before submission.
 
-## The form fields (what Google asks, and your answers)
+## Current implementation
 
-**1. Which permissions does your app request?**
-> `android.permission.READ_SMS`, `android.permission.RECEIVE_SMS`
+- `app.json` declares `READ_SMS` and `RECEIVE_SMS`.
+- Onboarding requests `READ_SMS` for historical import. The native SMS receiver handles new messages.
+- Users can choose notification access or manual entry instead. The notification listener only forwards alerts from its bank/UPI app allowlist; it cannot backfill old notifications and it will miss transactions when those apps do not post an alert.
+- An unrecognised transaction may send its merchant and up to 100 characters of alert text to the `anthropic-proxy` Edge Function and Anthropic for categorisation. Transaction fields, including sender/source, are stored in Supabase. Raw alert bodies are not stored in the transactions table.
 
-**2. Is this permission part of your app's core functionality?**
-> Yes. Tally's core feature is automatically logging the user's bank/UPI
-> transactions by reading transactional SMS, so the user never types entries
-> manually.
+## Play Console declaration draft
 
-**3. Selected use case (Google dropdown)**
-> There is no exact match. The closest selectable category is typically
-> "**Financial management / transaction tracking**" if shown, otherwise
-> "Other." This mismatch is the core risk — Google's allowed list does not
-> formally include this case.
+**Permissions:** `android.permission.READ_SMS`, `android.permission.RECEIVE_SMS`.
 
-**4. Why your app needs this permission (justification)**
-> Tally reads only transactional SMS from known bank/UPI sender IDs to extract
-> transaction details (amount, debit/credit, merchant, date) and present the
-> user a real-time view of their spending. Without SMS access the app cannot
-> deliver its core value — automatic, zero-effort expense tracking. The raw SMS
-> body is parsed **on-device**; only the extracted transaction fields are stored.
-> Personal (non-bank) SMS are filtered out and never read beyond a sender/keyword
-> check.
+**Use case:** Select **SMS-based money management** if offered in the current declaration form. Verify the actual options in Play Console at submission time.
 
-**5. Alternatives considered**
-> - Manual entry — defeats the product's entire purpose (zero-effort tracking).
-> - Notification listener — under active evaluation as the primary path (see below).
-> - Account Aggregator (RBI AA) — the sanctioned long-term path; integration planned.
+**Core function:** Tally identifies bank transaction alerts, extracts amount, direction, merchant and date, and shows spending and budget progress without manual entry.
 
-**6. Demo video (required)**
-> Record a <2-min screen capture: onboarding → grant SMS → a bank SMS arrives →
-> the transaction auto-appears in the feed. Host unlisted on YouTube, link it.
+**Why access is needed:** `READ_SMS` imports past transaction alerts; `RECEIVE_SMS` captures new alerts. Tally filters messages by bank sender or transaction markers before parsing. It does not use SMS for advertising. Explain the limited AI snippet transfer in the prominent disclosure and privacy policy.
 
----
+**Evidence to prepare:** A device recording of onboarding, the permission choice, a transaction alert appearing in the feed, the notification/manual alternatives, and account deletion. Use real Play Console requirements for the final submission.
 
-## If rejected (plan for this — it's the likely outcome)
+## Release gate
 
-**Path A — Notification Listener (fastest, recommended).**
-Use `BIND_NOTIFICATION_LISTENER_SERVICE` to read **bank app / SMS notifications**
-instead of the SMS inbox. Same data (amount, merchant), **no SMS-policy review**,
-allowed on Play. Trade-offs: the user must keep bank notifications on, and you
-only catch transactions while notifications fire (no historical backfill).
-This is what most India expense apps migrated to. **Start this now, in parallel.**
+1. Complete the capture accuracy study in [CAPTURE_VALIDATION.md](CAPTURE_VALIDATION.md), including SMS and notification paths.
+2. Review the final manifest, in-app disclosure, store listing, privacy policy, and Play Console Data safety answers together.
+3. Submit the SMS permissions declaration for review. Keep the notification path available; Play review may require changes.
 
-**Path B — Account Aggregator (RBI AA).**
-The regulator-sanctioned, consent-based way to pull bank transaction data
-(via Finvu / OneMoney / Anumati etc.). Cleanest and most scalable, but a heavier
-integration + a partnership. The right end-state if Tally goes serious.
-
-**Path C — User-forwarded SMS.**
-User forwards bank SMS to an in-app inbox / number. Clunky, but policy-safe and
-needs no special permission.
-
----
-
-## Recommendation
-1. Submit the declaration above **and** begin the **Notification Listener**
-   migration immediately — treat A as the real plan, the declaration as a long shot.
-2. Keep the on-device parsing model (`smsParser`) — it ports almost unchanged to
-   notification text.
-3. Plan the **Account Aggregator** path for the serious version.
-
-*The SMS read path is a launch risk, not a certainty. Don't let it block the
-internal beta — that can run on a dev build without Play review.*
+Google's current guidance is the source of truth for the policy decision. This file is an implementation checklist, not a prediction of review outcome.

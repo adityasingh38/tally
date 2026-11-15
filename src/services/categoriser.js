@@ -2,21 +2,9 @@ import { ruleBasedCategory } from './smsParser';
 import { CATEGORIES } from '../constants';
 import { supabase } from './supabase';
 
-const CATEGORY_IDS = CATEGORIES.map(c => c.id).join(', ');
-
-const SYSTEM_PROMPT = `You are a financial transaction categoriser for Indian users. Given a list of transactions (merchant name + SMS snippet), classify each into exactly one category.
-
-Categories: ${CATEGORY_IDS}
-
-Rules:
-- Return ONLY a JSON array, no explanation
-- Each item: { "index": number, "category": string, "confidence": number (0-1) }
-- confidence < 0.5 → use "other"
-- Be decisive: pick best match, never null`;
-
-async function callAnthropic(systemPrompt, userContent) {
+async function callAnthropic(transactions) {
   const { data, error } = await supabase.functions.invoke('anthropic-proxy', {
-    body: { system: systemPrompt, content: userContent },
+    body: { kind: 'categorization', transactions },
   });
   if (error) throw error;
   if (!data?.text) throw new Error('Empty response from anthropic-proxy');
@@ -27,30 +15,36 @@ export async function categoriseTransactions(transactions) {
   // Apply rule-based first
   const results = transactions.map((tx, i) => {
     const ruleCategory = ruleBasedCategory(tx.merchant, tx.raw_sms);
-    return { index: i, category: ruleCategory, needsAI: !ruleCategory };
+    return { index: i, category: ruleCategory, category_status: ruleCategory ? 'done' : 'pending', needsAI: !ruleCategory };
   });
 
   const needsAI = results.filter(r => r.needsAI);
   if (needsAI.length === 0) {
-    return results.map((r, i) => ({ ...transactions[i], category: r.category }));
+    return results.map((r, i) => ({ ...transactions[i], category: r.category, category_status: 'done' }));
   }
 
   // Batch AI categorisation for unknowns
   const aiInput = needsAI.map(r => {
     const tx = transactions[r.index];
-    return `${r.index}: merchant="${tx.merchant}" sms="${tx.raw_sms.substring(0, 100)}"`;
-  }).join('\n');
+    return { merchant: String(tx.merchant || '').slice(0, 80), sms: String(tx.raw_sms || '').slice(0, 100) };
+  });
 
   try {
-    const text = await callAnthropic(SYSTEM_PROMPT, aiInput);
+    const text = await callAnthropic(aiInput);
     const aiResults = JSON.parse(text);
+    if (!Array.isArray(aiResults)) throw new Error('Invalid categorisation response');
 
     aiResults.forEach(({ index, category, confidence }) => {
-      results[index].category = confidence >= 0.5 ? category : 'other';
+      if (!Number.isInteger(index) || index < 0 || index >= needsAI.length) return;
+      const result = results[needsAI[index].index];
+      if (!Number.isFinite(confidence) || !CATEGORIES.some(c => c.id === category)) return;
+      result.category = confidence >= 0.5 ? category : 'other';
+      result.category_status = 'done';
     });
   } catch {
-    needsAI.forEach(r => { results[r.index].category = 'other'; });
+    // The transaction can still be captured. A later retry uses extracted
+    // fields, never a stored copy of the raw alert.
   }
 
-  return results.map((r, i) => ({ ...transactions[i], category: r.category || 'other' }));
+  return results.map((r, i) => ({ ...transactions[i], category: r.category || 'other', category_status: r.category_status }));
 }
