@@ -1,12 +1,234 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-<meta charset="UTF-8" />
-<meta http-equiv="refresh" content="0; url=./privacy.html" />
-<title>Privacy Policy · tally</title>
-<script>window.location.replace("./privacy.html");</script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy · tally</title>
+  <meta name="description" content="Tally privacy policy. How we collect, handle, and protect your data with bank-grade isolation." />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    @font-face {
+      font-family: 'Coconat';
+      src: url('./assets/fonts/coconat-regular.woff2') format('woff2'),
+           url('https://design.ohmmmm.com/assets/coconat-regular-vcQqB2Xs.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    :root {
+      --ohm-forest: #013220;
+      --ohm-forest-hover: #02482e;
+      --ohm-forest-tint: rgba(1, 50, 32, 0.06);
+      --ohm-ebony: #250e0e;
+      --ohm-green-light: #7bd389;
+      --ohm-red: #e5484d;
+      --ohm-red-tint: rgba(229, 72, 77, 0.08);
+
+      --ohm-font-display: 'Coconat', Georgia, 'Times New Roman', serif;
+      --ohm-font-sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Roboto, sans-serif;
+      --ohm-font-mono: 'Space Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+      --ohm-radius-pill: 999px;
+      --ohm-radius-chip: 8px;
+      --ohm-radius-item: 12px;
+      --ohm-radius-card: 24px;
+      --ohm-ease: cubic-bezier(.23, 1, .32, 1);
+      --ohm-duration: 0.18s;
+    }
+
+    html[data-theme="light"] {
+      --ohm-canvas: #fafaf8;
+      --ohm-paper: #ffffff;
+      --ohm-card: #ffffff;
+      --ohm-wash: #f4f4f1;
+      --ohm-line: #e6e6e2;
+      --ohm-line-strong: #d5d5cf;
+      --ohm-muted: #6b6d67;
+      --ohm-faint: #989c93;
+      --ohm-ink: #1b1c19;
+      --ohm-frost: rgba(255, 255, 255, 0.78);
+      --ohm-frost-border: rgba(230, 230, 226, 0.85);
+      --ohm-shade-1: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --ohm-shade-2: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px -2px rgba(0, 0, 0, 0.06);
+    }
+
+    html[data-theme="dark"] {
+      --ohm-canvas: #0e0f0d;
+      --ohm-paper: #090a09;
+      --ohm-card: #131412;
+      --ohm-wash: #181916;
+      --ohm-line: #262824;
+      --ohm-line-strong: #383a34;
+      --ohm-muted: #9da098;
+      --ohm-faint: #5e6159;
+      --ohm-ink: #f2f3ef;
+      --ohm-frost: rgba(14, 15, 13, 0.82);
+      --ohm-frost-border: rgba(38, 40, 36, 0.85);
+      --ohm-shade-1: 0 1px 2px rgba(0, 0, 0, 0.35);
+      --ohm-shade-2: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 14px -2px rgba(0, 0, 0, 0.45);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; background: var(--ohm-canvas); color: var(--ohm-ink); font-family: var(--ohm-font-sans); -webkit-font-smoothing: antialiased; }
+    body { min-height: 100vh; line-height: 1.6; }
+
+    .wrap { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+    .mono { font-family: var(--ohm-font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ohm-muted); }
+
+    /* Nav */
+    .nav-wrapper { position: sticky; top: 16px; z-index: 100; padding: 0 16px; margin-bottom: 24px; }
+    .nav-bar { max-width: 800px; margin: 0 auto; background: var(--ohm-frost); backdrop-filter: blur(24px) saturate(1.6); -webkit-backdrop-filter: blur(24px) saturate(1.6); border: 1px solid var(--ohm-frost-border); box-shadow: var(--ohm-shade-1); border-radius: var(--ohm-radius-pill); padding: 10px 18px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ohm-ink); }
+    .nav-brand-title { font-family: var(--ohm-font-display); font-size: 22px; font-weight: 400; }
+    .back-btn { font-family: var(--ohm-font-mono); font-size: 11px; color: var(--ohm-forest); text-decoration: none; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; }
+    .back-btn:hover { text-decoration: underline; }
+
+    /* Content */
+    .content { padding: 40px 0 60px; }
+    h1 { font-family: var(--ohm-font-display); font-size: 42px; font-weight: 400; letter-spacing: -0.02em; margin-bottom: 12px; }
+    .meta { font-family: var(--ohm-font-mono); font-size: 11px; color: var(--ohm-faint); margin-bottom: 30px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .intro { font-size: 17px; color: var(--ohm-muted); line-height: 1.6; margin-bottom: 36px; padding-bottom: 24px; border-bottom: 1.5px dashed var(--ohm-line); }
+
+    h2 { font-family: var(--ohm-font-display); font-size: 24px; font-weight: 400; margin: 38px 0 14px; color: var(--ohm-ink); }
+    h3 { font-family: var(--ohm-font-sans); font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ohm-forest); margin: 20px 0 8px; }
+
+    p { font-size: 15px; color: var(--ohm-muted); line-height: 1.65; margin-bottom: 14px; }
+    p strong, p b { color: var(--ohm-ink); font-weight: 600; }
+    ul { margin: 0 0 18px 22px; color: var(--ohm-muted); }
+    li { font-size: 15px; line-height: 1.65; margin-bottom: 8px; }
+    li strong, li b { color: var(--ohm-ink); font-weight: 600; }
+
+    .highlight-card { background: var(--ohm-card); border: 1px solid var(--ohm-line); border-radius: var(--ohm-radius-item); padding: 22px; margin: 24px 0; box-shadow: var(--ohm-shade-1); }
+    .highlight-card .label { font-family: var(--ohm-font-mono); font-size: 10px; color: var(--ohm-forest); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; font-weight: 700; }
+
+    a { color: var(--ohm-forest); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    footer { border-top: 1px solid var(--ohm-line); padding: 40px 0; text-align: center; margin-top: 40px; }
+  </style>
 </head>
 <body>
-<p>Redirecting to <a href="./privacy.html">Privacy Policy</a>...</p>
+
+  <div class="nav-wrapper">
+    <nav class="nav-bar">
+      <a href="./index.html" class="nav-brand">
+        <svg width="22" height="26" viewBox="0 0 100 116" fill="none">
+          <rect x="14" y="22" width="11" height="72" rx="4" fill="var(--ohm-forest)" />
+          <rect x="36" y="22" width="11" height="72" rx="4" fill="var(--ohm-forest)" />
+          <rect x="58" y="22" width="11" height="72" rx="4" fill="var(--ohm-forest)" />
+          <rect x="80" y="22" width="11" height="72" rx="4" fill="var(--ohm-forest)" />
+          <rect x="47" y="9" width="11" height="98" rx="4" transform="rotate(56 52.5 58)" fill="var(--ohm-red)" />
+        </svg>
+        <span class="nav-brand-title">tally</span>
+      </a>
+      <a href="./index.html" class="back-btn">← Back to Overview</a>
+    </nav>
+  </div>
+
+  <main class="wrap content">
+    <h1>Privacy Policy</h1>
+    <div class="meta">
+      <span>EFFECTIVE DATE: 9 JUNE 2026</span>
+      <span>•</span>
+      <span>LAST UPDATED: 15 NOVEMBER 2026</span>
+    </div>
+
+    <p class="intro">
+      Tally ("Tally", "we", "us") is a personal expense-tracking mobile app designed with quiet calm and radical transparency. We parse supported transactional alerts locally on your device to log your damage and provide honest financial insights. This document outlines our data architecture and commitments.
+    </p>
+
+    <h2>1. Who We Are</h2>
+    <p>Tally is operated by <strong>Aditya Singh</strong>, an individual developer based in India.<br>Contact: <a href="mailto:adityasuper38@gmail.com">adityasuper38@gmail.com</a>.</p>
+
+    <h2>2. What We Collect</h2>
+    
+    <h3>a) Account Data</h3>
+    <p>Email address and authentication credentials (handled securely by our auth provider, Supabase). Used solely to create, authenticate, and secure your account.</p>
+
+    <h3>b) Transaction Data</h3>
+    <p>With SMS permission, Tally checks sender IDs and message content for bank transaction alerts. With notification access, Android grants access to notifications, but Tally's listener processes alerts only from its supported bank/UPI app list. From matching alerts, we extract: transaction <strong>amount</strong>, <strong>type</strong> (debit/credit), <strong>merchant name</strong>, <strong>date/time</strong>, and sender identifier. When an alert includes a masked account or card identifier, we also save its bank name and last four digits for account grouping.</p>
+    
+    <div class="highlight-card">
+      <div class="label">How Alerts Are Processed</div>
+      <p style="margin:0; font-size:14px;">
+        <strong>Full raw alert bodies are not stored as transaction records.</strong> Transaction details are stored in your private account. If local rules cannot categorise an alert, its merchant and up to 100 characters of alert text are sent through our Supabase Edge Function to our AI provider (Google Gemini API or Anthropic). This excerpt can contain information in the alert, such as masked account details. Alerts outside the bank/transaction filters are ignored by Tally.
+      </p>
+    </div>
+
+    <h3>c) App Data You Provide</h3>
+    <p>Monthly budgets, category corrections, account labels (bank name, last four digits and nickname), and display preferences. Preferences are stored locally on your device; account labels, budgets and categorised transactions are stored in your private account. We do not ask for or store full card numbers or PINs.</p>
+
+    <h3>d) Subscription Data</h3>
+    <p>If you purchase Tally Pro, subscription status is managed by Google Play Billing via RevenueCat. We never receive, process, or store your credit card or banking credentials.</p>
+
+    <p><strong>We do NOT collect:</strong> contacts, photos, precise GPS location, browser history, or call logs.</p>
+
+    <h2>3. How We Use Your Data</h2>
+    <ul>
+      <li>To automatically log, categorise, and organise your spending transactions.</li>
+      <li>To display spending trends, budget thresholds, and alerts before you overspend.</li>
+      <li>To generate AI-assisted categorisation and monthly spending verdicts.</li>
+      <li>To operate your account, provide customer support, and prevent abuse.</li>
+    </ul>
+    <p>We <strong>do not sell your personal data</strong>, and we do not use your information for targeted advertising.</p>
+
+    <h2>4. AI Processing</h2>
+    <p>To categorise ambiguous alerts, the merchant and up to 100 characters of alert text are sent to our AI backend via our Supabase Edge Function (powered by <strong>Google Gemini API</strong> and/or <strong>Anthropic</strong>). AI commentary may also send category totals, spending totals, income you entered, and a question you ask Tally. If you request a purchase plan, we also send the item, price and timeframe you enter. Purchase plans are displayed in the app and are not saved to your account. We do not use this data to build advertising profiles. See Google's and Anthropic's privacy terms for their handling of API data.</p>
+
+    <h2>5. Permissions We Request (Android)</h2>
+    <ul>
+      <li><strong>Notification access</strong>: Android grants access to notifications; Tally's listener processes alerts from supported bank/UPI apps. You may decline and use SMS or manual entry.</li>
+      <li><strong>SMS (READ_SMS / RECEIVE_SMS)</strong>: Used to parse bank transaction SMS and import past alerts. You may decline and use manual entry or notification capture.</li>
+      <li><strong>Post Notifications & Vibrate</strong>: To send you budget alerts and weekly spending summaries.</li>
+    </ul>
+
+    <h2>6. Where Your Data Is Stored</h2>
+    <p>Account and transaction records are stored with <strong>Supabase</strong> (managed PostgreSQL) with Row-Level Security (RLS) enabled. All data in transit is encrypted using HTTPS / TLS 1.3.</p>
+
+    <h2>7. Data Sharing</h2>
+    <p>We share data exclusively with trusted infrastructure service providers required to deliver the service:</p>
+    <ul>
+      <li><strong>Supabase</strong> — Database hosting, authentication, and encrypted storage.</li>
+      <li><strong>Google (Gemini API) / Anthropic</strong> — Server-side AI categorisation and financial commentary.</li>
+      <li><strong>RevenueCat & Google Play</strong> — In-app subscription validation.</li>
+    </ul>
+    <p>We do not sell, rent, or trade your data with any data broker or advertiser.</p>
+
+    <h2>8. Data Retention & Deletion</h2>
+    <ul>
+      <li>We keep transaction records while your account remains active.</li>
+      <li><strong>One-tap account deletion:</strong> You can permanently delete your entire account and all associated transaction records at any time directly in the app (<strong>Settings → Delete account</strong>).</li>
+      <li>Upon deletion, your data is cascaded and permanently purged from our servers.</li>
+    </ul>
+
+    <h2>9. Your Rights & Grievance Redressal</h2>
+    <p>Under the <strong>Digital Personal Data Protection Act, 2023 (India)</strong> and applicable privacy regulations, you have the right to access, rectify, and erase your personal data.</p>
+    <p>For any privacy requests or grievances, contact our Grievance Officer directly:</p>
+    <ul>
+      <li><strong>Grievance Officer:</strong> Aditya Singh</li>
+      <li><strong>Email:</strong> <a href="mailto:adityasuper38@gmail.com">adityasuper38@gmail.com</a></li>
+    </ul>
+
+    <h2>10. Security</h2>
+    <p>We use industry-standard encryption in transit, strict database row-level security, and client-side alert parsing to minimise data footprint. While no system is impenetrable, we actively maintain safeguards to protect your personal information.</p>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p class="mono">transaction details saved · full alerts not stored</p>
+      <p class="mono" style="margin-top:6px;">© 2026 tally · Designed with Ohm Design System</p>
+    </div>
+  </footer>
+
+  <script>
+    const savedTheme = localStorage.getItem('tally-theme') || 
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  </script>
 </body>
 </html>
