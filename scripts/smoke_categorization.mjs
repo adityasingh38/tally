@@ -15,12 +15,22 @@ const password = randomUUID() + 'aA1!';
 let token;
 
 async function request(path, body, auth = key) {
-  const response = await fetch(`${base}${path}`, {
-    method: 'POST',
-    headers: { apikey: key, Authorization: `Bearer ${auth}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  return { status: response.status, body: await response.json() };
+  console.log(`[smoke] Requesting ${path}...`);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 20000);
+  try {
+    const response = await fetch(`${base}${path}`, {
+      method: 'POST',
+      headers: { apikey: key, Authorization: `Bearer ${auth}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    const resBody = await response.json();
+    console.log(`[smoke] ${path} returned HTTP ${response.status}`);
+    return { status: response.status, body: resBody };
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 try {

@@ -51,14 +51,9 @@ needed client-side.
 - [x] Deploy `account-profile` (version 1) for the account-label feature. Its one-account
       free limit is enforced in the database; additional labels require a
       server-verified `Tally Pro` entitlement.
-- [ ] Set `GEMINI_API_KEY` (or renew `ANTHROPIC_API_KEY`) server secret:
-      ```bash
-      npx supabase secrets set GEMINI_API_KEY=your_key --project-ref gjrmpiauvreudygyvdhx
-      npx supabase functions deploy anthropic-proxy --project-ref gjrmpiauvreudygyvdhx
-      ```
-      Then rerun `node scripts/smoke_categorization.mjs --live`.
-      Gemini API keys are free from Google AI Studio (https://aistudio.google.com/app/apikey).
-      Note: Google AI Pro / Gemini Advanced consumer subscription does not provide API keys.
+- [x] Configure Gemini API key (`gemini-3.5-flash`) and deploy `anthropic-proxy`.
+      Verified live with `node scripts/smoke_categorization.mjs --live` (HTTP 200,
+      real AI categorisation succeeded, ephemeral test account created & deleted).
 - [ ] Confirm `REVENUECAT_SECRET_API_KEY` with a Pro entitlement test.
 - [ ] Run the private category accuracy study on a real Android device; the
       workspace has no connected Android device or completed worksheet.

@@ -12,11 +12,13 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { hasProEntitlement, revenueCatConfigured } from '../_shared/revenuecat.ts';
 
-const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
+const env = Deno.env.toObject();
+const geminiEntry = Object.entries(env).find(([k]) => k.replace(/[\s_-]/g, '').toLowerCase() === 'geminiapikey');
+const GEMINI_API_KEY = geminiEntry ? geminiEntry[1] : (Deno.env.get("GEMINI_API_KEY") ?? "");
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.0-flash";
+const DEFAULT_GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-3.5-flash";
 const ANTHROPIC_MODEL = "claude-haiku-4-5-20251001";
 const MAX_TOKENS = 512;
 const FREE_DAILY_LIMIT = 10;
@@ -31,7 +33,8 @@ const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
   if (!GEMINI_API_KEY && !ANTHROPIC_API_KEY) {
-    return json({ error: "AI API key not configured (set GEMINI_API_KEY or ANTHROPIC_API_KEY)" }, 500);
+    const presentKeys = Object.keys(Deno.env.toObject()).join(", ");
+    return json({ error: `AI API key not configured. Present env keys: ${presentKeys}` }, 500);
   }
 
   // Identify the caller from their JWT.
@@ -127,17 +130,12 @@ Deno.serve(async (req) => {
   try {
     let text: string;
     if (GEMINI_API_KEY) {
-      try {
-        text = await callGemini(system, content, kind === 'categorization');
-      } catch (geminiErr) {
-        if (ANTHROPIC_API_KEY) {
-          text = await callAnthropic(system, content);
-        } else {
-          throw geminiErr;
-        }
-      }
-    } else {
+      const model = typeof body.model === 'string' ? body.model : DEFAULT_GEMINI_MODEL;
+      text = await callGemini(system, content, kind === 'categorization', model);
+    } else if (ANTHROPIC_API_KEY) {
       text = await callAnthropic(system, content);
+    } else {
+      return json({ error: "No AI API key found" }, 500);
     }
     return json({ text });
   } catch (e) {
@@ -145,8 +143,8 @@ Deno.serve(async (req) => {
   }
 });
 
-async function callGemini(system: string | undefined, content: string, jsonMode: boolean): Promise<string> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+async function callGemini(system: string | undefined, content: string, jsonMode: boolean, model = DEFAULT_GEMINI_MODEL): Promise<string> {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
   const body: Record<string, unknown> = {
     contents: [
       {
