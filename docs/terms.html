@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,125 +8,100 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
 
   <style>
-    @font-face {
-      font-family: 'Coconat';
-      src: url('./assets/fonts/coconat-regular.woff2') format('woff2'),
-           url('https://design.ohmmmm.com/assets/coconat-regular-vcQqB2Xs.woff2') format('woff2');
-      font-weight: 400;
-      font-style: normal;
-      font-display: swap;
-    }
-
     :root {
-      --ohm-forest: #013220;
-      --ohm-forest-hover: #02482e;
-      --ohm-forest-tint: rgba(1, 50, 32, 0.06);
-      --ohm-ebony: #250e0e;
-      --ohm-green-light: #7bd389;
-      --ohm-red: #e5484d;
-      --ohm-red-tint: rgba(229, 72, 77, 0.08);
-
-      --ohm-font-display: 'Coconat', Georgia, 'Times New Roman', serif;
-      --ohm-font-sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Roboto, sans-serif;
-      --ohm-font-mono: 'Space Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-
-      --ohm-radius-pill: 999px;
-      --ohm-radius-chip: 8px;
-      --ohm-radius-item: 12px;
-      --ohm-radius-card: 24px;
-      --ohm-ease: cubic-bezier(.23, 1, .32, 1);
-      --ohm-duration: 0.18s;
-    }
-
-    html[data-theme="light"] {
-      --ohm-canvas: #fafaf8;
-      --ohm-paper: #ffffff;
-      --ohm-card: #ffffff;
-      --ohm-wash: #f4f4f1;
-      --ohm-line: #e6e6e2;
-      --ohm-line-strong: #d5d5cf;
-      --ohm-muted: #6b6d67;
-      --ohm-faint: #989c93;
-      --ohm-ink: #1b1c19;
-      --ohm-frost: rgba(255, 255, 255, 0.78);
-      --ohm-frost-border: rgba(230, 230, 226, 0.85);
-      --ohm-shade-1: 0 1px 2px rgba(0, 0, 0, 0.05);
-      --ohm-shade-2: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px -2px rgba(0, 0, 0, 0.06);
+      --red: #FF5436;
+      --font-display: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
+      --font-sans: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+      --font-mono: 'Space Mono', ui-monospace, monospace;
+      --r-pill: 999px;
+      --r-card: 16px;
     }
 
     html[data-theme="dark"] {
-      --ohm-canvas: #0e0f0d;
-      --ohm-paper: #090a09;
-      --ohm-card: #131412;
-      --ohm-wash: #181916;
-      --ohm-line: #262824;
-      --ohm-line-strong: #383a34;
-      --ohm-muted: #9da098;
-      --ohm-faint: #5e6159;
-      --ohm-ink: #f2f3ef;
-      --ohm-frost: rgba(14, 15, 13, 0.82);
-      --ohm-frost-border: rgba(38, 40, 36, 0.85);
-      --ohm-shade-1: 0 1px 2px rgba(0, 0, 0, 0.35);
-      --ohm-shade-2: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 14px -2px rgba(0, 0, 0, 0.45);
+      --bg: #0E0F0C;
+      --card: #181A12;
+      --wash: #1C1E16;
+      --line: rgba(233, 255, 208, 0.10);
+      --line-strong: rgba(233, 255, 208, 0.20);
+      --text: #F2F3EC;
+      --dim: #9DA08F;
+      --faint: #63655A;
+      --frost: rgba(14, 15, 12, 0.85);
+      --frost-border: rgba(233, 255, 208, 0.12);
+      --logo-bar: #F2F3EC;
+    }
+
+    html[data-theme="light"] {
+      --bg: #F1EDE3;
+      --card: #FAF8F2;
+      --wash: #E8E3D5;
+      --line: rgba(233, 255, 208, 0.10);
+      --line-strong: rgba(23, 22, 20, 0.20);
+      --text: #16150F;
+      --dim: #6C695E;
+      --faint: #A39E92;
+      --frost: rgba(241, 237, 227, 0.85);
+      --frost-border: rgba(23, 22, 20, 0.12);
+      --logo-bar: #16150F;
     }
 
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; background: var(--ohm-canvas); color: var(--ohm-ink); font-family: var(--ohm-font-sans); -webkit-font-smoothing: antialiased; }
+    html { scroll-behavior: smooth; background: var(--bg); color: var(--text); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
     body { min-height: 100vh; line-height: 1.6; }
 
-    .wrap { max-width: 800px; margin: 0 auto; padding: 0 24px; }
-    .mono { font-family: var(--ohm-font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ohm-muted); }
+    .wrap { max-width: 780px; margin: 0 auto; padding: 0 24px; }
+    .mono { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
 
     /* Nav */
-    .nav-wrapper { position: sticky; top: 16px; z-index: 100; padding: 0 16px; margin-bottom: 24px; }
-    .nav-bar { max-width: 800px; margin: 0 auto; background: var(--ohm-frost); backdrop-filter: blur(24px) saturate(1.6); -webkit-backdrop-filter: blur(24px) saturate(1.6); border: 1px solid var(--ohm-frost-border); box-shadow: var(--ohm-shade-1); border-radius: var(--ohm-radius-pill); padding: 10px 18px; display: flex; align-items: center; justify-content: space-between; }
-    .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ohm-ink); }
-    .nav-brand-title { font-family: var(--ohm-font-display); font-size: 22px; font-weight: 400; }
-    .back-btn { font-family: var(--ohm-font-mono); font-size: 11px; color: var(--ohm-forest); text-decoration: none; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; }
+    .nav-wrap { position: sticky; top: 14px; z-index: 100; padding: 0 16px; margin-bottom: 24px; }
+    .nav-bar { max-width: 780px; margin: 0 auto; background: var(--frost); backdrop-filter: blur(24px) saturate(1.6); -webkit-backdrop-filter: blur(24px) saturate(1.6); border: 1px solid var(--frost-border); border-radius: var(--r-pill); padding: 8px 18px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); }
+    .nav-brand-text { font-family: var(--font-display); font-size: 24px; font-weight: 800; letter-spacing: -0.04em; }
+    .back-btn { font-family: var(--font-mono); font-size: 11px; color: var(--red); text-decoration: none; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; }
     .back-btn:hover { text-decoration: underline; }
 
     /* Content */
-    .content { padding: 40px 0 60px; }
-    h1 { font-family: var(--ohm-font-display); font-size: 42px; font-weight: 400; letter-spacing: -0.02em; margin-bottom: 12px; }
-    .meta { font-family: var(--ohm-font-mono); font-size: 11px; color: var(--ohm-faint); margin-bottom: 30px; display: flex; gap: 12px; flex-wrap: wrap; }
-    .intro { font-size: 17px; color: var(--ohm-muted); line-height: 1.6; margin-bottom: 36px; padding-bottom: 24px; border-bottom: 1.5px dashed var(--ohm-line); }
+    .content { padding: 36px 0 60px; }
+    h1 { font-family: var(--font-display); font-size: 44px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 12px; }
+    .meta { font-family: var(--font-mono); font-size: 11px; color: var(--faint); margin-bottom: 30px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .intro { font-size: 17px; color: var(--dim); line-height: 1.6; margin-bottom: 36px; padding-bottom: 24px; border-bottom: 1.5px dashed var(--line); }
 
-    h2 { font-family: var(--ohm-font-display); font-size: 24px; font-weight: 400; margin: 38px 0 14px; color: var(--ohm-ink); }
-    h3 { font-family: var(--ohm-font-sans); font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ohm-forest); margin: 20px 0 8px; }
+    h2 { font-family: var(--font-display); font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin: 38px 0 14px; color: var(--text); }
+    h3 { font-family: var(--font-mono); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--red); margin: 20px 0 8px; }
 
-    p { font-size: 15px; color: var(--ohm-muted); line-height: 1.65; margin-bottom: 14px; }
-    p strong, p b { color: var(--ohm-ink); font-weight: 600; }
-    ul { margin: 0 0 18px 22px; color: var(--ohm-muted); }
+    p { font-size: 15px; color: var(--dim); line-height: 1.65; margin-bottom: 14px; }
+    p strong, p b { color: var(--text); font-weight: 600; }
+    ul { margin: 0 0 18px 22px; color: var(--dim); }
     li { font-size: 15px; line-height: 1.65; margin-bottom: 8px; }
-    li strong, li b { color: var(--ohm-ink); font-weight: 600; }
+    li strong, li b { color: var(--text); font-weight: 600; }
 
-    .highlight-card { background: var(--ohm-card); border: 1px solid var(--ohm-line); border-radius: var(--ohm-radius-item); padding: 22px; margin: 24px 0; box-shadow: var(--ohm-shade-1); }
-    .highlight-card .label { font-family: var(--ohm-font-mono); font-size: 10px; color: var(--ohm-forest); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; font-weight: 700; }
+    .highlight-card { background: var(--card); border: 1px solid var(--line-strong); border-radius: 8px; padding: 20px; margin: 24px 0; }
+    .highlight-card .label { font-family: var(--font-mono); font-size: 10px; color: var(--red); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; font-weight: 700; }
 
-    a { color: var(--ohm-forest); text-decoration: none; }
+    a { color: var(--red); text-decoration: none; }
     a:hover { text-decoration: underline; }
 
-    footer { border-top: 1px solid var(--ohm-line); padding: 40px 0; text-align: center; margin-top: 40px; }
+    footer { border-top: 1px solid var(--line); padding: 40px 0; text-align: center; margin-top: 40px; }
   </style>
 </head>
 <body>
 
-  <div class="nav-wrapper">
+  <div class="nav-wrap">
     <nav class="nav-bar">
       <a href="./index.html" class="nav-brand">
-        <svg width="22" height="26" viewBox="0 0 100 116" fill="none">
-          <rect x="14" y="22" width="11" height="72" rx="4" fill="var(--ohm-forest)" />
-          <rect x="36" y="22" width="11" height="72" rx="4" fill="var(--ohm-forest)" />
-          <rect x="58" y="22" width="11" height="72" rx="4" fill="var(--ohm-forest)" />
-          <rect x="80" y="22" width="11" height="72" rx="4" fill="var(--ohm-forest)" />
-          <rect x="47" y="9" width="11" height="98" rx="4" transform="rotate(56 52.5 58)" fill="var(--ohm-red)" />
+        <svg style="width:24px; height:26px;" viewBox="0 0 100 116" fill="none">
+          <rect x="14" y="22" width="11" height="72" rx="4" fill="var(--logo-bar)" />
+          <rect x="36" y="22" width="11" height="72" rx="4" fill="var(--logo-bar)" />
+          <rect x="58" y="22" width="11" height="72" rx="4" fill="var(--logo-bar)" />
+          <rect x="80" y="22" width="11" height="72" rx="4" fill="var(--logo-bar)" />
+          <rect x="47" y="9" width="11" height="98" rx="4" transform="rotate(56 52.5 58)" fill="var(--red)" />
         </svg>
-        <span class="nav-brand-title">tally</span>
+        <span class="nav-brand-text">tally</span>
       </a>
-      <a href="./index.html" class="back-btn">← Back to Overview</a>
+      <a href="./index.html" class="back-btn">← Back to App</a>
     </nav>
   </div>
 
@@ -181,13 +156,12 @@
   <footer>
     <div class="wrap">
       <p class="mono">tally · track the damage · all rights reserved</p>
-      <p class="mono" style="margin-top:6px;">© 2026 tally · Designed with Ohm Design System</p>
+      <p class="mono" style="margin-top:6px;">© 2026 tally</p>
     </div>
   </footer>
 
   <script>
-    const savedTheme = localStorage.getItem('tally-theme') || 
-      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const savedTheme = localStorage.getItem('tally-theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
   </script>
 </body>
