@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tally · track the damage. Financially feral.</title>
+  <title>tally · track the damage. Automated expense tracker.</title>
   <meta name="description" content="A snarky money manager that tracks supported bank and UPI transaction alerts and tells you how badly you blew it." />
   
   <!-- Open Graph -->
-  <meta property="og:title" content="tally · track the damage. Financially feral." />
+  <meta property="og:title" content="tally · track the damage. Automated expense tracker." />
   <meta property="og:description" content="The money app for people who already know it's bad and want to watch anyway." />
   <meta property="og:type" content="website" />
   <link rel="icon" type="image/png" href="../assets/favicon.png" />
@@ -968,112 +968,421 @@
       transform-origin: center center;
     }
 
-    /* iPhone Device Frame directly inspired by trysurge.in */
-    .iphone {
+    /* ========================================================
+       UNBRANDED SAMSUNG FLAGSHIP DEVICE MOCKUP
+       Ultra-slim uniform bezels, center Infinity-O punch hole,
+       clean Android status bar, no Samsung branding.
+       ======================================================== */
+    .samsung-phone {
       position: relative;
-      height: min(580px, 62vh);
-      height: min(580px, 62dvh);
+      height: min(600px, 64vh);
+      height: min(600px, 64dvh);
       aspect-ratio: 9 / 19.5;
-      border-radius: 46px;
-      padding: 9px;
-      background: linear-gradient(150deg, #37373c 0%, #151518 42%, #08080a 100%);
-      box-shadow: 0 40px 90px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      border-radius: 36px;
+      padding: 8px;
+      background: linear-gradient(150deg, #303035 0%, #1c1c20 40%, #0e0e11 100%);
+      box-shadow: 0 40px 90px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.12);
       user-select: none;
     }
 
-    html[data-theme="light"] .iphone {
-      background: linear-gradient(150deg, #e4dfd5 0%, #cac5bb 42%, #a8a49c 100%);
-      box-shadow: 0 35px 80px rgba(23, 22, 20, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.08);
+    html[data-theme="light"] .samsung-phone {
+      background: linear-gradient(150deg, #ded9ce 0%, #c5bfb4 40%, #9a958c 100%);
+      box-shadow: 0 35px 80px rgba(23, 22, 20, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
     }
 
-    .iphone-screen {
+    .samsung-screen {
       position: relative;
       width: 100%;
       height: 100%;
-      border-radius: 38px;
-      background: #000000;
+      border-radius: 28px;
+      background: #0E0F0C;
       overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.8);
     }
 
-    .iphone-island {
+    /* Minimal circular Infinity-O punch hole camera (Samsung style) */
+    .samsung-camera {
       position: absolute;
       top: 10px;
       left: 50%;
       transform: translateX(-50%);
-      width: 32%;
-      height: 22px;
-      background: #000000;
-      border-radius: 999px;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #020202;
+      border: 1.5px solid #1a1a1e;
+      box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.9), 0 0 2px rgba(255, 255, 255, 0.12);
       z-index: 50;
+      pointer-events: none;
     }
 
-    .iphone-status {
+    .samsung-camera::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 2.5px;
+      height: 2.5px;
+      border-radius: 50%;
+      background: rgba(100, 140, 200, 0.5);
+    }
+
+    /* Sleek Android / One UI Status Bar (Pinned at top) */
+    .samsung-status-bar {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
-      height: 40px;
+      height: 30px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 20px 0;
+      padding: 6px 18px 0;
       color: #FFFFFF;
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 700;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      font-family: var(--font-sans);
       z-index: 40;
-      letter-spacing: -0.01em;
-    }
-
-    .status-icons {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      opacity: 0.9;
-    }
-
-    .iphone-display {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    .screen-img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: top center;
-      opacity: 0;
-      transition: opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+      background: linear-gradient(180deg, rgba(14, 15, 12, 0.9) 0%, rgba(14, 15, 12, 0) 100%);
       pointer-events: none;
     }
 
-    .screen-img.active {
-      opacity: 1;
-      pointer-events: auto;
+    .samsung-status-icons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 700;
     }
 
-    .iphone-glass-sheen {
+    .android-battery {
+      width: 18px;
+      height: 9px;
+      border: 1.5px solid currentColor;
+      border-radius: 2px;
+      padding: 1px;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+    .android-battery::after {
+      content: '';
+      position: absolute;
+      right: -3px;
+      top: 2px;
+      width: 2px;
+      height: 3px;
+      background: currentColor;
+      border-radius: 0 1px 1px 0;
+    }
+    .android-battery-level {
+      width: 85%;
+      height: 100%;
+      background: var(--red);
+      border-radius: 1px;
+    }
+
+    /* Bottom Android Gesture Navigation Bar */
+    .samsung-home-bar {
+      position: absolute;
+      bottom: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 64px;
+      height: 3.5px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.45);
+      z-index: 50;
+      pointer-events: none;
+    }
+
+    /* ========================================================
+       SCROLLABLE SCREEN VIEWPORT (Inside Samsung Screen)
+       Allows full vertical scrolling and dragging through feed & insights
+       ======================================================== */
+    .samsung-screen-viewport {
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 35%, transparent 55%);
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      cursor: grab;
+      z-index: 10;
+      padding-top: 28px; /* dedicated clearance for status bar */
+      padding-bottom: 24px;
+    }
+
+    .samsung-screen-viewport:active {
+      cursor: grabbing;
+    }
+
+    /* Sleek Android thin scrollbar */
+    .samsung-screen-viewport::-webkit-scrollbar {
+      width: 4px;
+    }
+    .samsung-screen-viewport::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .samsung-screen-viewport::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 4px;
+    }
+    .samsung-screen-viewport::-webkit-scrollbar-thumb:hover {
+      background: var(--red);
+    }
+
+    .screen-pane {
+      display: none;
+      width: 100%;
+      min-height: 100%;
+      animation: screenFadeIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .screen-pane.active {
+      display: block;
+    }
+
+    @keyframes screenFadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .screen-content-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    /* Subtle Glass Sheen Glare across Samsung screen */
+    .samsung-glass-sheen {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 35%, transparent 55%);
       pointer-events: none;
       z-index: 30;
     }
 
-    .iphone-home {
-      position: absolute;
-      bottom: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 34%;
-      height: 4.5px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.6);
-      z-index: 50;
+    /* ========================================================
+       IN-PHONE RICH APP FEED & INSIGHTS STYLES
+       ======================================================== */
+    .app-screen-inner {
+      padding: 10px 14px 24px;
+      font-family: var(--font-sans);
+      color: #F2F3EC;
+      text-align: left;
+    }
+
+    .app-screen-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .app-screen-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .app-feed-badge {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--red);
+      background: rgba(255, 84, 54, 0.14);
+      padding: 3px 8px;
+      border-radius: var(--r-pill);
+      letter-spacing: 0.08em;
+    }
+
+    .app-search-box {
+      background: #181A12;
+      border: 1px solid rgba(233, 255, 208, 0.12);
+      border-radius: 10px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #63655A;
+      margin-bottom: 10px;
+    }
+
+    .app-filter-tabs {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 12px;
+    }
+
+    .app-filter-pill {
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 3px 9px;
+      border-radius: var(--r-pill);
+      border: 1px solid rgba(233, 255, 208, 0.12);
+      color: #9DA08F;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .app-filter-pill.active {
+      background: var(--red);
+      border-color: var(--red);
+      color: #FFFFFF;
+    }
+
+    .app-group-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      color: #63655A;
+      text-transform: uppercase;
+      margin: 12px 0 6px;
+      font-weight: 700;
+    }
+
+    .app-tx-card {
+      background: #181A12;
+      border: 1px solid rgba(233, 255, 208, 0.1);
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-bottom: 7px;
+    }
+
+    .app-tx-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .app-tx-name {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #F2F3EC;
+      line-height: 1.2;
+    }
+
+    .app-tx-sub {
+      font-size: 10px;
+      color: #9DA08F;
+      font-style: italic;
+      margin-top: 2px;
+      line-height: 1.25;
+    }
+
+    .app-tx-val {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .app-tx-val.red {
+      color: var(--red);
+    }
+
+    .app-tx-val.acid {
+      color: var(--acid);
+    }
+
+    .app-reactions-row {
+      display: flex;
+      gap: 5px;
+      margin-top: 7px;
+      padding-top: 6px;
+      border-top: 1px dashed rgba(233, 255, 208, 0.08);
+    }
+
+    .app-react-chip {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: #20221A;
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+
+    .app-react-chip.active {
+      border-color: var(--red);
+      background: rgba(255, 84, 54, 0.2);
+    }
+
+    /* Insights inside phone screen */
+    .app-meter-row {
+      display: flex;
+      gap: 4px;
+      margin: 8px 0 14px;
+    }
+
+    .app-meter-cell {
+      flex: 1;
+      height: 6px;
+      border-radius: 2px;
+      background: #20221A;
+    }
+
+    .app-meter-cell.lit {
+      background: var(--red);
+    }
+
+    .app-verdict-card {
+      background: #181A12;
+      border: 1px solid rgba(233, 255, 208, 0.12);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .app-verdict-tag {
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      color: var(--red);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+
+    .app-verdict-quote {
+      font-size: 11.5px;
+      font-weight: 700;
+      line-height: 1.4;
+      color: #F2F3EC;
+    }
+
+    .app-category-bar-row {
+      margin-bottom: 8px;
+    }
+
+    .app-category-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10.5px;
+      margin-bottom: 3px;
+    }
+
+    .app-cat-progress {
+      width: 100%;
+      height: 5px;
+      border-radius: 3px;
+      background: #20221A;
+      overflow: hidden;
+    }
+
+    .app-cat-fill {
+      height: 100%;
+      background: var(--red);
+      border-radius: 3px;
     }
 
     /* Floating TrySurge-style contextual chips */
@@ -1228,7 +1537,7 @@
 
       <h1 class="hero-h1">
         track the damage.<br />
-        <span class="red">Financially feral.</span>
+        <span class="red">Zero manual logging.</span>
       </h1>
 
       <p class="hero-lead">
@@ -1267,7 +1576,7 @@
   <!-- ========================================================
        TRYSURGE-STYLE PHONE ZOOM REVEAL (ContainerScroll)
        Scroll-driven 3D tilt-to-flat + zoom-toward-viewer
-       Ported directly from trysurge.in
+       Unbranded Samsung Flagship Device with Scrollable Screens
        ======================================================== -->
   <section id="phoneSection" class="phone-scroll-section">
     <div class="phone-sticky-viewport">
@@ -1283,6 +1592,10 @@
           <button class="phone-tab-btn active" data-screen="dashboard">The Damage</button>
           <button class="phone-tab-btn" data-screen="feed">Live Alerts</button>
           <button class="phone-tab-btn" data-screen="insights">Insights</button>
+        </div>
+        <div class="scroll-hint-pill">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"/></svg>
+          <span>Scroll inside phone to explore</span>
         </div>
       </div>
 
@@ -1301,41 +1614,296 @@
 
       <!-- Phone Reveal Card (3D Tilt & Zoom container) -->
       <div id="phoneRevealCard" class="phone-reveal-card">
-        <!-- Titanium iPhone Device Frame -->
-        <div class="iphone">
-          <div class="iphone-screen">
-            <!-- Dynamic Island -->
-            <div class="iphone-island"></div>
+        <!-- Unbranded Samsung Flagship Device Frame -->
+        <div class="samsung-phone">
+          <div class="samsung-screen">
+            <!-- Center Infinity-O Punch Hole Camera (Samsung hardware detail) -->
+            <div class="samsung-camera"></div>
 
-            <!-- iOS Status Bar -->
-            <div class="iphone-status">
+            <!-- Sleek Android One UI Status Bar (Pinned at top, zero overlap with app) -->
+            <div class="samsung-status-bar">
               <span>9:41</span>
-              <div class="status-icons">
-                <svg width="15" height="11" viewBox="0 0 16 12" fill="currentColor">
-                  <path d="M1 9.5h2v-2H1v2zm4 0h2v-4H5v4zm4 0h2v-7H9v7zm4 0h2v-9h-2v9z"/>
-                </svg>
-                <svg width="14" height="11" viewBox="0 0 16 12" fill="currentColor">
+              <div class="samsung-status-icons">
+                <span>5G</span>
+                <svg width="13" height="10" viewBox="0 0 16 12" fill="currentColor">
                   <path d="M8 2.5a9.5 9.5 0 0 0-6.7 2.8l1.4 1.4A7.5 7.5 0 0 1 8 4.5a7.5 7.5 0 0 1 5.3 2.2l1.4-1.4A9.5 9.5 0 0 0 8 2.5zm0 4a5.5 5.5 0 0 0-3.9 1.6l1.4 1.4A3.5 3.5 0 0 1 8 8.5a3.5 3.5 0 0 1 2.5 1l1.4-1.4A5.5 5.5 0 0 0 8 6.5zm0 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
                 </svg>
-                <svg width="20" height="10" viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <rect x="1" y="1" width="19" height="10" rx="3"/>
-                  <path d="M22 4v4" stroke-linecap="round"/>
-                  <rect x="3" y="3" width="13" height="6" rx="1.5" fill="currentColor"/>
-                </svg>
+                <div class="android-battery">
+                  <div class="android-battery-level"></div>
+                </div>
               </div>
             </div>
 
-            <!-- Screen Images with Smooth Fade Transitions -->
-            <div class="iphone-display">
-              <img id="screenDashboard" src="./assets/dashboard.png" alt="Tally Damage Dashboard" class="screen-img active" />
-              <img id="screenFeed" src="./assets/feed.png" alt="Tally Live Transaction Feed" class="screen-img" />
-              <img id="screenInsights" src="./assets/insights.png" alt="Tally Spending Insights" class="screen-img" />
-              <!-- Gloss Sheen Reflection -->
-              <div class="iphone-glass-sheen"></div>
+            <!-- Scrollable Viewport inside Phone -->
+            <div class="samsung-screen-viewport" id="screenViewport">
+              <!-- Screen 1: Dashboard (Clean Shipframe Screenshot without stamp) -->
+              <div id="screenDashboard" class="screen-pane active">
+                <img src="./assets/dashboard.png" alt="Tally Damage Dashboard" class="screen-content-img" />
+              </div>
+
+              <!-- Screen 2: Live Alerts Feed (Rich, deeply scrollable transaction cards) -->
+              <div id="screenFeed" class="screen-pane">
+                <div class="app-screen-inner">
+                  <div class="app-screen-header">
+                    <span class="app-screen-title">the feed</span>
+                    <span class="app-feed-badge">18 HITS</span>
+                  </div>
+
+                  <div class="app-search-box">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <span>search merchants, notes…</span>
+                  </div>
+
+                  <div class="app-filter-tabs">
+                    <span class="app-filter-pill active">ALL</span>
+                    <span class="app-filter-pill">SPENT</span>
+                    <span class="app-filter-pill">RECEIVED</span>
+                  </div>
+
+                  <!-- TODAY -->
+                  <div class="app-group-label">TODAY · 17 NOV</div>
+
+                  <div class="app-tx-card">
+                    <div class="app-tx-top">
+                      <div>
+                        <div class="app-tx-name">Swiggy Instamart</div>
+                        <div class="app-tx-sub">"3rd order today · midnight craving" · FOOD</div>
+                      </div>
+                      <div class="app-tx-val red">−₹487</div>
+                    </div>
+                    <div class="app-reactions-row">
+                      <span class="app-react-chip active">💀 1</span>
+                      <span class="app-react-chip">😭</span>
+                      <span class="app-react-chip">🔥</span>
+                      <span class="app-react-chip">📉</span>
+                    </div>
+                  </div>
+
+                  <div class="app-tx-card">
+                    <div class="app-tx-top">
+                      <div>
+                        <div class="app-tx-name">Zepto</div>
+                        <div class="app-tx-sub">"1 maggi, 1 redbull" · GROCERIES</div>
+                      </div>
+                      <div class="app-tx-val red">−₹312</div>
+                    </div>
+                  </div>
+
+                  <div class="app-tx-card">
+                    <div class="app-tx-top">
+                      <div>
+                        <div class="app-tx-name">Blue Tokai Coffee</div>
+                        <div class="app-tx-sub">"afternoon flat white" · FOOD</div>
+                      </div>
+                      <div class="app-tx-val red">−₹340</div>
+                    </div>
+                  </div>
+
+                  <!-- YESTERDAY -->
+                  <div class="app-group-label">YESTERDAY · 16 NOV</div>
+
+                  <div class="app-tx-card">
+                    <div class="app-tx-top">
+                      <div>
+                        <div class="app-tx-name">Steam Games</div>
+                        <div class="app-tx-sub">"unplayed backlog expansion" · FUN</div>
+                      </div>
+                      <div class="app-tx-val red">−₹3,499</div>
+                    </div>
+                  </div>
+
+                  <div class="app-tx-card">
+                    <div class="app-tx-top">
+                      <div>
+                        <div class="app-tx-name">Uber Auto</div>
+                        <div class="app-tx-sub">"surged 2.4x in rain" · MOVE</div>
+                      </div>
+                      <div class="app-tx-val red">−₹245</div>
+                    </div>
+                  </div>
+
+                  <div class="app-tx-card">
+                    <div class="app-tx-top">
+                      <div>
+                        <div class="app-tx-name">BookMyShow</div>
+                        <div class="app-tx-sub">"IMAX Dune re-release" · FUN</div>
+                      </div>
+                      <div class="app-tx-val red">−₹920</div>
+                    </div>
+                  </div>
+
+                  <!-- THIS WEEK -->
+                  <div class="app-group-label">THIS WEEK</div>
+
+                  <div class="app-tx-card">
+                    <div class="app-tx-top">
+                      <div>
+                        <div class="app-tx-name">Apple Store India</div>
+                        <div class="app-tx-sub">"magic trackpad" · SHOPPING</div>
+                      </div>
+                      <div class="app-tx-val red">−₹12,400</div>
+                    </div>
+                  </div>
+
+                  <div class="app-tx-card">
+                    <div class="app-tx-top">
+                      <div>
+                        <div class="app-tx-name">Salary Credit · HDFC</div>
+                        <div class="app-tx-sub">"lasted approximately 4 hours" · SALARY</div>
+                      </div>
+                      <div class="app-tx-val acid">+₹65,000</div>
+                    </div>
+                  </div>
+
+                  <div class="app-tx-card">
+                    <div class="app-tx-top">
+                      <div>
+                        <div class="app-tx-name">Amazon India</div>
+                        <div class="app-tx-sub">"mechanical switches" · SHOP</div>
+                      </div>
+                      <div class="app-tx-val red">−₹1,850</div>
+                    </div>
+                  </div>
+
+                  <div class="app-tx-card">
+                    <div class="app-tx-top">
+                      <div>
+                        <div class="app-tx-name">Netflix Subscription</div>
+                        <div class="app-tx-sub">"auto-debit" · BILLS</div>
+                      </div>
+                      <div class="app-tx-val red">−₹649</div>
+                    </div>
+                  </div>
+
+                  <div class="app-tx-card">
+                    <div class="app-tx-top">
+                      <div>
+                        <div class="app-tx-name">Airtel Broadband</div>
+                        <div class="app-tx-sub">"fiber optic monthly" · UTILITIES</div>
+                      </div>
+                      <div class="app-tx-val red">−₹1,179</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Screen 3: Insights (Rich, deeply scrollable analytics & breakdowns) -->
+              <div id="screenInsights" class="screen-pane">
+                <div class="app-screen-inner">
+                  <div class="app-screen-header">
+                    <span class="app-screen-title">insights</span>
+                    <span class="app-feed-badge">MARCH 2026</span>
+                  </div>
+
+                  <!-- Cope Meter -->
+                  <div class="app-meter-row">
+                    <div class="app-meter-cell lit"></div>
+                    <div class="app-meter-cell lit"></div>
+                    <div class="app-meter-cell lit"></div>
+                    <div class="app-meter-cell"></div>
+                    <div class="app-meter-cell"></div>
+                  </div>
+
+                  <!-- Tally Roast Card -->
+                  <div class="app-verdict-card">
+                    <div class="app-verdict-tag">★ OFFICIAL TALLY VERDICT ★</div>
+                    <div class="app-verdict-quote">"You spent 41% of your salary in the first 72 hours. The landlord has restored balance."</div>
+                  </div>
+
+                  <!-- Spending Categories -->
+                  <div class="app-group-label">SPENDING BREAKDOWN</div>
+
+                  <div class="app-category-bar-row">
+                    <div class="app-category-head">
+                      <span>🍕 Food & Swiggy</span>
+                      <span class="mono">₹18,400 (39%)</span>
+                    </div>
+                    <div class="app-cat-progress">
+                      <div class="app-cat-fill" style="width: 39%;"></div>
+                    </div>
+                  </div>
+
+                  <div class="app-category-bar-row">
+                    <div class="app-category-head">
+                      <span>🛍️ Shopping & Tech</span>
+                      <span class="mono">₹14,250 (30%)</span>
+                    </div>
+                    <div class="app-cat-progress">
+                      <div class="app-cat-fill" style="width: 30%;"></div>
+                    </div>
+                  </div>
+
+                  <div class="app-category-bar-row">
+                    <div class="app-category-head">
+                      <span>🎮 Fun & Gaming</span>
+                      <span class="mono">₹5,820 (12%)</span>
+                    </div>
+                    <div class="app-cat-progress">
+                      <div class="app-cat-fill" style="width: 12%;"></div>
+                    </div>
+                  </div>
+
+                  <div class="app-category-bar-row">
+                    <div class="app-category-head">
+                      <span>🚕 Cabs & Transport</span>
+                      <span class="mono">₹3,410 (7%)</span>
+                    </div>
+                    <div class="app-cat-progress">
+                      <div class="app-cat-fill" style="width: 7%;"></div>
+                    </div>
+                  </div>
+
+                  <div class="app-category-bar-row">
+                    <div class="app-category-head">
+                      <span>⚡ Bills & Utilities</span>
+                      <span class="mono">₹5,220 (12%)</span>
+                    </div>
+                    <div class="app-cat-progress">
+                      <div class="app-cat-fill" style="width: 12%;"></div>
+                    </div>
+                  </div>
+
+                  <!-- Top Suspects -->
+                  <div class="app-group-label" style="margin-top: 14px;">TOP OFFENDERS</div>
+
+                  <div class="app-tx-card" style="margin-bottom: 6px;">
+                    <div class="app-tx-top">
+                      <div>
+                        <div class="app-tx-name">Swiggy</div>
+                        <div class="app-tx-sub">14 orders this month</div>
+                      </div>
+                      <div class="app-tx-val red">₹8,200</div>
+                    </div>
+                  </div>
+
+                  <div class="app-tx-card" style="margin-bottom: 6px;">
+                    <div class="app-tx-top">
+                      <div>
+                        <div class="app-tx-name">Steam Games</div>
+                        <div class="app-tx-sub">2 major hits</div>
+                      </div>
+                      <div class="app-tx-val red">₹3,499</div>
+                    </div>
+                  </div>
+
+                  <div class="app-tx-card" style="margin-bottom: 6px;">
+                    <div class="app-tx-top">
+                      <div>
+                        <div class="app-tx-name">Zepto Quick Commerce</div>
+                        <div class="app-tx-sub">11 orders</div>
+                      </div>
+                      <div class="app-tx-val red">₹3,140</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <!-- iOS Home Indicator Bar -->
-            <div class="iphone-home"></div>
+            <!-- Glass Sheen Overlay -->
+            <div class="samsung-glass-sheen"></div>
+
+            <!-- Bottom Android Home Indicator -->
+            <div class="samsung-home-bar"></div>
           </div>
         </div>
       </div>
@@ -1636,7 +2204,8 @@
 
       // Phone screen tabs switcher (Dashboard / Feed / Insights)
       const tabBtns = document.querySelectorAll('.phone-tab-btn');
-      const screenImgs = {
+      const viewport = document.getElementById('screenViewport');
+      const screenPanes = {
         dashboard: document.getElementById('screenDashboard'),
         feed: document.getElementById('screenFeed'),
         insights: document.getElementById('screenInsights')
@@ -1648,13 +2217,41 @@
           tabBtns.forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
 
-          Object.keys(screenImgs).forEach(key => {
-            if (screenImgs[key]) {
-              screenImgs[key].classList.toggle('active', key === target);
+          Object.keys(screenPanes).forEach(key => {
+            if (screenPanes[key]) {
+              screenPanes[key].classList.toggle('active', key === target);
             }
           });
+          if (viewport) {
+            viewport.scrollTop = 0;
+          }
         });
       });
+
+      // Mouse drag-to-scroll inside Samsung phone screen
+      if (viewport) {
+        let isDown = false;
+        let startY;
+        let startScroll;
+
+        viewport.addEventListener('mousedown', (e) => {
+          isDown = true;
+          startY = e.pageY;
+          startScroll = viewport.scrollTop;
+        });
+
+        window.addEventListener('mouseup', () => {
+          isDown = false;
+        });
+
+        viewport.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const y = e.pageY;
+          const delta = (y - startY) * 1.4;
+          viewport.scrollTop = startScroll - delta;
+        });
+      }
     })();
 
     // 3. Forever Magnetic Button Physics
