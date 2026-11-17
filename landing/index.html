@@ -440,9 +440,10 @@
       color: var(--faint);
     }
 
-    /* Forever Magnetic Button Component */
+    /* Forever Magnetic Button Component with Bencho Shimmer Beam */
     .btn-magnetic {
       position: relative;
+      overflow: hidden;
       background: var(--red);
       color: #ffffff;
       border: none;
@@ -463,6 +464,28 @@
       transition: transform var(--dur-fast) var(--ease-out-soft), background 0.15s ease;
       will-change: transform;
       box-shadow: 0 2px 8px rgba(255, 84, 54, 0.35);
+    }
+
+    .btn-magnetic::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -120%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.25),
+        transparent
+      );
+      transform: skewX(-20deg);
+      pointer-events: none;
+      transition: left 650ms ease;
+    }
+
+    .btn-magnetic:hover::after {
+      left: 150%;
     }
 
     .btn-magnetic:hover {
@@ -818,11 +841,232 @@
     }
 
     /* ========================================================
+       BENCHO COMPONENTS: SPOTLIGHT, SPECULAR RIM & SHIMMER
+       Inspired by bencho.dev craft & physical interactions
+       ======================================================== */
+    .spotlight-card {
+      position: relative;
+      overflow: hidden;
+      border-top: 1px solid rgba(255, 255, 255, 0.18) !important;
+    }
+
+    .spotlight-card::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      pointer-events: none;
+      background: radial-gradient(
+        380px circle at var(--mouse-x, -500px) var(--mouse-y, -500px),
+        rgba(255, 84, 54, 0.10),
+        rgba(212, 255, 46, 0.02) 35%,
+        transparent 65%
+      );
+      opacity: 0;
+      transition: opacity 250ms ease;
+      z-index: 1;
+    }
+
+    .spotlight-card:hover::before {
+      opacity: 1;
+    }
+
+    .spotlight-card > * {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Shimmer Light Beam */
+    .shimmer-beam {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shimmer-beam::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -120%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.22),
+        transparent
+      );
+      transform: skewX(-20deg);
+      pointer-events: none;
+      transition: left 650ms ease;
+    }
+
+    .shimmer-beam:hover::after {
+      left: 150%;
+    }
+
+    /* ========================================================
+       BENCHO COMPONENT: FLOATING GLASS DOCK / COMMAND BAR
+       ======================================================== */
+    .bencho-dock-wrap {
+      position: fixed;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%) translateZ(0);
+      z-index: 999;
+      pointer-events: none;
+      transition: opacity 250ms ease, transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .bencho-dock {
+      pointer-events: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(18, 19, 14, 0.85);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      padding: 5px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(233, 255, 208, 0.12);
+      border-top: 1px solid rgba(255, 255, 255, 0.22);
+      box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(0, 0, 0, 0.4);
+    }
+
+    .dock-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      background: transparent;
+      border: none;
+      color: var(--dim);
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 150ms ease, background 150ms ease, transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+      user-select: none;
+      outline: none;
+    }
+
+    .dock-btn:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px) scale(1.08);
+    }
+
+    .dock-btn:active {
+      transform: scale(0.92);
+      transition: transform 100ms ease;
+    }
+
+    .dock-tooltip {
+      position: absolute;
+      bottom: calc(100% + 9px);
+      left: 50%;
+      transform: translateX(-50%) translateY(4px) scale(0.92);
+      opacity: 0;
+      pointer-events: none;
+      background: rgba(22, 24, 18, 0.95);
+      border: 1px solid rgba(233, 255, 208, 0.16);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55);
+      transition: opacity 180ms ease, transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 1010;
+    }
+
+    .dock-btn:hover .dock-tooltip {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0) scale(1);
+    }
+
+    .dock-divider {
+      width: 1px;
+      height: 20px;
+      background: rgba(233, 255, 208, 0.12);
+      margin: 0 3px;
+    }
+
+    .dock-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--red);
+      color: #ffffff;
+      padding: 0 14px;
+      height: 36px;
+      border-radius: 999px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      box-shadow: 0 4px 14px rgba(255, 84, 54, 0.45);
+      transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 180ms ease;
+    }
+
+    .dock-cta:hover {
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 6px 20px rgba(255, 84, 54, 0.6);
+    }
+
+    .dock-cta:active {
+      transform: scale(0.95);
+    }
+
+    .dock-sound-active {
+      position: relative;
+    }
+
+    .dock-sound-active::after {
+      content: '';
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 6px;
+      height: 6px;
+      background: var(--acid);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--acid);
+    }
+
+    @media (max-width: 640px) {
+      .bencho-dock-wrap {
+        bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+        width: calc(100% - 24px);
+        max-width: 380px;
+      }
+      .bencho-dock {
+        width: 100%;
+        justify-content: space-around;
+        padding: 4px 6px;
+      }
+      .dock-btn {
+        width: 36px;
+        height: 36px;
+      }
+      .dock-tooltip {
+        display: none;
+      }
+    }
+
+    /* ========================================================
        FOOTER
        ======================================================== */
     footer {
       border-top: 1px solid var(--line);
-      padding: 48px 0 54px;
+      padding: 48px 0 92px;
       text-align: center;
       background: var(--wash);
     }
@@ -1585,15 +1829,15 @@
         </div>
       </div>
 
-      <!-- Floating Marks / Contextual Badges (TrySurge style) -->
-      <div class="phone-float-card phone-float-left">
-        <div class="float-tag">⚡ BANK ALERT · 02:14 AM</div>
+      <!-- Floating Marks / Contextual Badges (TrySurge style with Bencho Spotlight) -->
+      <div class="phone-float-card phone-float-left spotlight-card">
+        <div class="float-tag" data-scramble="true">⚡ BANK ALERT · 02:14 AM</div>
         <div class="float-title">HDFC BANK · SWIGGY</div>
         <div class="float-amount text-red">₹1,420</div>
       </div>
 
-      <div class="phone-float-card phone-float-right">
-        <div class="float-tag">MONTHLY DAMAGE</div>
+      <div class="phone-float-card phone-float-right spotlight-card">
+        <div class="float-tag" data-scramble="true">MONTHLY DAMAGE</div>
         <div class="float-title">MARCH TOTAL</div>
         <div class="float-amount text-red">₹48,290 <span class="float-sub">▲ 34%</span></div>
       </div>
@@ -1904,14 +2148,14 @@
     <section class="receipt-section" id="receipt">
       <div class="receipt-container">
 
-        <!-- 3D Tilt Parallax Card -->
-        <div class="tilt-card" id="tiltReceipt">
+        <!-- 3D Tilt Parallax Card with Bencho Spotlight -->
+        <div class="tilt-card spotlight-card" id="tiltReceipt">
           <div class="tilt-shine" id="tiltShine"></div>
 
           <div class="receipt-head">
             <div class="receipt-top-row">
               <span class="mono" style="letter-spacing:0.18em;">the damage · this month</span>
-              <span class="receipt-tag" id="receiptBadge">STATUS: BLEEDING</span>
+              <span class="receipt-tag" id="receiptBadge" data-scramble="true">STATUS: BLEEDING</span>
             </div>
 
             <!-- Large Amount Display -->
@@ -1978,9 +2222,9 @@
       </div>
 
       <div class="bento-grid">
-        <div class="bento-card">
+        <div class="bento-card spotlight-card">
           <div>
-            <div class="bento-tag">01 · LOCAL PARSER</div>
+            <div class="bento-tag" data-scramble="true">01 · LOCAL PARSER</div>
             <h3 class="bento-h3">Reads supported bank and UPI alerts.</h3>
             <p class="bento-p">
               Less typing, fewer forgotten spends. Tally's on-device parser decodes SMS and transactional notifications from HDFC, ICICI, SBI, Axis, GPay, PhonePe, and Paytm in under 4ms.
@@ -1989,9 +2233,9 @@
           <div class="bento-stat">⚡ 4ms average parse latency</div>
         </div>
 
-        <div class="bento-card">
+        <div class="bento-card spotlight-card">
           <div>
-            <div class="bento-tag">02 · SMART CATEGORIZATION</div>
+            <div class="bento-tag" data-scramble="true">02 · SMART CATEGORIZATION</div>
             <h3 class="bento-h3">Decodes cryptic UPI and bank tags.</h3>
             <p class="bento-p">
               Never wonder what an obscure merchant code was. Cryptic transaction IDs and payment handles are automatically resolved into clean, recognizable categories.
@@ -2000,9 +2244,9 @@
           <div class="bento-stat">🏷️ Instant vendor cleanup</div>
         </div>
 
-        <div class="bento-card">
+        <div class="bento-card spotlight-card">
           <div>
-            <div class="bento-tag">03 · SHAREABLE STATEMENTS</div>
+            <div class="bento-tag" data-scramble="true">03 · SHAREABLE STATEMENTS</div>
             <h3 class="bento-h3">A shareable receipt of the monthly carnage.</h3>
             <p class="bento-p">
               Broke, but make it a brand. Turn financial chaos into sleek, high-resolution damage receipts formatted for your Instagram stories or group chat.
@@ -2011,9 +2255,9 @@
           <div class="bento-stat">🧾 High-DPI PNG export</div>
         </div>
 
-        <div class="bento-card">
+        <div class="bento-card spotlight-card">
           <div>
-            <div class="bento-tag">04 · ZERO SURVEILLANCE</div>
+            <div class="bento-tag" data-scramble="true">04 · ZERO SURVEILLANCE</div>
             <h3 class="bento-h3">Full alerts and bank credentials never stored.</h3>
             <p class="bento-p">
               We never ask for your net banking login. OTPs, personal messages, and bank balances never leave your device. Only sanitized merchant descriptors touch our server.
@@ -2112,6 +2356,84 @@
   </footer>
 
   <!-- ========================================================
+       BENCHO COMPONENT: FLOATING GLASS DOCK / COMMAND BAR
+       ======================================================== -->
+  <div class="bencho-dock-wrap" id="benchoDock">
+    <nav class="bencho-dock" aria-label="Quick Actions Dock">
+      <!-- Item 1: Phone Demo -->
+      <a href="#phoneSection" class="dock-btn" data-tooltip="Phone Demo" aria-label="Phone Demo">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="5" y="2" width="14" height="20" rx="3" ry="3"></rect>
+          <line x1="12" y1="18" x2="12.01" y2="18"></line>
+        </svg>
+        <span class="dock-tooltip">Phone Demo</span>
+      </a>
+
+      <!-- Item 2: The Damage Receipt -->
+      <a href="#receipt" class="dock-btn" data-tooltip="The Damage" aria-label="The Damage">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"></path>
+          <line x1="8" y1="8" x2="16" y2="8"></line>
+          <line x1="8" y1="12" x2="16" y2="12"></line>
+          <line x1="8" y1="16" x2="13" y2="16"></line>
+        </svg>
+        <span class="dock-tooltip">The Damage</span>
+      </a>
+
+      <!-- Item 3: Features Bento -->
+      <a href="#features" class="dock-btn" data-tooltip="How It Works" aria-label="How It Works">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+        <span class="dock-tooltip">How It Works</span>
+      </a>
+
+      <!-- Item 4: FAQ -->
+      <a href="#faq" class="dock-btn" data-tooltip="FAQ" aria-label="FAQ">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        <span class="dock-tooltip">FAQ</span>
+      </a>
+
+      <div class="dock-divider"></div>
+
+      <!-- Item 5: Web Audio API Synthesized Sound Toggle -->
+      <button id="dockSoundBtn" class="dock-btn dock-sound-active" data-tooltip="Audio: ON" aria-label="Toggle Sound Effects">
+        <svg id="dockSoundIconOn" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        </svg>
+        <svg id="dockSoundIconOff" style="display:none;" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <line x1="23" y1="9" x2="17" y2="15"></line>
+          <line x1="17" y1="9" x2="23" y2="15"></line>
+        </svg>
+        <span class="dock-tooltip" id="dockSoundTooltip">Audio: ON</span>
+      </button>
+
+      <!-- Item 6: Share / Copy Link -->
+      <button id="dockShareBtn" class="dock-btn" data-tooltip="Copy Link" aria-label="Copy Link">
+        <svg id="dockShareIcon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+        </svg>
+        <svg id="dockCheckIcon" style="display:none; color: var(--acid);" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span class="dock-tooltip" id="dockShareTooltip">Share Page</span>
+      </button>
+
+      <!-- Item 7: Waitlist Action Pill -->
+      <a href="#waitlist-box" class="dock-cta shimmer-beam" aria-label="Join Waitlist">
+        <span>Waitlist</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- ========================================================
        FOREVER COMPONENTS INTERACTION SCRIPTS
        ======================================================== -->
   <script>
@@ -2119,10 +2441,71 @@
     const htmlElem = document.documentElement;
     htmlElem.setAttribute('data-theme', 'dark');
 
+    // ========================================================
+    // BENCHO COMPONENT: SYNTHESIZED WEB AUDIO API SOUND EFFECTS
+    // Zero external audio files — 100% native Web Audio oscillator
+    // ========================================================
+    let audioCtx = null;
+    let soundEnabled = localStorage.getItem('tally-sound') !== 'off';
+
+    function getAudioContext() {
+      if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playBenchoClick(variant = 'tap') {
+      if (!soundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        if (variant === 'tap') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1400, now);
+          osc.frequency.exponentialRampToValueAtTime(120, now + 0.018);
+          gain.gain.setValueAtTime(0.045, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.018);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.02);
+        } else if (variant === 'pop') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(750, now);
+          osc.frequency.exponentialRampToValueAtTime(320, now + 0.035);
+          gain.gain.setValueAtTime(0.05, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.035);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.04);
+        } else if (variant === 'success') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(580, now);
+          osc.frequency.exponentialRampToValueAtTime(980, now + 0.06);
+          gain.gain.setValueAtTime(0.05, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        }
+      } catch (e) {}
+    }
+
     // Stickitupx Sticker tactile tap animation with smooth spring transition
     const sticker = document.querySelector('.coming-soon-sticker');
     if (sticker) {
       sticker.addEventListener('click', () => {
+        playBenchoClick('tap');
         sticker.classList.add('is-pressed');
         setTimeout(() => {
           sticker.classList.remove('is-pressed');
@@ -2185,6 +2568,7 @@
 
       tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
+          playBenchoClick('pop');
           const target = btn.dataset.screen;
           tabBtns.forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
@@ -2272,9 +2656,10 @@
       });
     }
 
-    // 4. FAQ Accordion Toggle
+    // 4. FAQ Accordion Toggle with Bencho Tactile Audio
     document.querySelectorAll('.faq-q').forEach(q => {
       q.addEventListener('click', () => {
+        playBenchoClick('tap');
         const item = q.parentElement;
         item.classList.toggle('open');
       });
@@ -2294,6 +2679,7 @@
       const val = email.value.trim();
       if (!val) return;
 
+      playBenchoClick('tap');
       btn.disabled = true;
       btn.innerHTML = '<span class="btn-magnetic-label">Saving...</span>';
       msg.className = 'form-msg';
@@ -2311,10 +2697,12 @@
         });
 
         if (res.ok) {
+          playBenchoClick('success');
           form.style.display = 'none';
           msg.textContent = "You're on the list. Brace yourself for the damage.";
           msg.className = 'form-msg ok';
         } else if (res.status === 409) {
+          playBenchoClick('pop');
           form.style.display = 'none';
           msg.textContent = "You're already on the list. Eager.";
           msg.className = 'form-msg ok';
@@ -2327,6 +2715,134 @@
         btn.disabled = false;
         btn.innerHTML = '<span class="btn-magnetic-label">Join Waitlist</span>';
       }
+    });
+
+    // ========================================================
+    // 6. BENCHO COMPONENT: SPOTLIGHT MOUSE CURSOR TRACKING
+    // ========================================================
+    document.querySelectorAll('.spotlight-card').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const rect = card.getBoundingClientRect();
+        card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+        card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+      });
+    });
+
+    // ========================================================
+    // 7. BENCHO COMPONENT: TEXT SCRAMBLE / CYPHER DECRYPTION
+    // ========================================================
+    const GLYPHS = '0123456789_~/*#%$-+';
+    function scrambleText(element) {
+      if (element.dataset.scrambling === 'true') return;
+      element.dataset.scrambling = 'true';
+      const originalText = element.dataset.originalText || element.innerText.trim();
+      element.dataset.originalText = originalText;
+
+      let iteration = 0;
+      const totalSteps = originalText.length * 2.2;
+      const interval = setInterval(() => {
+        element.innerText = originalText
+          .split('')
+          .map((char, index) => {
+            if (char === ' ' || char === '·') return char;
+            if (index < iteration / 2.2) {
+              return originalText[index];
+            }
+            return GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+          })
+          .join('');
+
+        iteration += 1;
+        if (iteration >= totalSteps) {
+          clearInterval(interval);
+          element.innerText = originalText;
+          element.dataset.scrambling = 'false';
+        }
+      }, 24);
+    }
+
+    document.querySelectorAll('[data-scramble="true"]').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        scrambleText(el);
+      });
+    });
+
+    // ========================================================
+    // 8. BENCHO COMPONENT: FLOATING DOCK ACTION CONTROLLERS
+    // ========================================================
+    const soundBtn = document.getElementById('dockSoundBtn');
+    const soundIconOn = document.getElementById('dockSoundIconOn');
+    const soundIconOff = document.getElementById('dockSoundIconOff');
+    const soundTooltip = document.getElementById('dockSoundTooltip');
+
+    function updateSoundUI() {
+      if (!soundBtn) return;
+      if (soundEnabled) {
+        if (soundIconOn) soundIconOn.style.display = 'block';
+        if (soundIconOff) soundIconOff.style.display = 'none';
+        soundBtn.classList.add('dock-sound-active');
+        if (soundTooltip) soundTooltip.textContent = 'Audio: ON';
+      } else {
+        if (soundIconOn) soundIconOn.style.display = 'none';
+        if (soundIconOff) soundIconOff.style.display = 'block';
+        soundBtn.classList.remove('dock-sound-active');
+        if (soundTooltip) soundTooltip.textContent = 'Audio: MUTED';
+      }
+    }
+    updateSoundUI();
+
+    if (soundBtn) {
+      soundBtn.addEventListener('click', () => {
+        soundEnabled = !soundEnabled;
+        localStorage.setItem('tally-sound', soundEnabled ? 'on' : 'off');
+        updateSoundUI();
+        if (soundEnabled) {
+          playBenchoClick('tap');
+        }
+      });
+    }
+
+    const shareBtn = document.getElementById('dockShareBtn');
+    const shareIcon = document.getElementById('dockShareIcon');
+    const checkIcon = document.getElementById('dockCheckIcon');
+    const shareTooltip = document.getElementById('dockShareTooltip');
+
+    if (shareBtn) {
+      shareBtn.addEventListener('click', async () => {
+        playBenchoClick('success');
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(window.location.href);
+          } else {
+            throw new Error('Clipboard API not available');
+          }
+        } catch (e) {
+          const inp = document.createElement('input');
+          inp.value = window.location.href;
+          document.body.appendChild(inp);
+          inp.select();
+          document.execCommand('copy');
+          document.body.removeChild(inp);
+        }
+
+        if (shareIcon && checkIcon) {
+          shareIcon.style.display = 'none';
+          checkIcon.style.display = 'block';
+          if (shareTooltip) shareTooltip.textContent = 'Copied Link!';
+          setTimeout(() => {
+            shareIcon.style.display = 'block';
+            checkIcon.style.display = 'none';
+            if (shareTooltip) shareTooltip.textContent = 'Share Page';
+          }, 2000);
+        }
+      });
+    }
+
+    // Dock quick scroll click sounds
+    document.querySelectorAll('.dock-btn:not(#dockSoundBtn):not(#dockShareBtn), .dock-cta').forEach(btn => {
+      btn.addEventListener('click', () => {
+        playBenchoClick('pop');
+      });
     });
   </script>
 </body>
