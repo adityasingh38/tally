@@ -866,6 +866,293 @@
       font-size: 10.5px;
       color: var(--faint);
     }
+
+    /* ========================================================
+       TRYSURGE-STYLE PHONE ZOOM REVEAL (ContainerScroll)
+       Scroll-driven 3D tilt-to-flat + zoom-toward-viewer
+       Ported from trysurge.in with Tally dark/light aesthetics
+       ======================================================== */
+    .phone-scroll-section {
+      height: 185vh;
+      position: relative;
+      background: transparent;
+      margin-top: 10px;
+    }
+
+    .phone-sticky-viewport {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      perspective: 1000px;
+      -webkit-perspective: 1000px;
+      padding: 0 16px;
+    }
+
+    .phone-reveal-glow {
+      position: absolute;
+      width: min(580px, 92vw);
+      height: min(580px, 92vw);
+      border-radius: 50%;
+      background: radial-gradient(circle at center, rgba(255, 84, 54, 0.42) 0%, rgba(255, 84, 54, 0.12) 45%, transparent 70%);
+      filter: blur(55px);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1;
+      transform: translate3d(0, 0, 0);
+      transition: opacity 0.12s ease-out;
+    }
+
+    .phone-reveal-header {
+      text-align: center;
+      margin-bottom: 20px;
+      z-index: 10;
+      max-width: 600px;
+    }
+
+    .phone-reveal-h2 {
+      font-family: var(--font-display);
+      font-size: clamp(24px, 3.8vw, 38px);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 1.15;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .phone-screen-tabs {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--wash);
+      border: 1px solid var(--line);
+      padding: 4px;
+      border-radius: var(--r-pill);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .phone-tab-btn {
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 14px;
+      border-radius: var(--r-pill);
+      border: none;
+      background: transparent;
+      color: var(--dim);
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .phone-tab-btn:hover {
+      color: var(--text);
+    }
+
+    .phone-tab-btn.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    }
+
+    .phone-reveal-card {
+      position: relative;
+      will-change: transform;
+      z-index: 5;
+      transform-style: preserve-3d;
+      transform-origin: center center;
+    }
+
+    /* iPhone Device Frame directly inspired by trysurge.in */
+    .iphone {
+      position: relative;
+      height: min(580px, 62vh);
+      height: min(580px, 62dvh);
+      aspect-ratio: 9 / 19.5;
+      border-radius: 46px;
+      padding: 9px;
+      background: linear-gradient(150deg, #37373c 0%, #151518 42%, #08080a 100%);
+      box-shadow: 0 40px 90px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      user-select: none;
+    }
+
+    html[data-theme="light"] .iphone {
+      background: linear-gradient(150deg, #e4dfd5 0%, #cac5bb 42%, #a8a49c 100%);
+      box-shadow: 0 35px 80px rgba(23, 22, 20, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.08);
+    }
+
+    .iphone-screen {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 38px;
+      background: #000000;
+      overflow: hidden;
+    }
+
+    .iphone-island {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 32%;
+      height: 22px;
+      background: #000000;
+      border-radius: 999px;
+      z-index: 50;
+    }
+
+    .iphone-status {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px 0;
+      color: #FFFFFF;
+      font-size: 11.5px;
+      font-weight: 700;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      z-index: 40;
+      letter-spacing: -0.01em;
+    }
+
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      opacity: 0.9;
+    }
+
+    .iphone-display {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .screen-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      opacity: 0;
+      transition: opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+      pointer-events: none;
+    }
+
+    .screen-img.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .iphone-glass-sheen {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 35%, transparent 55%);
+      pointer-events: none;
+      z-index: 30;
+    }
+
+    .iphone-home {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 34%;
+      height: 4.5px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.6);
+      z-index: 50;
+    }
+
+    /* Floating TrySurge-style contextual chips */
+    .phone-float-card {
+      position: absolute;
+      background: var(--surface);
+      border: 1px solid var(--line-strong);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.24);
+      padding: 12px 18px;
+      border-radius: 16px;
+      z-index: 12;
+      pointer-events: none;
+    }
+
+    .phone-float-left {
+      top: 36%;
+      left: max(24px, calc(50% - 320px));
+      animation: floatBobLeft 5s ease-in-out infinite;
+    }
+
+    .phone-float-right {
+      top: 52%;
+      right: max(24px, calc(50% - 320px));
+      animation: floatBobRight 5.5s ease-in-out infinite -2.5s;
+    }
+
+    @keyframes floatBobLeft {
+      0%, 100% { transform: translateY(0px) rotate(-1.5deg); }
+      50% { transform: translateY(-8px) rotate(1deg); }
+    }
+
+    @keyframes floatBobRight {
+      0%, 100% { transform: translateY(0px) rotate(1.5deg); }
+      50% { transform: translateY(-9px) rotate(-1deg); }
+    }
+
+    .float-tag {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: 4px;
+    }
+
+    .float-title {
+      font-family: var(--font-sans);
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .float-amount {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+
+    .float-amount.text-red {
+      color: var(--red);
+    }
+
+    .float-sub {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--red);
+      margin-left: 4px;
+    }
+
+    @media (max-width: 820px) {
+      .phone-float-card {
+        display: none;
+      }
+      .phone-reveal-h2 {
+        font-size: 24px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -890,6 +1177,7 @@
       </a>
 
       <div class="nav-links">
+        <a href="#app-preview" class="nav-link">The App</a>
         <a href="#receipt" class="nav-link">The Damage</a>
         <a href="#features" class="nav-link">How It Works</a>
         <a href="#faq" class="nav-link">FAQ</a>
@@ -974,7 +1262,88 @@
         <div id="formMsg" class="form-msg"></div>
       </div>
     </section>
+  </main>
 
+  <!-- ========================================================
+       TRYSURGE-STYLE PHONE ZOOM REVEAL (ContainerScroll)
+       Scroll-driven 3D tilt-to-flat + zoom-toward-viewer
+       Ported directly from trysurge.in
+       ======================================================== -->
+  <section id="phoneSection" class="phone-scroll-section">
+    <div class="phone-sticky-viewport">
+
+      <!-- Ambient Background Glow (blooms as phone zooms in) -->
+      <div id="phoneRevealGlow" class="phone-reveal-glow"></div>
+
+      <!-- Section Title & Screen Switcher Tabs -->
+      <div class="phone-reveal-header">
+        <div class="mono" style="margin-bottom:6px; letter-spacing:0.18em; opacity:0.8;">[ AUTOMATED NOTIFICATION PARSER ]</div>
+        <h2 class="phone-reveal-h2">every single ruinous rupee.</h2>
+        <div class="phone-screen-tabs">
+          <button class="phone-tab-btn active" data-screen="dashboard">The Damage</button>
+          <button class="phone-tab-btn" data-screen="feed">Live Alerts</button>
+          <button class="phone-tab-btn" data-screen="insights">Insights</button>
+        </div>
+      </div>
+
+      <!-- Floating Marks / Contextual Badges (TrySurge style) -->
+      <div class="phone-float-card phone-float-left">
+        <div class="float-tag">⚡ BANK ALERT · 02:14 AM</div>
+        <div class="float-title">HDFC BANK · SWIGGY</div>
+        <div class="float-amount text-red">₹1,420</div>
+      </div>
+
+      <div class="phone-float-card phone-float-right">
+        <div class="float-tag">MONTHLY DAMAGE</div>
+        <div class="float-title">MARCH TOTAL</div>
+        <div class="float-amount text-red">₹48,290 <span class="float-sub">▲ 34%</span></div>
+      </div>
+
+      <!-- Phone Reveal Card (3D Tilt & Zoom container) -->
+      <div id="phoneRevealCard" class="phone-reveal-card">
+        <!-- Titanium iPhone Device Frame -->
+        <div class="iphone">
+          <div class="iphone-screen">
+            <!-- Dynamic Island -->
+            <div class="iphone-island"></div>
+
+            <!-- iOS Status Bar -->
+            <div class="iphone-status">
+              <span>9:41</span>
+              <div class="status-icons">
+                <svg width="15" height="11" viewBox="0 0 16 12" fill="currentColor">
+                  <path d="M1 9.5h2v-2H1v2zm4 0h2v-4H5v4zm4 0h2v-7H9v7zm4 0h2v-9h-2v9z"/>
+                </svg>
+                <svg width="14" height="11" viewBox="0 0 16 12" fill="currentColor">
+                  <path d="M8 2.5a9.5 9.5 0 0 0-6.7 2.8l1.4 1.4A7.5 7.5 0 0 1 8 4.5a7.5 7.5 0 0 1 5.3 2.2l1.4-1.4A9.5 9.5 0 0 0 8 2.5zm0 4a5.5 5.5 0 0 0-3.9 1.6l1.4 1.4A3.5 3.5 0 0 1 8 8.5a3.5 3.5 0 0 1 2.5 1l1.4-1.4A5.5 5.5 0 0 0 8 6.5zm0 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
+                </svg>
+                <svg width="20" height="10" viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <rect x="1" y="1" width="19" height="10" rx="3"/>
+                  <path d="M22 4v4" stroke-linecap="round"/>
+                  <rect x="3" y="3" width="13" height="6" rx="1.5" fill="currentColor"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Screen Images with Smooth Fade Transitions -->
+            <div class="iphone-display">
+              <img id="screenDashboard" src="./assets/dashboard.png" alt="Tally Damage Dashboard" class="screen-img active" />
+              <img id="screenFeed" src="./assets/feed.png" alt="Tally Live Transaction Feed" class="screen-img" />
+              <img id="screenInsights" src="./assets/insights.png" alt="Tally Spending Insights" class="screen-img" />
+              <!-- Gloss Sheen Reflection -->
+              <div class="iphone-glass-sheen"></div>
+            </div>
+
+            <!-- iOS Home Indicator Bar -->
+            <div class="iphone-home"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <main class="wrap">
     <!-- ========================================================
          FOREVER COMPONENT: 3D TILT DAMAGE RECEIPT
          ======================================================== -->
@@ -1221,7 +1590,74 @@
       });
     }
 
-    // 2. Forever Magnetic Button Physics
+    // 2. TrySurge-Style Phone Zoom In Scroll Physics & Screen Switcher
+    (function () {
+      const container = document.getElementById('phoneSection');
+      const card = document.getElementById('phoneRevealCard');
+      const glow = document.getElementById('phoneRevealGlow');
+      if (!container || !card) return;
+
+      let isMobile = window.innerWidth <= 768;
+      window.addEventListener('resize', () => {
+        isMobile = window.innerWidth <= 768;
+      });
+
+      function progress() {
+        const rect = container.getBoundingClientRect();
+        const total = rect.height - window.innerHeight;
+        if (total <= 0) return rect.top <= 0 ? 1 : 0;
+        const scrolled = -rect.top;
+        return Math.min(1, Math.max(0, scrolled / total));
+      }
+
+      function lerp(a, b, t) {
+        return a + (b - a) * t;
+      }
+
+      function update() {
+        const p = progress();
+        // Starts tilted back in 3D perspective at 22deg, levels out flat to 0deg
+        const rotate = lerp(22, 0, p);
+        // Real zoom-toward-viewer, from 0.72 to 1.14 scale on desktop (0.62 to 0.98 on mobile)
+        const scaleRange = isMobile ? [0.62, 0.98] : [0.72, 1.14];
+        const scale = lerp(scaleRange[0], scaleRange[1], p);
+
+        card.style.transform = `rotateX(${rotate.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
+        if (glow) {
+          glow.style.opacity = p.toFixed(2);
+        }
+      }
+
+      window.addEventListener('scroll', () => {
+        requestAnimationFrame(update);
+      }, { passive: true });
+      window.addEventListener('resize', update);
+      update();
+
+      // Phone screen tabs switcher (Dashboard / Feed / Insights)
+      const tabBtns = document.querySelectorAll('.phone-tab-btn');
+      const screenImgs = {
+        dashboard: document.getElementById('screenDashboard'),
+        feed: document.getElementById('screenFeed'),
+        insights: document.getElementById('screenInsights')
+      };
+
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.screen;
+          tabBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          Object.keys(screenImgs).forEach(key => {
+            if (screenImgs[key]) {
+              screenImgs[key].classList.toggle('active', key === target);
+            }
+          });
+        });
+      });
+    })();
+
+    // 3. Forever Magnetic Button Physics
     const magneticBtns = document.querySelectorAll('.btn-magnetic');
     magneticBtns.forEach(btn => {
       const label = btn.querySelector('.btn-magnetic-label');
