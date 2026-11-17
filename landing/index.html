@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tally · track the damage. Financially feral.</title>
-  <meta name="description" content="A snarky AI money manager that tracks supported bank and UPI transaction alerts and tells you how badly you blew it. Powered by Gemini 3.5 Flash." />
+  <meta name="description" content="A snarky money manager that tracks supported bank and UPI transaction alerts and tells you how badly you blew it." />
   
   <!-- Open Graph -->
   <meta property="og:title" content="tally · track the damage. Financially feral." />
@@ -62,9 +62,8 @@
       --text: #F2F3EC;
       --dim: #9DA08F;
       --faint: #63655A;
-      --frost: rgba(14, 15, 12, 0.82);
+      --frost: rgba(14, 15, 12, 0.85);
       --frost-border: rgba(233, 255, 208, 0.12);
-      --ticker-bg: #13140E;
       --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.6), 0 20px 48px -10px rgba(0, 0, 0, 0.8);
       --specular: rgba(255, 255, 255, 0.08);
       --logo-bar: #F2F3EC;
@@ -86,7 +85,6 @@
       --faint: #A39E92;
       --frost: rgba(241, 237, 227, 0.85);
       --frost-border: rgba(23, 22, 20, 0.12);
-      --ticker-bg: #EAE5D7;
       --shadow-card: 0 4px 16px -2px rgba(0, 0, 0, 0.06), 0 16px 36px -8px rgba(70, 50, 30, 0.12);
       --specular: rgba(255, 255, 255, 0.6);
       --logo-bar: #16150F;
@@ -155,7 +153,7 @@
       gap: 16px;
     }
 
-    /* Fixed Brand Logo */
+    /* Fixed Brand Logo: 4 high-contrast vertical bars + 56° red slash */
     .nav-brand {
       display: flex;
       align-items: center;
@@ -212,32 +210,16 @@
       gap: 10px;
     }
 
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--wash);
-      border: 1px solid var(--line);
-      padding: 4px 10px;
-      border-radius: var(--r-pill);
+    .pill-status {
       font-family: var(--font-mono);
       font-size: 10px;
-      color: var(--dim);
-      letter-spacing: 0.05em;
-    }
-
-    .pulse-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--green-light);
-      box-shadow: 0 0 8px rgba(123, 211, 137, 0.8);
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.45; transform: scale(0.8); }
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #ffffff;
+      background: var(--red);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: 700;
     }
 
     /* Theme Toggle */
@@ -259,56 +241,6 @@
       background: var(--wash-hover);
       border-color: var(--line-strong);
       transform: scale(1.05);
-    }
-
-    /* ========================================================
-       FOREVER COMPONENT: MARQUEE TICKER TAPE
-       ======================================================== */
-    .ticker-wrap {
-      width: 100%;
-      overflow: hidden;
-      background: var(--ticker-bg);
-      border-top: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
-      padding: 7px 0;
-      margin-bottom: 24px;
-      user-select: none;
-    }
-
-    .ticker-track {
-      display: flex;
-      width: max-content;
-      animation: marquee 32s linear infinite;
-    }
-
-    .ticker-track:hover {
-      animation-play-state: paused;
-    }
-
-    .ticker-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 0 18px;
-      font-family: var(--font-mono);
-      font-size: 11.5px;
-      letter-spacing: 0.06em;
-      color: var(--dim);
-      white-space: nowrap;
-    }
-
-    .ticker-item .amt {
-      color: var(--red);
-      font-weight: 700;
-    }
-
-    .ticker-item .dot {
-      color: var(--faint);
-    }
-
-    @keyframes marquee {
-      from { transform: translateX(0); }
-      to { transform: translateX(-50%); }
     }
 
     /* ========================================================
@@ -496,52 +428,6 @@
       margin: 0 auto;
     }
 
-    /* Forever Sliding Pill Tab Switcher */
-    .tab-nav {
-      position: relative;
-      display: flex;
-      background: var(--wash);
-      border: 1px solid var(--line-strong);
-      border-radius: var(--r-pill);
-      padding: 4px;
-      margin-bottom: 22px;
-    }
-
-    .tab-pill-indicator {
-      position: absolute;
-      top: 4px;
-      bottom: 4px;
-      left: 4px;
-      width: calc(33.333% - 2.66px);
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--r-pill);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-      transition: transform var(--dur-base) var(--ease-out-soft);
-      z-index: 1;
-    }
-
-    .tab-btn {
-      flex: 1;
-      position: relative;
-      z-index: 2;
-      border: none;
-      background: transparent;
-      padding: 8px 10px;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      letter-spacing: 0.05em;
-      color: var(--dim);
-      cursor: pointer;
-      text-align: center;
-      transition: color var(--dur-fast) ease;
-    }
-
-    .tab-btn.active {
-      color: var(--text);
-      font-weight: 700;
-    }
-
     /* 3D Tilt Card */
     .tilt-card {
       position: relative;
@@ -598,7 +484,7 @@
       letter-spacing: 0.08em;
     }
 
-    /* Forever Odometer Roll Display */
+    /* Large Odometer Display */
     .odometer-total {
       font-family: var(--font-display);
       font-weight: 800;
@@ -666,42 +552,6 @@
       color: var(--faint);
       font-size: 11px;
       margin-left: 6px;
-    }
-
-    /* Gemini Verdict Callout */
-    .verdict-card {
-      background: var(--surface);
-      border: 1px solid var(--line-strong);
-      border-left: 3px solid var(--red);
-      border-radius: 8px;
-      padding: 14px;
-      margin-top: 16px;
-    }
-
-    .verdict-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-    }
-
-    .ai-badge {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--red);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .verdict-body {
-      font-size: 13.5px;
-      line-height: 1.45;
-      color: var(--text);
-      font-style: italic;
     }
 
     .receipt-foot {
@@ -941,15 +791,12 @@
 
       <div class="nav-links">
         <a href="#receipt" class="nav-link">The Damage</a>
-        <a href="#features" class="nav-link">Intelligence</a>
+        <a href="#features" class="nav-link">How It Works</a>
         <a href="#faq" class="nav-link">FAQ</a>
       </div>
 
       <div class="nav-actions">
-        <div class="status-badge" title="Edge AI is operational">
-          <span class="pulse-dot"></span>
-          <span>gemini 3.5 live</span>
-        </div>
+        <span class="pill-status">coming soon</span>
 
         <!-- Light/Dark Mode Switcher -->
         <button id="themeBtn" class="btn-toggle" aria-label="Toggle theme">
@@ -976,35 +823,14 @@
     </nav>
   </div>
 
-  <!-- ========================================================
-       FOREVER COMPONENT: MARQUEE TICKER TAPE
-       ======================================================== -->
-  <div class="ticker-wrap" aria-hidden="true">
-    <div class="ticker-track">
-      <div class="ticker-item"><span>⚡ HDFC</span><span class="amt">₹1,420</span><span>SWIGGY</span><span class="dot">·</span><span>02:14 AM</span></div>
-      <div class="ticker-item"><span>⚡ ICICI</span><span class="amt">₹3,499</span><span>STEAM GAMES</span><span class="dot">·</span><span>01:22 AM</span></div>
-      <div class="ticker-item"><span>⚡ SBI</span><span class="amt">₹580</span><span>ZEPTO</span><span class="dot">·</span><span>11:45 PM</span></div>
-      <div class="ticker-item"><span>⚡ AXIS</span><span class="amt">₹12,400</span><span>APPLE STORE</span><span class="dot">·</span><span>04:10 PM</span></div>
-      <div class="ticker-item"><span>⚡ GPAY</span><span class="amt">₹450</span><span>BLUE TOKAI</span><span class="dot">·</span><span>08:30 AM</span></div>
-      <div class="ticker-item"><span>⚡ PHONEPE</span><span class="amt">₹890</span><span>UBER TRIP</span><span class="dot">·</span><span>09:15 AM</span></div>
-      <!-- Duplicate set for infinite seamless loop -->
-      <div class="ticker-item"><span>⚡ HDFC</span><span class="amt">₹1,420</span><span>SWIGGY</span><span class="dot">·</span><span>02:14 AM</span></div>
-      <div class="ticker-item"><span>⚡ ICICI</span><span class="amt">₹3,499</span><span>STEAM GAMES</span><span class="dot">·</span><span>01:22 AM</span></div>
-      <div class="ticker-item"><span>⚡ SBI</span><span class="amt">₹580</span><span>ZEPTO</span><span class="dot">·</span><span>11:45 PM</span></div>
-      <div class="ticker-item"><span>⚡ AXIS</span><span class="amt">₹12,400</span><span>APPLE STORE</span><span class="dot">·</span><span>04:10 PM</span></div>
-      <div class="ticker-item"><span>⚡ GPAY</span><span class="amt">₹450</span><span>BLUE TOKAI</span><span class="dot">·</span><span>08:30 AM</span></div>
-      <div class="ticker-item"><span>⚡ PHONEPE</span><span class="amt">₹890</span><span>UBER TRIP</span><span class="dot">·</span><span>09:15 AM</span></div>
-    </div>
-  </div>
-
   <main class="wrap">
     <!-- ========================================================
          HERO SECTION
          ======================================================== -->
     <section class="hero">
       <div class="hero-pill">
-        <span class="tag">AI MONEY MANAGER</span>
-        <span>AUTOMATED BANK ALERT TRACKING</span>
+        <span class="tag">FINANCIALLY FERAL</span>
+        <span>AUTOMATED EXPENSE TRACKER</span>
       </div>
 
       <h1 class="hero-h1">
@@ -1013,7 +839,7 @@
       </h1>
 
       <p class="hero-lead">
-        A snarky AI money manager that tracks supported bank and UPI transaction alerts and is deeply unbothered about your feelings.
+        A snarky money manager that tracks supported bank and UPI transaction alerts and is deeply unbothered about your feelings.
       </p>
 
       <!-- Forever Magnetic Waitlist Box -->
@@ -1050,27 +876,19 @@
     <section class="receipt-section" id="receipt">
       <div class="receipt-container">
 
-        <!-- Forever Sliding Pill Tabs -->
-        <div class="tab-nav">
-          <div class="tab-pill-indicator" id="tabIndicator"></div>
-          <button class="tab-btn active" data-index="0" data-key="swiggy">The Swiggy Surge</button>
-          <button class="tab-btn" data-index="1" data-key="steam">Impulse Carnage</button>
-          <button class="tab-btn" data-index="2" data-key="payday">Payday Delusion</button>
-        </div>
-
         <!-- 3D Tilt Parallax Card -->
         <div class="tilt-card" id="tiltReceipt">
           <div class="tilt-shine" id="tiltShine"></div>
 
           <div class="receipt-head">
             <div class="receipt-top-row">
-              <span class="mono" style="letter-spacing:0.18em;">damage statement · this month</span>
+              <span class="mono" style="letter-spacing:0.18em;">the damage · this month</span>
               <span class="receipt-tag" id="receiptBadge">STATUS: BLEEDING</span>
             </div>
 
-            <!-- Odometer Amount -->
+            <!-- Large Amount Display -->
             <div class="odometer-total">
-              <span>₹</span><strong id="receiptAmount">51,847</strong>
+              <span>₹</span><strong>51,847</strong>
             </div>
 
             <!-- Micro Data-Viz Sparkline with moving pulse dot -->
@@ -1086,7 +904,7 @@
           </div>
 
           <!-- Line items -->
-          <div class="receipt-list" id="receiptList">
+          <div class="receipt-list">
             <div class="receipt-row">
               <span class="label">FOOD & DRINK</span>
               <span class="dots"></span>
@@ -1113,24 +931,8 @@
             </div>
           </div>
 
-          <!-- Gemini Verdict -->
-          <div class="verdict-card">
-            <div class="verdict-header">
-              <span class="ai-badge">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path>
-                </svg>
-                * THE GEMINI 3.5 VERDICT *
-              </span>
-              <span class="mono" style="font-size:9.5px;" id="receiptConf">CONFIDENCE 99.4%</span>
-            </div>
-            <p class="verdict-body" id="receiptVerdict">
-              "Swiggy delivery partners saw you more than your friends did this month. 31 orders. Bold."
-            </p>
-          </div>
-
           <div class="receipt-foot">
-            <span>BROKE STREAK: <strong class="streak-badge" id="receiptStreak">14 DAYS</strong></span>
+            <span>BROKE STREAK: <strong class="streak-badge">14 DAYS</strong></span>
             <span>TRANSACTION DETAILS SAVED</span>
           </div>
         </div>
@@ -1161,13 +963,13 @@
 
         <div class="bento-card">
           <div>
-            <div class="bento-tag">02 · GEMINI 3.5 FLASH</div>
-            <h3 class="bento-h3">An AI that roasts your spending.</h3>
+            <div class="bento-tag">02 · SMART CATEGORIZATION</div>
+            <h3 class="bento-h3">Decodes cryptic UPI and bank tags.</h3>
             <p class="bento-p">
-              Deeply unbothered about your feelings. Edge intelligence classifies cryptic UPI merchant IDs, resolves vendor categories, and delivers deadpan reality checks.
+              Never wonder what an obscure merchant code was. Cryptic transaction IDs and payment handles are automatically resolved into clean, recognizable categories.
             </p>
           </div>
-          <div class="bento-stat">🤖 Model: gemini-3.5-flash</div>
+          <div class="bento-stat">🏷️ Instant vendor cleanup</div>
         </div>
 
         <div class="bento-card">
@@ -1234,7 +1036,7 @@
           </svg>
         </div>
         <div class="faq-a">
-          Tally offers a generous free tier with automatic parsing and monthly receipts. A Tally Pro subscription provides unlimited real-time Gemini AI roasts, custom damage categories, and historical export options. We never monetize by pushing credit card or loan offers.
+          Tally offers a generous free tier with automatic parsing and monthly receipts. A Tally Pro subscription provides unlimited real-time category insights, custom damage alerts, and historical export options. We never monetize by pushing credit card or loan offers.
         </div>
       </div>
 
@@ -1319,7 +1121,6 @@
         const rect = btn.getBoundingClientRect();
         const x = e.clientX - rect.left - rect.width / 2;
         const y = e.clientY - rect.top - rect.height / 2;
-        // Float button slightly toward cursor
         btn.style.transform = `translate(${x * 0.22}px, ${y * 0.22}px)`;
         if (label) {
           label.style.transform = `translate(${x * 0.12}px, ${y * 0.12}px)`;
@@ -1345,7 +1146,6 @@
         const cx = rect.width / 2;
         const cy = rect.height / 2;
         
-        // Gentle rotation angles
         const rotX = ((y - cy) / cy) * -7;
         const rotY = ((x - cx) / cx) * 7;
 
@@ -1359,90 +1159,7 @@
       });
     }
 
-    // 4. Forever Sliding Pill Tab Switcher & Dynamic Scenarios
-    const scenarios = {
-      swiggy: {
-        badge: 'STATUS: BLEEDING',
-        total: '51,847',
-        streak: '14 DAYS',
-        conf: 'CONFIDENCE 99.4%',
-        items: [
-          { label: 'FOOD & DRINK', val: '₹14,230', count: '(31 orders)' },
-          { label: 'QUICK COMMERCE', val: '₹11,480', count: '(19 orders)' },
-          { label: 'IMPULSE & SHOP', val: '₹18,650', count: '(7 orders)' },
-          { label: 'SURGE COMMUTE', val: '₹7,487', count: '(22 rides)' }
-        ],
-        verdict: '"Swiggy delivery partners saw you more than your friends did this month. 31 orders. Bold."'
-      },
-      steam: {
-        badge: 'STATUS: UNHINGED',
-        total: '74,210',
-        streak: '22 DAYS',
-        conf: 'CONFIDENCE 98.7%',
-        items: [
-          { label: 'STEAM GAMES', val: '₹22,990', count: '(14 titles)' },
-          { label: 'TECH GADGETS', val: '₹34,500', count: '(Mechanical KB)' },
-          { label: 'ENERGY DRINKS', val: '₹6,420', count: '(Monster cases)' },
-          { label: 'UBER EATS 3AM', val: '₹10,300', count: '(16 night runs)' }
-        ],
-        verdict: '"You bought 14 Steam games during the sale and played zero of them. Your backlog is now an officially recognized hedge fund."'
-      },
-      payday: {
-        badge: 'STATUS: TEMPORARY RICH',
-        total: '1,12,400',
-        streak: '3 DAYS',
-        conf: 'CONFIDENCE 99.9%',
-        items: [
-          { label: 'SALARY INFLOW', val: '+₹1,40,000', count: '(1 deposit)' },
-          { label: 'RENT & SOCIETY', val: '₹42,000', count: '(Transferred)' },
-          { label: 'CREDIT CARD DUE', val: '₹58,400', count: '(Painful)' },
-          { label: 'LEFT FOR SURVIVAL', val: '₹12,000', count: '(Good luck)' }
-        ],
-        verdict: '"You felt rich for exactly 4 hours after salary credit. The landlord and credit card bill have restored balance to the universe."'
-      }
-    };
-
-    const tabIndicator = document.getElementById('tabIndicator');
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const receiptBadge = document.getElementById('receiptBadge');
-    const receiptAmount = document.getElementById('receiptAmount');
-    const receiptStreak = document.getElementById('receiptStreak');
-    const receiptConf = document.getElementById('receiptConf');
-    const receiptVerdict = document.getElementById('receiptVerdict');
-    const receiptList = document.getElementById('receiptList');
-
-    tabBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        tabBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
-        // Move sliding pill indicator
-        const idx = parseInt(btn.getAttribute('data-index'), 10);
-        tabIndicator.style.transform = `translateX(${idx * 100}%)`;
-
-        // Update receipt content
-        const key = btn.getAttribute('data-key');
-        const sc = scenarios[key];
-        if (!sc) return;
-
-        receiptBadge.textContent = sc.badge;
-        receiptAmount.textContent = sc.total;
-        receiptStreak.textContent = sc.streak;
-        receiptConf.textContent = sc.conf;
-        receiptVerdict.textContent = sc.verdict;
-
-        receiptList.innerHTML = sc.items.map(item => `
-          <div class="receipt-row">
-            <span class="label">${item.label}</span>
-            <span class="dots"></span>
-            <span class="val">${item.val}</span>
-            <span class="count">${item.count}</span>
-          </div>
-        `).join('');
-      });
-    });
-
-    // 5. FAQ Accordion Toggle
+    // 4. FAQ Accordion Toggle
     document.querySelectorAll('.faq-q').forEach(q => {
       q.addEventListener('click', () => {
         const item = q.parentElement;
@@ -1450,7 +1167,7 @@
       });
     });
 
-    // 6. Supabase Waitlist Submission
+    // 5. Supabase Waitlist Submission
     const SUPABASE_URL = 'https://gjrmpiauvreudygyvdhx.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdqcm1waWF1dnJldWR5Z3l2ZGh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3MjcyNDUsImV4cCI6MjA5NjMwMzI0NX0.6kq_QrPkmIAQz4xpvwxem6pFQALnAKATmhTBNskUWhc';
 
