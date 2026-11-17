@@ -39,7 +39,7 @@ export async function categoriseTransactions(transactions) {
       const result = results[needsAI[index].index];
       if (!Number.isFinite(confidence) || !CATEGORIES.some(c => c.id === category)) return;
       result.category = confidence >= 0.5 ? category : 'other';
-      result.category_status = 'done';
+      result.category_status = confidence >= 0.5 ? 'done' : 'review';
     });
   } catch {
     // The transaction can still be captured. A later retry uses extracted

@@ -10,9 +10,11 @@ Project ref: `gjrmpiauvreudygyvdhx` (Supabase dashboard name: Focal)
 2. **Auth** — Authentication → Providers → Email: enabled. For testing, disable
    "Confirm email".
 3. **Secrets** — set `GEMINI_API_KEY` (or `ANTHROPIC_API_KEY`) and `REVENUECAT_SECRET_API_KEY`
-   as Supabase Edge Function secrets. For free tier AI, generate a Gemini key at
-   https://aistudio.google.com/app/apikey (free, no credit card required).
-   `anthropic-proxy` supports Gemini 2.0 Flash / 1.5 Flash natively with Claude fallback.
+   as Supabase Edge Function secrets. Generate a Gemini key at
+   https://aistudio.google.com/app/apikey. For financial alerts, check the
+   project's billing tier and data-use terms before public release.
+   `anthropic-proxy` uses Gemini 3.5 Flash-Lite for categorisation and
+   Gemini 3.5 Flash for interactive requests, with Claude fallback.
    `REVENUECAT_SECRET_API_KEY` is a RevenueCat **secret** API key, used by `anthropic-proxy`
    to verify the signed-in user's Pro entitlement. Never place secrets in the app or EAS environment.
 4. **Functions** — deploy all three:
@@ -29,21 +31,21 @@ eas build -p android --profile preview
 ```
 - Produces an installable APK (internal distribution).
 - Supabase URL + anon key come from `env` in [eas.json](eas.json) (public, RLS-protected).
-- `ANTHROPIC_API_KEY` and `REVENUECAT_SECRET_API_KEY` are server-side only.
+- `GEMINI_API_KEY` (or `ANTHROPIC_API_KEY`) and `REVENUECAT_SECRET_API_KEY` are server-side only.
 - If it fails downloading Gradle (HTTP 504 from services.gradle.org): infra
   flake, just retry.
 
 ## Client env (local `expo start`)
 
-`.env` (gitignored) needs `SUPABASE_URL`, `SUPABASE_ANON_KEY`. Anthropic key not
-needed client-side.
+`.env` (gitignored) needs `SUPABASE_URL`, `SUPABASE_ANON_KEY`. AI provider keys are
+not needed client-side.
 
-## Backend rollout status (2026-11-15)
+## Backend rollout status (2026-11-17)
 
 - [x] Apply `20261115135928_account_grouping.sql`,
       `20261115135940_free_ai_categorization.sql`, and
       `20261115135947_categorization_retry.sql` to the Focal project.
-- [x] Deploy `anthropic-proxy` (version 5). Interactive AI is tiered at 10 calls/day for free and
+- [x] Deploy `anthropic-proxy` (version 16). Interactive AI is tiered at 10 calls/day for free and
       50/day for Pro; alert categorisation has a separate 100-call daily abuse
       cap for everyone. Purchase plans require server-verified Pro. Without the
       RevenueCat secret, everyone receives the free interactive quota and
@@ -51,12 +53,15 @@ needed client-side.
 - [x] Deploy `account-profile` (version 1) for the account-label feature. Its one-account
       free limit is enforced in the database; additional labels require a
       server-verified `Tally Pro` entitlement.
-- [x] Configure Gemini API key (`gemini-3.5-flash`) and deploy `anthropic-proxy`.
+- [x] Configure Gemini API key and deploy `anthropic-proxy` (categorisation uses
+      `gemini-3.5-flash-lite`; interactive requests use `gemini-3.5-flash`).
       Verified live with `node scripts/smoke_categorization.mjs --live` (HTTP 200,
       real AI categorisation succeeded, ephemeral test account created & deleted).
 - [ ] Confirm `REVENUECAT_SECRET_API_KEY` with a Pro entitlement test.
 - [ ] Run the private category accuracy study on a real Android device; the
       workspace has no connected Android device or completed worksheet.
+- [ ] Confirm the Gemini API project is on an acceptable billing/data-use tier
+      before sending real financial alerts. The last screenshot showed Free tier.
 - [ ] **After** the new (raw-SMS-free) APK is installed and verified, drop the
       old column:
       ```sql

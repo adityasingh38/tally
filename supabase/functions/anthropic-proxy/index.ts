@@ -19,6 +19,7 @@ const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const DEFAULT_GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") ?? "gemini-3.5-flash";
+const CATEGORIZATION_GEMINI_MODEL = "gemini-3.5-flash-lite";
 const ANTHROPIC_MODEL = "claude-haiku-4-5-20251001";
 const MAX_TOKENS = 512;
 const FREE_DAILY_LIMIT = 10;
@@ -33,8 +34,7 @@ const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
   if (!GEMINI_API_KEY && !ANTHROPIC_API_KEY) {
-    const presentKeys = Object.keys(Deno.env.toObject()).join(", ");
-    return json({ error: `AI API key not configured. Present env keys: ${presentKeys}` }, 500);
+    return json({ error: "AI API key not configured" }, 500);
   }
 
   // Identify the caller from their JWT.
@@ -130,7 +130,7 @@ Deno.serve(async (req) => {
   try {
     let text: string;
     if (GEMINI_API_KEY) {
-      const model = typeof body.model === 'string' ? body.model : DEFAULT_GEMINI_MODEL;
+      const model = kind === 'categorization' ? CATEGORIZATION_GEMINI_MODEL : DEFAULT_GEMINI_MODEL;
       text = await callGemini(system, content, kind === 'categorization', model);
     } else if (ANTHROPIC_API_KEY) {
       text = await callAnthropic(system, content);
@@ -144,7 +144,7 @@ Deno.serve(async (req) => {
 });
 
 async function callGemini(system: string | undefined, content: string, jsonMode: boolean, model = DEFAULT_GEMINI_MODEL): Promise<string> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
   const body: Record<string, unknown> = {
     contents: [
       {
@@ -166,8 +166,9 @@ async function callGemini(system: string | undefined, content: string, jsonMode:
 
   const upstream = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_API_KEY },
     body: JSON.stringify(body),
+    signal: AbortSignal.timeout(15000),
   });
 
   const data = await upstream.json();
