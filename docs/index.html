@@ -67,7 +67,7 @@
       --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.6), 0 20px 48px -10px rgba(0, 0, 0, 0.8);
       --specular: rgba(255, 255, 255, 0.08);
       /* Tally Iconic Brandmark (4 dark green bars + 1 red slash) */
-      --logo-bar: #0B5E38;
+      --logo-bar: #FF5436;
     }
 
     /* Light Theme (Warm Paper) */
@@ -88,7 +88,7 @@
       --frost-border: rgba(23, 22, 20, 0.12);
       --shadow-card: 0 4px 16px -2px rgba(0, 0, 0, 0.06), 0 16px 36px -8px rgba(70, 50, 30, 0.12);
       --specular: rgba(255, 255, 255, 0.6);
-      --logo-bar: #0B5E38;
+      --logo-bar: #FF5436;
     }
 
     *, *::before, *::after {
@@ -805,6 +805,7 @@
     .faq-item {
       border-bottom: 1.5px dashed var(--line);
       padding: 18px 0;
+      transition: padding var(--dur-fast) ease;
     }
 
     .faq-q {
@@ -817,27 +818,42 @@
       color: var(--text);
       cursor: pointer;
       user-select: none;
+      transition: color 180ms ease;
+    }
+
+    .faq-q:hover {
+      color: var(--red);
     }
 
     .faq-q svg {
-      transition: transform var(--dur-fast) ease;
+      transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
       color: var(--dim);
+      flex-shrink: 0;
     }
 
     .faq-item.open .faq-q svg {
       transform: rotate(180deg);
+      color: var(--red);
     }
 
     .faq-a {
       font-size: 14.5px;
       line-height: 1.6;
       color: var(--dim);
-      margin-top: 10px;
-      display: none;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      display: block;
+      transition: max-height 320ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                  opacity 260ms ease,
+                  margin-top 260ms ease;
+      margin-top: 0;
     }
 
     .faq-item.open .faq-a {
-      display: block;
+      max-height: 220px;
+      opacity: 1;
+      margin-top: 12px;
     }
 
     /* ========================================================
@@ -905,168 +921,11 @@
     }
 
     /* ========================================================
-       BENCHO COMPONENT: FLOATING GLASS DOCK / COMMAND BAR
-       ======================================================== */
-    .bencho-dock-wrap {
-      position: fixed;
-      bottom: 22px;
-      left: 50%;
-      transform: translateX(-50%) translateZ(0);
-      z-index: 999;
-      pointer-events: none;
-      transition: opacity 250ms ease, transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .bencho-dock {
-      pointer-events: auto;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: rgba(18, 19, 14, 0.85);
-      backdrop-filter: blur(24px) saturate(180%);
-      -webkit-backdrop-filter: blur(24px) saturate(180%);
-      padding: 5px 7px;
-      border-radius: 999px;
-      border: 1px solid rgba(233, 255, 208, 0.12);
-      border-top: 1px solid rgba(255, 255, 255, 0.22);
-      box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(0, 0, 0, 0.4);
-    }
-
-    .dock-btn {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 38px;
-      height: 38px;
-      border-radius: 999px;
-      background: transparent;
-      border: none;
-      color: var(--dim);
-      cursor: pointer;
-      text-decoration: none;
-      transition: color 150ms ease, background 150ms ease, transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
-      user-select: none;
-      outline: none;
-    }
-
-    .dock-btn:hover {
-      color: var(--text);
-      background: rgba(255, 255, 255, 0.08);
-      transform: translateY(-2px) scale(1.08);
-    }
-
-    .dock-btn:active {
-      transform: scale(0.92);
-      transition: transform 100ms ease;
-    }
-
-    .dock-tooltip {
-      position: absolute;
-      bottom: calc(100% + 9px);
-      left: 50%;
-      transform: translateX(-50%) translateY(4px) scale(0.92);
-      opacity: 0;
-      pointer-events: none;
-      background: rgba(22, 24, 18, 0.95);
-      border: 1px solid rgba(233, 255, 208, 0.16);
-      color: var(--text);
-      font-family: var(--font-mono);
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      padding: 4px 8px;
-      border-radius: 6px;
-      white-space: nowrap;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55);
-      transition: opacity 180ms ease, transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1);
-      z-index: 1010;
-    }
-
-    .dock-btn:hover .dock-tooltip {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0) scale(1);
-    }
-
-    .dock-divider {
-      width: 1px;
-      height: 20px;
-      background: rgba(233, 255, 208, 0.12);
-      margin: 0 3px;
-    }
-
-    .dock-cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: var(--red);
-      color: #ffffff;
-      padding: 0 14px;
-      height: 36px;
-      border-radius: 999px;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      text-decoration: none;
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      box-shadow: 0 4px 14px rgba(255, 84, 54, 0.45);
-      transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 180ms ease;
-    }
-
-    .dock-cta:hover {
-      transform: translateY(-2px) scale(1.04);
-      box-shadow: 0 6px 20px rgba(255, 84, 54, 0.6);
-    }
-
-    .dock-cta:active {
-      transform: scale(0.95);
-    }
-
-    .dock-sound-active {
-      position: relative;
-    }
-
-    .dock-sound-active::after {
-      content: '';
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      width: 6px;
-      height: 6px;
-      background: var(--acid);
-      border-radius: 50%;
-      box-shadow: 0 0 8px var(--acid);
-    }
-
-    @media (max-width: 640px) {
-      .bencho-dock-wrap {
-        bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-        width: calc(100% - 24px);
-        max-width: 380px;
-      }
-      .bencho-dock {
-        width: 100%;
-        justify-content: space-around;
-        padding: 4px 6px;
-      }
-      .dock-btn {
-        width: 36px;
-        height: 36px;
-      }
-      .dock-tooltip {
-        display: none;
-      }
-    }
-
-    /* ========================================================
        FOOTER
        ======================================================== */
     footer {
       border-top: 1px solid var(--line);
-      padding: 48px 0 92px;
+      padding: 48px 0 54px;
       text-align: center;
       background: var(--wash);
     }
@@ -1719,16 +1578,14 @@
        ======================================================== -->
   <div class="nav-wrap">
     <nav class="nav-bar">
-      <!-- Fixed Tally Brandmark: 4 bars in crisp text/ink color + 5th diagonal slash in signature red -->
+      <!-- Authentic Tally Brandmark (Official TallyMark from app in Signature Red) -->
       <a href="#" class="nav-brand" aria-label="Tally Home">
-        <svg class="brand-icon" viewBox="0 0 100 116" fill="none">
-          <g>
-            <rect x="14" y="22" width="11" height="72" rx="4" fill="var(--logo-bar)" />
-            <rect x="36" y="22" width="11" height="72" rx="4" fill="var(--logo-bar)" />
-            <rect x="58" y="22" width="11" height="72" rx="4" fill="var(--logo-bar)" />
-            <rect x="80" y="22" width="11" height="72" rx="4" fill="var(--logo-bar)" />
-            <rect x="47" y="9" width="11" height="98" rx="4" transform="rotate(56 52.5 58)" fill="var(--red)" />
-          </g>
+        <svg class="brand-icon" viewBox="0 0 126 134" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="17" width="16.5" height="100" rx="4" fill="var(--red)" />
+          <rect x="36.5" y="17" width="16.5" height="100" rx="4" fill="var(--red)" />
+          <rect x="73" y="17" width="16.5" height="100" rx="4" fill="var(--red)" />
+          <rect x="109.5" y="17" width="16.5" height="100" rx="4" fill="var(--red)" />
+          <rect x="55.15" y="0" width="15.7" height="134" rx="4" fill="var(--red)" transform="rotate(60 63 67)" />
         </svg>
         <span class="nav-brand-text">tally</span>
       </a>
@@ -2332,12 +2189,12 @@
   <footer>
     <div class="wrap">
       <a href="#" class="footer-brand" aria-label="Tally">
-        <svg class="brand-icon" style="width:22px; height:24px;" viewBox="0 0 100 116" fill="none">
-          <rect x="14" y="22" width="11" height="72" rx="4" fill="var(--logo-bar)" />
-          <rect x="36" y="22" width="11" height="72" rx="4" fill="var(--logo-bar)" />
-          <rect x="58" y="22" width="11" height="72" rx="4" fill="var(--logo-bar)" />
-          <rect x="80" y="22" width="11" height="72" rx="4" fill="var(--logo-bar)" />
-          <rect x="47" y="9" width="11" height="98" rx="4" transform="rotate(56 52.5 58)" fill="var(--red)" />
+        <svg class="brand-icon" style="width:22px; height:24px;" viewBox="0 0 126 134" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="17" width="16.5" height="100" rx="4" fill="var(--red)" />
+          <rect x="36.5" y="17" width="16.5" height="100" rx="4" fill="var(--red)" />
+          <rect x="73" y="17" width="16.5" height="100" rx="4" fill="var(--red)" />
+          <rect x="109.5" y="17" width="16.5" height="100" rx="4" fill="var(--red)" />
+          <rect x="55.15" y="0" width="15.7" height="134" rx="4" fill="var(--red)" transform="rotate(60 63 67)" />
         </svg>
         <b>tally</b>
       </a>
@@ -2354,84 +2211,6 @@
       <div class="footer-copy">© 2026 tally · All rights reserved</div>
     </div>
   </footer>
-
-  <!-- ========================================================
-       BENCHO COMPONENT: FLOATING GLASS DOCK / COMMAND BAR
-       ======================================================== -->
-  <div class="bencho-dock-wrap" id="benchoDock">
-    <nav class="bencho-dock" aria-label="Quick Actions Dock">
-      <!-- Item 1: Phone Demo -->
-      <a href="#phoneSection" class="dock-btn" data-tooltip="Phone Demo" aria-label="Phone Demo">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="5" y="2" width="14" height="20" rx="3" ry="3"></rect>
-          <line x1="12" y1="18" x2="12.01" y2="18"></line>
-        </svg>
-        <span class="dock-tooltip">Phone Demo</span>
-      </a>
-
-      <!-- Item 2: The Damage Receipt -->
-      <a href="#receipt" class="dock-btn" data-tooltip="The Damage" aria-label="The Damage">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"></path>
-          <line x1="8" y1="8" x2="16" y2="8"></line>
-          <line x1="8" y1="12" x2="16" y2="12"></line>
-          <line x1="8" y1="16" x2="13" y2="16"></line>
-        </svg>
-        <span class="dock-tooltip">The Damage</span>
-      </a>
-
-      <!-- Item 3: Features Bento -->
-      <a href="#features" class="dock-btn" data-tooltip="How It Works" aria-label="How It Works">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-        </svg>
-        <span class="dock-tooltip">How It Works</span>
-      </a>
-
-      <!-- Item 4: FAQ -->
-      <a href="#faq" class="dock-btn" data-tooltip="FAQ" aria-label="FAQ">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-          <line x1="12" y1="17" x2="12.01" y2="17"></line>
-        </svg>
-        <span class="dock-tooltip">FAQ</span>
-      </a>
-
-      <div class="dock-divider"></div>
-
-      <!-- Item 5: Web Audio API Synthesized Sound Toggle -->
-      <button id="dockSoundBtn" class="dock-btn dock-sound-active" data-tooltip="Audio: ON" aria-label="Toggle Sound Effects">
-        <svg id="dockSoundIconOn" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-        </svg>
-        <svg id="dockSoundIconOff" style="display:none;" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-          <line x1="23" y1="9" x2="17" y2="15"></line>
-          <line x1="17" y1="9" x2="23" y2="15"></line>
-        </svg>
-        <span class="dock-tooltip" id="dockSoundTooltip">Audio: ON</span>
-      </button>
-
-      <!-- Item 6: Share / Copy Link -->
-      <button id="dockShareBtn" class="dock-btn" data-tooltip="Copy Link" aria-label="Copy Link">
-        <svg id="dockShareIcon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-        </svg>
-        <svg id="dockCheckIcon" style="display:none; color: var(--acid);" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-        <span class="dock-tooltip" id="dockShareTooltip">Share Page</span>
-      </button>
-
-      <!-- Item 7: Waitlist Action Pill -->
-      <a href="#waitlist-box" class="dock-cta shimmer-beam" aria-label="Join Waitlist">
-        <span>Waitlist</span>
-      </a>
-    </nav>
-  </div>
 
   <!-- ========================================================
        FOREVER COMPONENTS INTERACTION SCRIPTS
@@ -2656,12 +2435,17 @@
       });
     }
 
-    // 4. FAQ Accordion Toggle with Bencho Tactile Audio
-    document.querySelectorAll('.faq-q').forEach(q => {
+    // 4. FAQ Accordion: Single active panel (one closes when another is opened)
+    const faqItems = document.querySelectorAll('.faq-item');
+    faqItems.forEach(item => {
+      const q = item.querySelector('.faq-q');
       q.addEventListener('click', () => {
         playBenchoClick('tap');
-        const item = q.parentElement;
-        item.classList.toggle('open');
+        const isOpen = item.classList.contains('open');
+        faqItems.forEach(other => other.classList.remove('open'));
+        if (!isOpen) {
+          item.classList.add('open');
+        }
       });
     });
 
@@ -2764,84 +2548,6 @@
     document.querySelectorAll('[data-scramble="true"]').forEach(el => {
       el.addEventListener('mouseenter', () => {
         scrambleText(el);
-      });
-    });
-
-    // ========================================================
-    // 8. BENCHO COMPONENT: FLOATING DOCK ACTION CONTROLLERS
-    // ========================================================
-    const soundBtn = document.getElementById('dockSoundBtn');
-    const soundIconOn = document.getElementById('dockSoundIconOn');
-    const soundIconOff = document.getElementById('dockSoundIconOff');
-    const soundTooltip = document.getElementById('dockSoundTooltip');
-
-    function updateSoundUI() {
-      if (!soundBtn) return;
-      if (soundEnabled) {
-        if (soundIconOn) soundIconOn.style.display = 'block';
-        if (soundIconOff) soundIconOff.style.display = 'none';
-        soundBtn.classList.add('dock-sound-active');
-        if (soundTooltip) soundTooltip.textContent = 'Audio: ON';
-      } else {
-        if (soundIconOn) soundIconOn.style.display = 'none';
-        if (soundIconOff) soundIconOff.style.display = 'block';
-        soundBtn.classList.remove('dock-sound-active');
-        if (soundTooltip) soundTooltip.textContent = 'Audio: MUTED';
-      }
-    }
-    updateSoundUI();
-
-    if (soundBtn) {
-      soundBtn.addEventListener('click', () => {
-        soundEnabled = !soundEnabled;
-        localStorage.setItem('tally-sound', soundEnabled ? 'on' : 'off');
-        updateSoundUI();
-        if (soundEnabled) {
-          playBenchoClick('tap');
-        }
-      });
-    }
-
-    const shareBtn = document.getElementById('dockShareBtn');
-    const shareIcon = document.getElementById('dockShareIcon');
-    const checkIcon = document.getElementById('dockCheckIcon');
-    const shareTooltip = document.getElementById('dockShareTooltip');
-
-    if (shareBtn) {
-      shareBtn.addEventListener('click', async () => {
-        playBenchoClick('success');
-        try {
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            await navigator.clipboard.writeText(window.location.href);
-          } else {
-            throw new Error('Clipboard API not available');
-          }
-        } catch (e) {
-          const inp = document.createElement('input');
-          inp.value = window.location.href;
-          document.body.appendChild(inp);
-          inp.select();
-          document.execCommand('copy');
-          document.body.removeChild(inp);
-        }
-
-        if (shareIcon && checkIcon) {
-          shareIcon.style.display = 'none';
-          checkIcon.style.display = 'block';
-          if (shareTooltip) shareTooltip.textContent = 'Copied Link!';
-          setTimeout(() => {
-            shareIcon.style.display = 'block';
-            checkIcon.style.display = 'none';
-            if (shareTooltip) shareTooltip.textContent = 'Share Page';
-          }, 2000);
-        }
-      });
-    }
-
-    // Dock quick scroll click sounds
-    document.querySelectorAll('.dock-btn:not(#dockSoundBtn):not(#dockShareBtn), .dock-cta').forEach(btn => {
-      btn.addEventListener('click', () => {
-        playBenchoClick('pop');
       });
     });
   </script>
