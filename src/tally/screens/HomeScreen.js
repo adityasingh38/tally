@@ -12,6 +12,7 @@ import { totalSpent, groupByCat, copeZone, monthlyTotals } from '../data';
 import { writeWidgetCache } from '../../services/widgetSync';
 
 function FeralStampOverlay({ accent }) {
+  return null; // Removed as per user request (remove financially feral)
   const stampY = useRef(new Animated.Value(-200)).current;
   const stampScale = useRef(new Animated.Value(3.0)).current;
   const stampOpacity = useRef(new Animated.Value(0)).current;

@@ -56,26 +56,30 @@ body {
 
 /* Status Bar */
 .status-bar {
-  height: 120px;
-  padding: 34px 60px 0;
+  height: 90px;
+  padding: 30px 60px 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-family: var(--sans);
   font-weight: 600;
-  font-size: 34px;
+  font-size: 32px;
   letter-spacing: -0.02em;
   color: var(--text);
   z-index: 100;
+  position: relative;
   background: transparent;
 }
 .camera-cutout {
-  width: 32px;
-  height: 32px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #000;
-  border: 1.5px solid rgba(255, 255, 255, 0.08);
-  margin-left: 20px;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  position: absolute;
+  left: 50%;
+  top: 40px;
+  transform: translateX(-50%);
 }
 .status-icons {
   display: flex;
@@ -97,6 +101,8 @@ body {
 
 /* Header */
 .screen-header {
+  margin-top: 24px;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -392,7 +398,9 @@ def build_screen_dashboard():
   font-weight: 700;
   font-size: 34px;
 }}
-.stamp-feral {{
+.stamp-feral {
+  display: none !important;
+{
   position: absolute;
   top: 50%;
   left: 50%;
