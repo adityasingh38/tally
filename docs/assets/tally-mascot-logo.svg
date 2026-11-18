@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title">
+  <title id="title">Tally mascot</title>
+  <defs>
+    <linearGradient id="face" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff7658"/>
+      <stop offset="0.55" stop-color="#ff5436"/>
+      <stop offset="1" stop-color="#e9472b"/>
+    </linearGradient>
+    <linearGradient id="hair" x1="0" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#242321"/>
+      <stop offset="0.5" stop-color="#111210"/>
+      <stop offset="1" stop-color="#090a09"/>
+    </linearGradient>
+    <radialGradient id="eye" cx="0.42" cy="0.3" r="0.85">
+      <stop offset="0" stop-color="#fffdf7"/>
+      <stop offset="1" stop-color="#f8efe1"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="70" y="74" width="884" height="876" rx="212" fill="url(#face)"/>
+  <path d="M100 754c20 106 94 169 211 183h401c119-14 195-80 212-183-64 89-179 126-412 126S164 843 100 754Z" fill="#ba321e" opacity="0.13"/>
+
+  <ellipse cx="317" cy="597" rx="143" ry="174" fill="url(#eye)"/>
+  <ellipse cx="677" cy="597" rx="143" ry="174" fill="url(#eye)"/>
+  <ellipse cx="330" cy="594" rx="85" ry="118" fill="#10110f"/>
+  <ellipse cx="690" cy="594" rx="85" ry="118" fill="#10110f"/>
+  <circle cx="274" cy="499" r="44" fill="#fffaf1"/>
+  <circle cx="634" cy="499" r="44" fill="#fffaf1"/>
+
+  <ellipse cx="225" cy="806" rx="52" ry="31" fill="#ce3b27" opacity="0.62"/>
+  <ellipse cx="799" cy="806" rx="52" ry="31" fill="#ce3b27" opacity="0.62"/>
+  <path d="M451 833c56 13 109-13 143-56" fill="none" stroke="#14110f" stroke-width="29" stroke-linecap="round"/>
+
+  <path d="M70 310V291C70 167 166 74 296 74h432c130 0 226 93 226 217v19c-31 31-82 49-134 47-56-3-102-36-124-85-34 54-93 91-184 91s-150-37-184-91c-23 49-69 82-125 85-52 2-102-16-133-47Z" fill="url(#hair)"/>
+  <path d="M139 284c25-77 82-124 153-138" fill="none" stroke="#6b6a67" stroke-width="30" stroke-linecap="round" opacity="0.33"/>
+</svg>
