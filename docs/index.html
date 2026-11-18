@@ -1841,58 +1841,103 @@
       overflow: visible;
     }
 
-    /* Exposed Wordmark Stage: 100% PURE WHITE, including Tally background */
+    /* Exposed Wordmark Stage: 100% PURE WHITE, with Multiple Animated Cursive Tallys */
     .tpf-wordmark-stage {
       position: relative;
       background: #FFFFFF !important;
       width: 100%;
-      padding: 24px 24px 48px;
+      padding: 30px 0 48px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 1;
+      overflow: hidden;
     }
-    .tpf-wm-btn {
-      background: none;
-      border: none;
-      padding: 0;
-      cursor: pointer;
+    .tpf-wordmark-track-wrap {
       width: 100%;
-      max-width: 900px;
+      overflow: hidden;
       display: flex;
-      justify-content: center;
-      align-items: center;
-      outline: none;
-      transition: transform 0.25s ease;
+      user-select: none;
+      padding: 10px 0 24px;
+      position: relative;
     }
-    .tpf-wm-btn:hover {
-      transform: scale(1.02);
+    .tpf-wordmark-track {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      width: max-content;
+      animation: wordmarkScroll 42s linear infinite;
+      will-change: transform;
+    }
+    .tpf-wordmark-track-wrap:hover .tpf-wordmark-track {
+      animation-play-state: paused;
+    }
+    @keyframes wordmarkScroll {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+    .wm-tally-pill {
+      flex: 0 0 auto;
+      width: 240px;
+      height: 140px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .wm-tally-pill:hover {
+      transform: scale(1.12);
     }
     .tpf-wm-svg {
       width: 100%;
-      max-height: 230px;
+      height: 100%;
       overflow: visible;
     }
     .tpf-wm-path {
       stroke: #FF5436;
-      stroke-width: 4.8;
+      stroke-width: 4.6;
       stroke-linecap: round;
       stroke-linejoin: round;
       fill: none;
-      stroke-dasharray: 400;
-      stroke-dashoffset: 0;
-      transition: stroke-dashoffset 2.4s cubic-bezier(0.25, 1, 0.5, 1);
     }
-    .tpf-wm-path.animating {
-      animation: drawSignature 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    .tpf-wm-main {
+      stroke-dasharray: 260;
+      stroke-dashoffset: 260;
+      animation: drawTallyMain 4.2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
     }
-    @keyframes drawSignature {
+    .tpf-wm-extra {
+      stroke-dasharray: 14;
+      stroke-dashoffset: 14;
+      animation: drawTallyExtra 4.2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+    }
+
+    @keyframes drawTallyMain {
       0% {
-        stroke-dashoffset: 400;
+        stroke-dashoffset: 260;
+      }
+      38%, 84% {
+        stroke-dashoffset: 0;
       }
       100% {
+        stroke-dashoffset: 260;
+      }
+    }
+
+    @keyframes drawTallyExtra {
+      0%, 15% {
+        stroke-dashoffset: 14;
+      }
+      42%, 84% {
         stroke-dashoffset: 0;
+      }
+      100% {
+        stroke-dashoffset: 14;
       }
     }
     .tpf-legal-bar {
@@ -2934,18 +2979,254 @@
     </div>
 
     <!-- Underlying White Stage with Giant Self-Drawing Cursive Wordmark in Signature Red -->
+    <!-- Underlying White Stage with Multiple Animated Cursive Tallys Flowing Beside Each Other -->
     <div class="tpf-wordmark-stage">
-      <button type="button" class="tpf-wm-btn" id="btn-replay-wordmark" aria-label="Replay Tally wordmark signature animation">
-        <!-- Exact Cursive Geometry from StickerSlapFooter Glyph Engine for 'tally' -->
+      <div class="tpf-wordmark-track-wrap" aria-label="Animated cursive Tally signatures">
+        <div class="tpf-wordmark-track">
+          
+      <div class="wm-tally-pill" data-index="0">
         <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
           <g transform="skewX(-9)">
             <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
-            <path class="tpf-wm-path tpf-wm-main" data-draw="true" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 0.00s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
             <!-- Crossbar on 't' -->
-            <path class="tpf-wm-path tpf-wm-extra" data-draw="true" d="M-0.98 -9.6L7.56 -9.6" />
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 0.00s;" d="M-0.98 -9.6L7.56 -9.6" />
           </g>
         </svg>
-      </button>
+      </div>
+      <div class="wm-tally-pill" data-index="1">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 0.35s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 0.35s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="wm-tally-pill" data-index="2">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 0.70s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 0.70s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="wm-tally-pill" data-index="3">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 1.05s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 1.05s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="wm-tally-pill" data-index="4">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 1.40s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 1.40s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="wm-tally-pill" data-index="5">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 1.75s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 1.75s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="wm-tally-pill" data-index="6">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 2.10s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 2.10s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="wm-tally-pill" data-index="7">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 2.45s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 2.45s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="wm-tally-pill" data-index="8">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 0.00s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 0.00s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="wm-tally-pill" data-index="9">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 0.35s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 0.35s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="wm-tally-pill" data-index="10">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 0.70s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 0.70s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="wm-tally-pill" data-index="11">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 1.05s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 1.05s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+          
+      <div class="wm-tally-pill" data-index="12">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 0.00s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 0.00s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="wm-tally-pill" data-index="13">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 0.35s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 0.35s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="wm-tally-pill" data-index="14">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 0.70s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 0.70s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="wm-tally-pill" data-index="15">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 1.05s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 1.05s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="wm-tally-pill" data-index="16">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 1.40s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 1.40s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="wm-tally-pill" data-index="17">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 1.75s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 1.75s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="wm-tally-pill" data-index="18">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 2.10s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 2.10s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="wm-tally-pill" data-index="19">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 2.45s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 2.45s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="wm-tally-pill" data-index="20">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 0.00s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 0.00s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="wm-tally-pill" data-index="21">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 0.35s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 0.35s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="wm-tally-pill" data-index="22">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 0.70s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 0.70s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="wm-tally-pill" data-index="23">
+        <svg class="tpf-wm-svg" viewBox="-2 -22 57 34" aria-hidden="true" focusable="false">
+          <g transform="skewX(-9)">
+            <!-- Main Continuous Cursive Path (t-a-l-l-y) -->
+            <path class="tpf-wm-path tpf-wm-main" style="animation-delay: 1.05s;" d="M0.0 -1C1.22 -1.4 2.68 -8 2.93 -15L2.93 -3.2C2.93 -0.8 4.88 -1 8.05 -1L9.05 -1C10.76 -1.4 10.76 -9.6 14.3 -10C12.1 -10 10.27 -7.8 10.27 -5C10.27 -2.2 12.1 0 14.3 0C16.49 0 18.32 -2.2 18.32 -5L18.57 -10L18.57 -3C18.57 -0.8 19.79 -1 21.5 -1L22.5 -1C25.91 -3 30.06 -12 29.82 -16.4C29.57 -19.8 24.69 -20 24.69 -16.4L24.69 -3.2C24.69 -0.6 27.38 -1 30.3 -1L31.3 -1C34.72 -3 38.87 -12 38.62 -16.4C38.38 -19.8 33.5 -20 33.5 -16.4L33.5 -3.2C33.5 -0.6 36.18 -1 39.11 -1L40.11 -1C41.58 -1.6 42.06 -6 42.31 -9.6L42.31 -3.6C42.31 -1 43.77 0 45.72 0C47.68 0 49.14 -1.4 49.38 -4L49.38 -9.8L49.38 4.4C49.38 9 46.94 9.6 45.24 9.6C42.55 9.6 41.82 7.6 43.53 6C45.72 4 49.14 1.6 51.82 -1" />
+            <!-- Crossbar on 't' -->
+            <path class="tpf-wm-path tpf-wm-extra" style="animation-delay: 1.05s;" d="M-0.98 -9.6L7.56 -9.6" />
+          </g>
+        </svg>
+      </div>
+        </div>
+      </div>
 
       <!-- Legal / Meta Bottom Bar on White Background -->
       <div class="tpf-legal-bar mono">
@@ -3534,6 +3815,20 @@
         }, 50);
       });
     }
+
+
+    // Interactive re-trigger and sound on clicking any cursive Tally
+    document.querySelectorAll('.wm-tally-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        playBenchoClick('pop');
+        const paths = pill.querySelectorAll('.tpf-wm-path');
+        paths.forEach(p => {
+          p.style.animation = 'none';
+          void p.offsetWidth;
+          p.style.animation = '';
+        });
+      });
+    });
 
   </script>
   <script src="./mascot-eyes.js"></script>
