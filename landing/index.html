@@ -435,13 +435,14 @@
     .hero-h1 {
       font-family: var(--font-display);
       font-weight: 800;
-      font-size: clamp(42px, 5vw, 70px);
-      line-height: 0.98;
+      font-size: clamp(34px, 3.45vw, 52px);
+      line-height: 1.04;
       letter-spacing: -0.04em;
       max-width: 840px;
       margin: 0;
     }
 
+    .hero-h1 .line { display: block; white-space: nowrap; }
     .hero-h1 .red {
       color: var(--red);
     }
@@ -465,6 +466,7 @@
     @media (max-width: 820px) {
       .hero { display: block; width: auto; margin-left: 0; min-height: 0; padding: 48px 0 36px; text-align: center; }
       .hero-copy { margin: 0 auto; }
+      .hero-h1 { font-size: clamp(25px, 6vw, 48px); }
       .hero-h1, .hero-lead { margin-left: auto; margin-right: auto; }
       .waitlist-box { margin-left: auto; margin-right: auto; }
       .hero-particles { display: none; }
@@ -1085,8 +1087,8 @@
     <section class="hero">
       <div class="hero-copy">
       <h1 class="hero-h1">
-        track the damage.<br />
-        <span class="red">Zero manual logging.</span>
+        <span class="line">track the damage.</span>
+        <span class="line red">Zero manual logging.</span>
       </h1>
 
       <p class="hero-lead">
@@ -1343,7 +1345,7 @@
     const htmlElem = document.documentElement;
     htmlElem.setAttribute('data-theme', 'dark');
 
-    // Bencho-inspired dot field: pointer repulsion and a press shockwave.
+    // Bencho-inspired dot field: ambient waves, pointer repulsion, and a press shockwave.
     (function () {
       const canvas = document.getElementById('heroParticles');
       if (!canvas) return;
@@ -1354,6 +1356,8 @@
       let frame = 0;
       let width = 0;
       let height = 0;
+      let visible = false;
+      let lastDraw = 0;
 
       function draw() {
         context.clearRect(0, 0, width, height);
@@ -1380,16 +1384,24 @@
         dots.length = 0;
         const step = Math.max(8, Math.min(width, height) / 62);
         for (let y = step / 2; y < height; y += step) {
-          for (let x = step / 2; x < width; x += step) {
-            dots.push({ homeX: x, homeY: y, x, y, vx: 0, vy: 0 });
+          for (let x = step / 2, column = 0; x < width; x += step, column++) {
+            dots.push({ homeX: x, homeY: y, x, y, vx: 0, vy: 0, column });
           }
         }
         draw();
+        wake();
       }
 
-      function tick() {
+      function tick(time) {
         frame = 0;
-        let moving = false;
+        if (!visible || document.hidden || motionPreference.matches) return;
+        // The ambient field only needs 30 fps; pointer movement gets full-rate feedback.
+        if (!pointer.active && time - lastDraw < 33) {
+          frame = requestAnimationFrame(tick);
+          return;
+        }
+        lastDraw = time;
+        const columnShift = Math.sin(time * 0.0011) * 4.2;
         dots.forEach(dot => {
           if (pointer.active) {
             const dx = dot.x - pointer.x;
@@ -1401,17 +1413,21 @@
               dot.vy += dy / distance * force;
             }
           }
+          const targetY = dot.homeY + (dot.column % 2 ? -columnShift : columnShift);
           dot.vx = (dot.vx + (dot.homeX - dot.x) * 0.075) * 0.82;
-          dot.vy = (dot.vy + (dot.homeY - dot.y) * 0.075) * 0.82;
+          dot.vy = (dot.vy + (targetY - dot.y) * 0.075) * 0.82;
           dot.x += dot.vx;
           dot.y += dot.vy;
-          moving ||= Math.abs(dot.vx) + Math.abs(dot.vy) + Math.abs(dot.x - dot.homeX) + Math.abs(dot.y - dot.homeY) > 0.12;
         });
         draw();
-        if (pointer.active || moving) frame = requestAnimationFrame(tick);
+        frame = requestAnimationFrame(tick);
       }
 
-      function wake() { if (!frame && !motionPreference.matches) frame = requestAnimationFrame(tick); }
+      function wake() {
+        if (!frame && visible && !document.hidden && !motionPreference.matches) {
+          frame = requestAnimationFrame(tick);
+        }
+      }
       canvas.addEventListener('pointermove', event => {
         const rect = canvas.getBoundingClientRect();
         pointer.x = event.clientX - rect.left;
@@ -1442,8 +1458,22 @@
           pointer.active = false;
           dots.forEach(dot => { dot.x = dot.homeX; dot.y = dot.homeY; dot.vx = dot.vy = 0; });
           draw();
-        }
+        } else wake();
       });
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          cancelAnimationFrame(frame);
+          frame = 0;
+        } else wake();
+      });
+      new IntersectionObserver(entries => {
+        visible = entries[0].isIntersecting;
+        if (visible) wake();
+        else {
+          cancelAnimationFrame(frame);
+          frame = 0;
+        }
+      }).observe(canvas);
       new ResizeObserver(build).observe(canvas);
       build();
     })();
