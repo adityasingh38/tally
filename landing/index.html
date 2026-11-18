@@ -382,15 +382,22 @@
       position: relative;
       width: 100vw;
       margin-left: calc(50% - 50vw);
-      padding: 44px 0 20px max(24px, calc((100vw - 960px) / 2));
+      padding: 44px 0 20px;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 50vw;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       align-items: center;
       gap: 0;
       min-height: max(650px, calc(100dvh - 90px));
     }
 
-    .hero-copy { position: relative; z-index: 1; min-width: 0; max-width: 550px; }
+    .hero-copy {
+      position: relative;
+      z-index: 1;
+      min-width: 0;
+      width: min(550px, calc(100% - 48px));
+      justify-self: center;
+      text-align: center;
+    }
     .hero-particles {
       position: absolute;
       top: -80px;
@@ -449,7 +456,7 @@
 
     .hero-lead {
       max-width: 500px;
-      margin: 20px 0 0;
+      margin: 20px auto 0;
       font-size: 17.5px;
       color: var(--dim);
       line-height: 1.5;
@@ -460,7 +467,7 @@
        ======================================================== */
     .waitlist-box {
       max-width: 460px;
-      margin: 32px 0 0;
+      margin: 32px auto 0;
     }
 
     @media (max-width: 820px) {
@@ -1356,6 +1363,8 @@
       let frame = 0;
       let width = 0;
       let height = 0;
+      let loopHeight = 0;
+      let marqueeStart = 0;
       let visible = false;
       let lastDraw = 0;
 
@@ -1383,9 +1392,11 @@
         context.setTransform(density, 0, 0, density, 0, 0);
         dots.length = 0;
         const step = Math.max(8, Math.min(width, height) / 62);
-        for (let y = step / 2; y < height; y += step) {
+        loopHeight = Math.ceil(height / step) * step;
+        marqueeStart = performance.now();
+        for (let y = step / 2; y < loopHeight; y += step) {
           for (let x = step / 2, column = 0; x < width; x += step, column++) {
-            dots.push({ homeX: x, homeY: y, x, y, vx: 0, vy: 0, column });
+            dots.push({ homeX: x, homeY: y, x, y, offsetX: 0, offsetY: 0, vx: 0, vy: 0, column });
           }
         }
         draw();
@@ -1401,7 +1412,7 @@
           return;
         }
         lastDraw = time;
-        const columnShift = Math.sin(time * 0.0011) * 4.2;
+        const travel = (time - marqueeStart) * 0.018;
         dots.forEach(dot => {
           if (pointer.active) {
             const dx = dot.x - pointer.x;
@@ -1413,11 +1424,14 @@
               dot.vy += dy / distance * force;
             }
           }
-          const targetY = dot.homeY + (dot.column % 2 ? -columnShift : columnShift);
-          dot.vx = (dot.vx + (dot.homeX - dot.x) * 0.075) * 0.82;
-          dot.vy = (dot.vy + (targetY - dot.y) * 0.075) * 0.82;
-          dot.x += dot.vx;
-          dot.y += dot.vy;
+          const direction = dot.column % 2 ? -1 : 1;
+          const baseY = ((dot.homeY + direction * travel) % loopHeight + loopHeight) % loopHeight;
+          dot.vx = (dot.vx - dot.offsetX * 0.075) * 0.82;
+          dot.vy = (dot.vy - dot.offsetY * 0.075) * 0.82;
+          dot.offsetX += dot.vx;
+          dot.offsetY += dot.vy;
+          dot.x = dot.homeX + dot.offsetX;
+          dot.y = baseY + dot.offsetY;
         });
         draw();
         frame = requestAnimationFrame(tick);
@@ -1456,9 +1470,16 @@
           cancelAnimationFrame(frame);
           frame = 0;
           pointer.active = false;
-          dots.forEach(dot => { dot.x = dot.homeX; dot.y = dot.homeY; dot.vx = dot.vy = 0; });
+          dots.forEach(dot => {
+            dot.x = dot.homeX;
+            dot.y = dot.homeY;
+            dot.offsetX = dot.offsetY = dot.vx = dot.vy = 0;
+          });
           draw();
-        } else wake();
+        } else {
+          marqueeStart = performance.now();
+          wake();
+        }
       });
       document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
