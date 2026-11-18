@@ -1527,301 +1527,6 @@
       margin-right: 4px;
     }
 
-    /* ========================================================
-       PUSHPIN TEAR FOOTER & STICKER SLAP WORDMARK ANIMATION
-       ======================================================== */
-    .pushpin-footer {
-      position: relative;
-      background: #090A08;
-      color: #F2F3EC;
-      padding-top: 60px;
-      overflow: hidden;
-    }
-    .pushpin-anchor {
-      position: absolute;
-      top: 18px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 20;
-      pointer-events: none;
-    }
-    .tpf-pin-svg {
-      width: 44px;
-      height: 88px;
-      display: block;
-      filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.7));
-    }
-    .tpf-paper-sheet {
-      position: relative;
-      background: #F1EDE3;
-      color: #15160E;
-      border-radius: 20px 20px 0 0;
-      margin: 0 auto;
-      max-width: 1200px;
-      padding: 60px 48px 120px 48px;
-      box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.6);
-      z-index: 10;
-    }
-    html[data-theme="dark"] .tpf-paper-sheet {
-      background: #171913;
-      color: #F2F3EC;
-      border: 1px solid var(--line-strong);
-      border-bottom: none;
-    }
-    .tpf-top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 32px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-      margin-bottom: 48px;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-    html[data-theme="dark"] .tpf-top-bar {
-      border-bottom-color: var(--line);
-    }
-    .tpf-brand-wrap {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .tpf-brand-title {
-      font-family: var(--font-display);
-      font-size: 22px;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-    }
-    .tpf-clock-wrap {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      padding: 6px 14px;
-      border-radius: var(--r-pill);
-      background: rgba(0, 0, 0, 0.05);
-      border: 1px solid rgba(0, 0, 0, 0.1);
-    }
-    html[data-theme="dark"] .tpf-clock-wrap {
-      background: var(--wash);
-      border-color: var(--line);
-      color: var(--text);
-    }
-    .tpf-clock-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--red);
-      animation: clock-pulse 1s infinite alternate;
-    }
-    @keyframes clock-pulse {
-      0% { opacity: 0.4; }
-      100% { opacity: 1; }
-    }
-    .tpf-back-top {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      font-weight: 600;
-      color: inherit;
-      cursor: pointer;
-      background: none;
-      border: 1px solid currentColor;
-      padding: 6px 14px;
-      border-radius: var(--r-pill);
-      transition: all var(--dur-fast);
-      text-decoration: none;
-    }
-    .tpf-back-top:hover {
-      background: var(--red);
-      border-color: var(--red);
-      color: #FFFFFF !important;
-      transform: translateY(-2px);
-    }
-    .tpf-cols {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 36px;
-      margin-bottom: 48px;
-    }
-    @media (max-width: 860px) {
-      .tpf-cols { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 520px) {
-      .tpf-cols { grid-template-columns: 1fr; }
-    }
-    .tpf-col h5 {
-      margin: 0 0 16px 0;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      opacity: 0.7;
-    }
-    .tpf-col ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .tpf-col a {
-      font-family: var(--font-sans);
-      font-size: 14px;
-      color: inherit;
-      opacity: 0.85;
-      text-decoration: none;
-      transition: all var(--dur-fast);
-    }
-    .tpf-col a:hover {
-      opacity: 1;
-      color: var(--red);
-      transform: translateX(3px);
-      display: inline-block;
-    }
-    .tpf-col p {
-      font-size: 13px;
-      line-height: 1.5;
-      margin: 0 0 14px 0;
-      opacity: 0.8;
-    }
-    .tpf-waitlist-mini {
-      display: flex;
-      gap: 6px;
-    }
-    .tpf-waitlist-mini input {
-      flex: 1;
-      background: rgba(0, 0, 0, 0.05);
-      border: 1px solid rgba(0, 0, 0, 0.15);
-      padding: 8px 12px;
-      border-radius: var(--r-chip);
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: inherit;
-    }
-    html[data-theme="dark"] .tpf-waitlist-mini input {
-      background: var(--surface);
-      border-color: var(--line-strong);
-    }
-    .tpf-waitlist-mini button {
-      background: var(--red);
-      color: #FFFFFF;
-      border: none;
-      padding: 0 14px;
-      border-radius: var(--r-chip);
-      font-family: var(--font-mono);
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background var(--dur-fast);
-    }
-    .tpf-waitlist-mini button:hover {
-      background: var(--red-hover);
-    }
-
-    /* Torn Paper Edge SVG */
-    .tpf-tear-stage {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: -45px;
-      width: 100%;
-      height: 80px;
-      pointer-events: none;
-      z-index: 12;
-      overflow: visible;
-    }
-    .tpf-tear-svg {
-      width: 100%;
-      height: 100%;
-      display: block;
-      filter: drop-shadow(0 14px 10px rgba(0, 0, 0, 0.45));
-    }
-
-    /* Revealed Under-Stage with Giant Self-Drawing Wordmark */
-    .tpf-wordmark-stage {
-      position: relative;
-      background: #090A08;
-      padding: 80px 24px 60px 24px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 5;
-    }
-    .tpf-wm-btn {
-      background: none;
-      border: none;
-      padding: 0;
-      cursor: pointer;
-      width: 100%;
-      max-width: 820px;
-      display: block;
-      margin: 0 auto;
-      outline: none;
-      transform-origin: center center;
-      transition: transform 0.3s var(--ease-bounce);
-    }
-    .tpf-wm-btn:hover {
-      transform: scale(1.02);
-    }
-    .tpf-wm-btn:active {
-      transform: scale(0.97);
-    }
-    .tpf-wm-svg {
-      width: 100%;
-      height: auto;
-      max-height: 40svh;
-      display: block;
-      overflow: visible;
-    }
-    .tpf-wm-path {
-      fill: none;
-      stroke: var(--red);
-      stroke-width: 3.2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      stroke-dasharray: var(--l, 350px);
-      stroke-dashoffset: var(--l, 350px);
-      transition: stroke-dashoffset 2.2s cubic-bezier(0.55, 0.1, 0.35, 1);
-      filter: drop-shadow(0 0 18px rgba(255, 84, 54, 0.4));
-    }
-    .pushpin-footer.in-view .tpf-wm-path {
-      stroke-dashoffset: 0;
-    }
-    .pushpin-footer.in-view .tpf-wm-extra {
-      transition-delay: 1.5s;
-      stroke-dashoffset: 0;
-    }
-    .tpf-legal-bar {
-      margin-top: 40px;
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      max-width: 1200px;
-      padding: 20px 24px 0 24px;
-      border-top: 1px solid var(--line);
-      font-size: 11px;
-      color: var(--faint);
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .tpf-legal-bar a {
-      color: inherit;
-      text-decoration: none;
-    }
-    .tpf-legal-bar a:hover {
-      color: var(--text);
-    }
-
-  </style>
-
-<style>
-
     /* Magic UI Smooth Cursor */
     @media (any-hover: hover) and (any-pointer: fine) {
       body, a, button, input, select, textarea {
@@ -1843,21 +1548,29 @@
       transition: opacity 0.15s ease;
     }
 
-    /* Standalone Bank Marquee */
+    /* ========================================================
+       STANDALONE BANK & UPI MARQUEE STRIP (BREADTH TO BREADTH)
+       ======================================================== */
     .banks-marquee-strip {
-      padding: 40px 0 50px;
-      overflow: hidden;
+      width: 100vw;
       position: relative;
-      background: linear-gradient(180deg, rgba(14, 15, 12, 0) 0%, rgba(20, 22, 16, 0.4) 50%, rgba(14, 15, 12, 0) 100%);
+      left: 50%;
+      right: 50%;
+      margin-left: -50vw;
+      margin-right: -50vw;
+      padding: 38px 0 46px;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(14, 15, 12, 0) 0%, rgba(20, 22, 16, 0.45) 50%, rgba(14, 15, 12, 0) 100%);
       border-top: 1px solid var(--line);
       border-bottom: 1px solid var(--line);
-      margin: 40px 0;
+      margin-top: 40px;
+      margin-bottom: 40px;
     }
     .banks-marquee-strip::before, .banks-marquee-strip::after {
       content: '';
       position: absolute;
       top: 0; bottom: 0;
-      width: 140px;
+      width: 160px;
       z-index: 2;
       pointer-events: none;
     }
@@ -1948,12 +1661,22 @@
       color: var(--dim);
     }
 
-    /* Authentic 21st.dev Kedhareswer Pushpin Tear Footer in Tally Red */
-    .pushpin-tear-footer {
+    /* ========================================================
+       AUTHENTIC 21ST.DEV KEDHARESWER PUSHPIN TEAR FOOTER
+       BREADTH TO BREADTH · TALLY RED SHEET · WHITE STAGE BELOW TEAR
+       ======================================================== */
+    footer.pushpin-tear-footer {
+      width: 100vw;
       position: relative;
-      background: #090A08;
-      width: 100%;
+      left: 50%;
+      right: 50%;
+      margin-left: -50vw;
+      margin-right: -50vw;
+      background: #FFFFFF !important;
       margin-top: 60px;
+      padding: 0 !important;
+      border: none !important;
+      text-align: left !important;
       overflow: hidden;
     }
     .tpf-red-sheet {
@@ -1961,6 +1684,7 @@
       background: #FF5436;
       color: #FFFDF9;
       padding-top: 56px;
+      padding-bottom: 24px;
       z-index: 2;
     }
     .tpf-content {
@@ -2027,7 +1751,6 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 32px;
-      padding-bottom: 20px;
     }
     @media (max-width: 768px) {
       .tpf-cols {
@@ -2085,13 +1808,16 @@
       font-size: 9.5px;
       color: #FFFDF9;
     }
-    .tpf-tear-arch-wrap {
+
+    /* Torn Paper Edge Transition (Breadth to Breadth, White background below tear) */
+    .tpf-tear-transition {
       position: relative;
+      background: #FFFFFF !important;
       width: 100%;
-      height: 280px;
-      margin-top: 10px;
-      overflow: visible;
+      height: 160px;
       line-height: 0;
+      overflow: visible;
+      margin-top: -1px;
     }
     .tpf-tear-svg {
       width: 100%;
@@ -2101,22 +1827,26 @@
     .pushpin-anchor {
       position: absolute;
       left: 50%;
-      transform: translate(-50%, -60%);
-      width: 72px;
-      height: 144px;
+      top: 0px;
+      transform: translate(-50%, -44%);
+      width: 68px;
+      height: 136px;
       z-index: 10;
       pointer-events: none;
-      filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.65));
+      filter: drop-shadow(0 14px 16px rgba(0, 0, 0, 0.35));
     }
     .tpf-pin-svg {
       width: 100%;
       height: 100%;
       overflow: visible;
     }
+
+    /* Exposed Wordmark Stage: 100% PURE WHITE, including Tally background */
     .tpf-wordmark-stage {
       position: relative;
-      background: #090A08;
-      padding: 40px 24px 30px;
+      background: #FFFFFF !important;
+      width: 100%;
+      padding: 24px 24px 48px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -2141,11 +1871,11 @@
     }
     .tpf-wm-svg {
       width: 100%;
-      max-height: 240px;
+      max-height: 230px;
       overflow: visible;
     }
     .tpf-wm-path {
-      stroke: var(--red);
+      stroke: #FF5436;
       stroke-width: 4.8;
       stroke-linecap: round;
       stroke-linejoin: round;
@@ -2172,9 +1902,9 @@
       max-width: 960px;
       margin-top: 36px;
       padding-top: 20px;
-      border-top: 1px solid var(--line);
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
       font-size: 11px;
-      color: var(--faint);
+      color: #63655A;
     }
     @media (max-width: 640px) {
       .tpf-legal-bar {
@@ -2183,7 +1913,6 @@
         text-align: center;
       }
     }
-
 </style>
 </head>
 <body>
@@ -3053,8 +2782,16 @@
   <!-- ========================================================
        AUTHENTIC 21ST.DEV KEDHARESWER PUSHPIN TEAR FOOTER IN TALLY RED
        ======================================================== -->
+  <!-- ========================================================
+       AUTHENTIC 21ST.DEV KEDHARESWER PUSHPIN TEAR FOOTER
+       BREADTH TO BREADTH · TALLY RED SHEET · WHITE STAGE BELOW TEAR
+       ======================================================== -->
+  <!-- ========================================================
+       AUTHENTIC 21ST.DEV KEDHARESWER PUSHPIN TEAR FOOTER
+       BREADTH TO BREADTH · TALLY RED SHEET · WHITE STAGE BELOW TEAR
+       ======================================================== -->
   <footer class="pushpin-tear-footer" id="tally-footer">
-    <!-- Red Paper Sheet Container -->
+    <!-- Top Red Sheet (100% full breadth) -->
     <div class="tpf-red-sheet">
       <div class="wrap tpf-content">
         <!-- Top Bar: Brand, Local Clock, Back to Top -->
@@ -3132,70 +2869,71 @@
           </div>
         </div>
       </div>
-
-      <!-- Dramatic Arched Torn Paper SVG Scoop -->
-      <div class="tpf-tear-arch-wrap" aria-hidden="true">
-        <!-- 3D Glossy Pushpin Anchored at the Exact Apex of the Tear -->
-        <div class="pushpin-anchor" style="top: 47px;">
-          <svg viewBox="0 0 100 200" class="tpf-pin-svg">
-            <defs>
-              <linearGradient id="tpf-pin-side" x1="0" x2="1" y1="0" y2="0">
-                <stop offset="0%" stop-color="#801F10" />
-                <stop offset="24%" stop-color="#D9381E" />
-                <stop offset="40%" stop-color="#FF9380" />
-                <stop offset="58%" stop-color="#FF5436" />
-                <stop offset="100%" stop-color="#4A0D05" />
-              </linearGradient>
-              <radialGradient id="tpf-pin-cap" cx="0.38" cy="0.3" r="0.8">
-                <stop offset="0%" stop-color="#FF9380" />
-                <stop offset="55%" stop-color="#FF5436" />
-                <stop offset="100%" stop-color="#801F10" />
-              </radialGradient>
-              <linearGradient id="tpf-pin-needle" x1="0" x2="1" y1="0" y2="0">
-                <stop offset="0%" stop-color="#5b616b" />
-                <stop offset="40%" stop-color="#f4f5f7" />
-                <stop offset="70%" stop-color="#a3a9b2" />
-                <stop offset="100%" stop-color="#4a4f57" />
-              </linearGradient>
-              <filter id="tpf-pin-blur" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="1.4" />
-              </filter>
-            </defs>
-            <!-- Needle -->
-            <path d="M48.3 112h3.4l-.7 76-1 4-1-4z" fill="url(#tpf-pin-needle)" />
-            <!-- Pinhole shadow -->
-            <ellipse cx="50" cy="191.5" rx="3.2" ry="1.1" fill="#000000" opacity="0.6" />
-            <!-- Lower Collar -->
-            <path d="M28 103v6.5a22 7 0 0 0 44 0V103z" fill="url(#tpf-pin-side)" />
-            <ellipse cx="50" cy="103" rx="22" ry="7" fill="url(#tpf-pin-cap)" />
-            <!-- Stem body -->
-            <path d="M41.5 38c1.6 16 4.6 26 3 36-1.8 10-13 19-14.6 29h40.2c-1.6-10-12.8-19-14.6-29-1.6-10 1.4-20 3-36z" fill="url(#tpf-pin-side)" />
-            <!-- Head -->
-            <path d="M16 22v14a34 13 0 0 0 68 0V22z" fill="url(#tpf-pin-side)" />
-            <ellipse cx="50" cy="22" rx="34" ry="13" fill="url(#tpf-pin-cap)" />
-            <ellipse cx="50" cy="22" rx="33" ry="12.3" fill="none" stroke="#fff" stroke-opacity="0.3" stroke-width="0.8" />
-            <ellipse cx="37" cy="17.5" rx="12" ry="4" fill="#fff" opacity="0.75" filter="url(#tpf-pin-blur)" />
-            <!-- Specular Highlight Arc -->
-            <path d="M22 38c4 4.5 9.5 6.4 15 7" stroke="#fff" stroke-opacity="0.45" stroke-width="2" fill="none" stroke-linecap="round" filter="url(#tpf-pin-blur)" />
-            <path d="M45 50c.8 8 1.6 14 .8 22" stroke="#fff" stroke-opacity="0.5" stroke-width="1.6" fill="none" stroke-linecap="round" />
-          </svg>
-        </div>
-
-        <svg viewBox="0 0 1440 360" preserveAspectRatio="none" class="tpf-tear-svg">
-          <defs>
-            <filter id="tear-shadow" x="-5%" y="-5%" width="110%" height="130%">
-              <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000000" flood-opacity="0.55" />
-            </filter>
-          </defs>
-          <!-- White fibrous torn rim with drop shadow -->
-          <path d="M 0 0 L 1440 0 L 1440 332.5 L 1440.0 332.5 L 1430.0 326.5 L 1420.0 323.4 L 1410.0 319.9 L 1400.0 314.9 L 1390.0 305.2 L 1380.0 295.4 L 1370.0 299.2 L 1360.0 290.6 L 1350.0 290.2 L 1340.0 284.5 L 1330.0 281.8 L 1320.0 267.0 L 1310.0 262.7 L 1300.0 259.8 L 1290.0 258.6 L 1280.0 255.4 L 1270.0 255.4 L 1260.0 248.7 L 1250.0 232.8 L 1240.0 232.5 L 1230.0 226.9 L 1220.0 229.1 L 1210.0 220.7 L 1200.0 225.4 L 1190.0 213.0 L 1180.0 203.9 L 1170.0 200.4 L 1160.0 204.0 L 1150.0 197.0 L 1140.0 194.3 L 1130.0 197.9 L 1120.0 183.4 L 1110.0 179.7 L 1100.0 175.1 L 1090.0 175.0 L 1080.0 167.6 L 1070.0 172.6 L 1060.0 170.0 L 1050.0 161.2 L 1040.0 152.4 L 1030.0 150.9 L 1020.0 148.9 L 1010.0 142.8 L 1000.0 150.4 L 990.0 144.8 L 980.0 139.3 L 970.0 127.7 L 960.0 132.2 L 950.0 126.5 L 940.0 127.4 L 930.0 126.8 L 920.0 127.3 L 910.0 114.0 L 900.0 111.0 L 890.0 113.5 L 880.0 107.1 L 870.0 109.1 L 860.0 109.5 L 850.0 111.1 L 840.0 99.7 L 830.0 99.5 L 820.0 95.6 L 810.0 92.3 L 800.0 93.1 L 790.0 99.6 L 780.0 93.4 L 770.0 87.2 L 760.0 91.7 L 750.0 84.5 L 740.0 84.5 L 730.0 86.5 L 720.0 98.1 L 710.0 87.0 L 700.0 87.8 L 690.0 88.9 L 680.0 86.0 L 670.0 87.0 L 660.0 92.9 L 650.0 100.1 L 640.0 94.7 L 630.0 96.0 L 620.0 95.8 L 610.0 99.2 L 600.0 95.1 L 590.0 109.3 L 580.0 107.9 L 570.0 109.3 L 560.0 111.4 L 550.0 113.9 L 540.0 110.4 L 530.0 112.6 L 520.0 125.9 L 510.0 125.3 L 500.0 128.9 L 490.0 127.8 L 480.0 134.9 L 470.0 124.9 L 460.0 136.6 L 450.0 143.5 L 440.0 146.2 L 430.0 147.6 L 420.0 154.2 L 410.0 152.3 L 400.0 148.1 L 390.0 161.4 L 380.0 166.6 L 370.0 170.3 L 360.0 170.2 L 350.0 179.7 L 340.0 173.5 L 330.0 175.4 L 320.0 184.7 L 310.0 193.7 L 300.0 196.0 L 290.0 196.9 L 280.0 205.6 L 270.0 199.2 L 260.0 204.1 L 250.0 214.9 L 240.0 223.7 L 230.0 221.7 L 220.0 233.9 L 210.0 230.0 L 200.0 230.0 L 190.0 231.9 L 180.0 245.0 L 170.0 250.6 L 160.0 251.2 L 150.0 264.5 L 140.0 261.9 L 130.0 265.1 L 120.0 264.0 L 110.0 278.8 L 100.0 279.7 L 90.0 287.5 L 80.0 297.8 L 70.0 298.2 L 60.0 296.9 L 50.0 302.7 L 40.0 313.6 L 30.0 317.0 L 20.0 325.6 L 10.0 329.9 L 0.0 333.0 Z" fill="#FFFFFF" opacity="0.95" filter="url(#tear-shadow)" />
-          <!-- Red paper sheet body -->
-          <path d="M 0 0 L 1440 0 L 1440 323.3 L 1440.0 323.3 L 1430.0 313.5 L 1420.0 309.1 L 1410.0 305.1 L 1400.0 301.4 L 1390.0 294.2 L 1380.0 286.8 L 1370.0 288.8 L 1360.0 279.2 L 1350.0 274.1 L 1340.0 269.8 L 1330.0 269.4 L 1320.0 256.8 L 1310.0 255.3 L 1300.0 250.5 L 1290.0 245.4 L 1280.0 239.6 L 1270.0 238.6 L 1260.0 235.3 L 1250.0 223.0 L 1240.0 224.7 L 1230.0 218.4 L 1220.0 215.8 L 1210.0 206.1 L 1200.0 208.7 L 1190.0 199.4 L 1180.0 194.3 L 1170.0 192.1 L 1160.0 193.4 L 1150.0 183.5 L 1140.0 179.0 L 1130.0 183.5 L 1120.0 169.9 L 1110.0 169.6 L 1100.0 166.5 L 1090.0 166.2 L 1080.0 154.6 L 1070.0 156.7 L 1060.0 154.1 L 1050.0 148.8 L 1040.0 142.8 L 1030.0 142.2 L 1020.0 138.4 L 1010.0 130.4 L 1000.0 135.0 L 990.0 128.6 L 980.0 126.5 L 970.0 119.2 L 960.0 123.4 L 950.0 116.2 L 940.0 113.8 L 930.0 111.3 L 920.0 112.0 L 910.0 101.5 L 900.0 102.3 L 890.0 104.8 L 880.0 96.4 L 870.0 96.8 L 860.0 93.6 L 850.0 95.6 L 840.0 86.2 L 830.0 90.2 L 820.0 87.0 L 810.0 82.8 L 800.0 80.3 L 790.0 83.9 L 780.0 79.1 L 770.0 75.0 L 760.0 81.1 L 750.0 75.5 L 740.0 74.5 L 730.0 72.4 L 720.0 81.5 L 710.0 70.6 L 700.0 75.6 L 690.0 78.6 L 680.0 78.8 L 670.0 76.3 L 660.0 79.6 L 650.0 85.4 L 640.0 80.4 L 630.0 84.0 L 620.0 87.6 L 610.0 90.8 L 600.0 84.6 L 590.0 96.4 L 580.0 93.0 L 570.0 92.8 L 560.0 99.2 L 550.0 104.5 L 540.0 102.4 L 530.0 101.9 L 520.0 113.3 L 510.0 108.4 L 500.0 114.6 L 490.0 116.3 L 480.0 125.5 L 470.0 117.1 L 460.0 125.7 L 450.0 131.0 L 440.0 130.8 L 430.0 133.4 L 420.0 140.8 L 410.0 142.8 L 400.0 141.0 L 390.0 150.4 L 380.0 153.8 L 370.0 155.6 L 360.0 154.9 L 350.0 167.7 L 340.0 164.0 L 330.0 167.6 L 320.0 174.7 L 310.0 180.5 L 300.0 179.4 L 290.0 182.9 L 280.0 193.9 L 270.0 189.0 L 260.0 195.2 L 250.0 203.6 L 240.0 210.6 L 230.0 204.9 L 220.0 218.0 L 210.0 218.6 L 200.0 220.8 L 190.0 224.0 L 180.0 234.8 L 170.0 236.3 L 160.0 235.2 L 150.0 249.1 L 140.0 250.9 L 130.0 255.3 L 120.0 255.9 L 110.0 268.3 L 100.0 265.9 L 90.0 271.3 L 80.0 281.5 L 70.0 287.2 L 60.0 287.5 L 50.0 293.4 L 40.0 303.6 L 30.0 302.2 L 20.0 309.1 L 10.0 315.3 L 0.0 321.1 Z" fill="#FF5436" />
-        </svg>
-      </div>
     </div>
 
-    <!-- Underlying Exposed Stage with Giant Self-Drawing Cursive Wordmark -->
+    <!-- Torn Paper Edge Transition (Breadth to Breadth, White background below tear) -->
+    <div class="tpf-tear-transition" aria-hidden="true">
+      <!-- 3D Glossy Pushpin Anchored at the Exact Apex of the Tear Arch -->
+      <div class="pushpin-anchor">
+        <svg viewBox="0 0 100 200" class="tpf-pin-svg">
+          <defs>
+            <linearGradient id="tpf-pin-side" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0%" stop-color="#801F10" />
+              <stop offset="24%" stop-color="#D9381E" />
+              <stop offset="40%" stop-color="#FF9380" />
+              <stop offset="58%" stop-color="#FF5436" />
+              <stop offset="100%" stop-color="#4A0D05" />
+            </linearGradient>
+            <radialGradient id="tpf-pin-cap" cx="0.38" cy="0.3" r="0.8">
+              <stop offset="0%" stop-color="#FF9380" />
+              <stop offset="55%" stop-color="#FF5436" />
+              <stop offset="100%" stop-color="#801F10" />
+            </radialGradient>
+            <linearGradient id="tpf-pin-needle" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0%" stop-color="#5b616b" />
+              <stop offset="40%" stop-color="#f4f5f7" />
+              <stop offset="70%" stop-color="#a3a9b2" />
+              <stop offset="100%" stop-color="#4a4f57" />
+            </linearGradient>
+            <filter id="tpf-pin-blur" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="1.4" />
+            </filter>
+          </defs>
+          <!-- Needle -->
+          <path d="M48.3 112h3.4l-.7 76-1 4-1-4z" fill="url(#tpf-pin-needle)" />
+          <!-- Pinhole shadow on white paper -->
+          <ellipse cx="50" cy="191.5" rx="3.5" ry="1.2" fill="#000000" opacity="0.45" />
+          <!-- Lower Collar -->
+          <path d="M28 103v6.5a22 7 0 0 0 44 0V103z" fill="url(#tpf-pin-side)" />
+          <ellipse cx="50" cy="103" rx="22" ry="7" fill="url(#tpf-pin-cap)" />
+          <!-- Stem body -->
+          <path d="M41.5 38c1.6 16 4.6 26 3 36-1.8 10-13 19-14.6 29h40.2c-1.6-10-12.8-19-14.6-29-1.6-10 1.4-20 3-36z" fill="url(#tpf-pin-side)" />
+          <!-- Head -->
+          <path d="M16 22v14a34 13 0 0 0 68 0V22z" fill="url(#tpf-pin-side)" />
+          <ellipse cx="50" cy="22" rx="34" ry="13" fill="url(#tpf-pin-cap)" />
+          <ellipse cx="50" cy="22" rx="33" ry="12.3" fill="none" stroke="#fff" stroke-opacity="0.3" stroke-width="0.8" />
+          <ellipse cx="37" cy="17.5" rx="12" ry="4" fill="#fff" opacity="0.75" filter="url(#tpf-pin-blur)" />
+          <!-- Specular Highlight Arc -->
+          <path d="M22 38c4 4.5 9.5 6.4 15 7" stroke="#fff" stroke-opacity="0.45" stroke-width="2" fill="none" stroke-linecap="round" filter="url(#tpf-pin-blur)" />
+          <path d="M45 50c.8 8 1.6 14 .8 22" stroke="#fff" stroke-opacity="0.5" stroke-width="1.6" fill="none" stroke-linecap="round" />
+        </svg>
+      </div>
+
+      <!-- Arched Tear SVG: Red on top, white fibrous ripped border with soft shadow falling onto pure white below -->
+      <svg viewBox="0 0 1440 180" preserveAspectRatio="none" class="tpf-tear-svg">
+        <defs>
+          <filter id="tear-shadow" x="-5%" y="-10%" width="110%" height="160%">
+            <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#000000" flood-opacity="0.25" />
+          </filter>
+        </defs>
+        <!-- White fibrous deckle rim with drop shadow onto the white surface -->
+        <path d="M 0 0 L 1440 0 L 1440 145.9 L 1440.0 145.9 L 1432.0 145.5 L 1424.0 147.8 L 1416.0 141.1 L 1408.0 132.8 L 1400.0 128.9 L 1392.0 137.2 L 1384.0 134.6 L 1376.0 134.7 L 1368.0 129.1 L 1360.0 135.5 L 1352.0 124.9 L 1344.0 119.6 L 1336.0 120.1 L 1328.0 127.0 L 1320.0 120.5 L 1312.0 120.4 L 1304.0 115.5 L 1296.0 118.1 L 1288.0 107.3 L 1280.0 110.6 L 1272.0 108.8 L 1264.0 120.8 L 1256.0 106.8 L 1248.0 108.2 L 1240.0 101.2 L 1232.0 105.1 L 1224.0 92.0 L 1216.0 95.3 L 1208.0 96.7 L 1200.0 108.4 L 1192.0 94.3 L 1184.0 94.3 L 1176.0 92.4 L 1168.0 93.5 L 1160.0 83.7 L 1152.0 87.0 L 1144.0 88.5 L 1136.0 91.3 L 1128.0 79.1 L 1120.0 80.3 L 1112.0 80.0 L 1104.0 82.5 L 1096.0 75.5 L 1088.0 79.4 L 1080.0 80.8 L 1072.0 81.0 L 1064.0 66.3 L 1056.0 66.8 L 1048.0 68.0 L 1040.0 73.5 L 1032.0 66.1 L 1024.0 68.9 L 1016.0 73.2 L 1008.0 70.3 L 1000.0 57.0 L 992.0 58.4 L 984.0 59.9 L 976.0 62.8 L 968.0 56.7 L 960.0 62.1 L 952.0 63.0 L 944.0 58.1 L 936.0 48.9 L 928.0 51.4 L 920.0 57.5 L 912.0 54.2 L 904.0 51.5 L 896.0 52.4 L 888.0 52.9 L 880.0 44.2 L 872.0 38.8 L 864.0 43.4 L 856.0 52.7 L 848.0 47.1 L 840.0 46.5 L 832.0 46.2 L 824.0 44.8 L 816.0 37.1 L 808.0 33.7 L 800.0 38.8 L 792.0 44.1 L 784.0 39.5 L 776.0 40.5 L 768.0 38.9 L 760.0 40.9 L 752.0 32.0 L 744.0 33.9 L 736.0 37.6 L 728.0 44.5 L 720.0 36.0 L 712.0 33.4 L 704.0 32.3 L 696.0 37.6 L 688.0 31.6 L 680.0 38.2 L 672.0 42.9 L 664.0 49.5 L 656.0 39.3 L 648.0 38.4 L 640.0 35.4 L 632.0 40.8 L 624.0 36.5 L 616.0 41.6 L 608.0 47.4 L 600.0 51.1 L 592.0 40.1 L 584.0 44.2 L 576.0 45.9 L 568.0 50.5 L 560.0 42.6 L 552.0 53.1 L 544.0 53.3 L 536.0 54.9 L 528.0 45.6 L 520.0 50.8 L 512.0 52.5 L 504.0 57.7 L 496.0 55.4 L 488.0 64.8 L 480.0 62.0 L 472.0 63.2 L 464.0 50.3 L 456.0 58.3 L 448.0 62.2 L 440.0 64.3 L 432.0 63.3 L 424.0 71.8 L 416.0 74.4 L 408.0 68.9 L 400.0 63.1 L 392.0 69.9 L 384.0 75.7 L 376.0 74.5 L 368.0 70.9 L 360.0 77.0 L 352.0 77.1 L 344.0 74.0 L 336.0 73.1 L 328.0 82.6 L 320.0 87.6 L 312.0 87.1 L 304.0 86.6 L 296.0 87.5 L 288.0 87.9 L 280.0 85.2 L 272.0 86.8 L 264.0 95.2 L 256.0 100.1 L 248.0 96.3 L 240.0 95.8 L 232.0 99.9 L 224.0 99.8 L 216.0 94.3 L 208.0 100.2 L 200.0 109.2 L 192.0 112.0 L 184.0 103.0 L 176.0 107.9 L 168.0 111.3 L 160.0 114.8 L 152.0 110.0 L 144.0 117.3 L 136.0 123.5 L 128.0 124.6 L 120.0 114.9 L 112.0 120.7 L 104.0 120.0 L 96.0 124.7 L 88.0 120.9 L 80.0 133.7 L 72.0 135.9 L 64.0 137.9 L 56.0 126.8 L 48.0 132.6 L 40.0 134.3 L 32.0 140.2 L 24.0 134.8 L 16.0 147.0 L 8.0 146.3 L 0.0 146.1 Z" fill="#FFFFFF" filter="url(#tear-shadow)" />
+        <!-- Red paper sheet body -->
+        <path d="M 0 0 L 1440 0 L 1440 132.5 L 1440.0 132.5 L 1432.0 131.9 L 1424.0 135.2 L 1416.0 130.6 L 1408.0 124.0 L 1400.0 120.7 L 1392.0 127.1 L 1384.0 122.6 L 1376.0 119.2 L 1368.0 116.3 L 1360.0 125.5 L 1352.0 117.6 L 1344.0 112.1 L 1336.0 111.7 L 1328.0 114.6 L 1320.0 106.8 L 1312.0 105.7 L 1304.0 104.2 L 1296.0 109.5 L 1288.0 99.7 L 1280.0 102.2 L 1272.0 98.1 L 1264.0 106.4 L 1256.0 93.1 L 1248.0 95.1 L 1240.0 91.2 L 1232.0 97.3 L 1224.0 85.0 L 1216.0 86.4 L 1208.0 85.3 L 1200.0 93.3 L 1192.0 81.2 L 1184.0 83.3 L 1176.0 82.8 L 1168.0 85.1 L 1160.0 74.9 L 1152.0 76.7 L 1144.0 75.5 L 1136.0 77.9 L 1128.0 67.2 L 1120.0 70.6 L 1112.0 72.5 L 1104.0 74.4 L 1096.0 64.6 L 1088.0 65.4 L 1080.0 65.3 L 1072.0 68.0 L 1064.0 55.6 L 1056.0 59.0 L 1048.0 59.6 L 1040.0 63.6 L 1032.0 53.5 L 1024.0 55.7 L 1016.0 59.0 L 1008.0 58.4 L 1000.0 48.6 L 992.0 51.8 L 984.0 51.8 L 976.0 50.9 L 968.0 43.6 L 960.0 46.8 L 952.0 50.1 L 944.0 48.5 L 936.0 40.2 L 928.0 42.5 L 920.0 47.8 L 912.0 41.2 L 904.0 37.8 L 896.0 39.0 L 888.0 41.5 L 880.0 36.1 L 872.0 31.4 L 864.0 34.3 L 856.0 40.1 L 848.0 34.0 L 840.0 33.1 L 832.0 34.2 L 824.0 35.8 L 816.0 28.5 L 808.0 25.6 L 800.0 27.7 L 792.0 31.1 L 784.0 23.9 L 776.0 26.4 L 768.0 28.5 L 760.0 33.0 L 752.0 24.0 L 744.0 23.8 L 736.0 26.2 L 728.0 30.3 L 720.0 21.2 L 712.0 21.2 L 704.0 23.2 L 696.0 30.3 L 688.0 23.0 L 680.0 27.7 L 672.0 28.7 L 664.0 34.4 L 656.0 25.7 L 648.0 28.2 L 640.0 27.9 L 632.0 32.9 L 624.0 25.7 L 616.0 29.5 L 608.0 33.9 L 600.0 37.6 L 592.0 29.6 L 584.0 36.1 L 576.0 37.5 L 568.0 41.5 L 560.0 31.7 L 552.0 38.2 L 544.0 40.0 L 536.0 43.0 L 528.0 35.1 L 520.0 42.3 L 512.0 44.1 L 504.0 48.2 L 496.0 41.4 L 488.0 50.3 L 480.0 49.5 L 472.0 52.0 L 464.0 41.9 L 456.0 50.7 L 448.0 53.7 L 440.0 52.9 L 432.0 49.3 L 424.0 57.3 L 416.0 61.8 L 408.0 59.7 L 400.0 56.0 L 392.0 61.5 L 384.0 63.5 L 376.0 60.3 L 368.0 56.4 L 360.0 64.3 L 352.0 67.4 L 344.0 67.1 L 336.0 65.4 L 328.0 72.9 L 320.0 75.5 L 312.0 73.6 L 304.0 73.1 L 296.0 77.1 L 288.0 80.1 L 280.0 76.7 L 272.0 77.5 L 264.0 82.9 L 256.0 86.6 L 248.0 83.1 L 240.0 84.4 L 232.0 90.9 L 224.0 92.3 L 216.0 86.4 L 208.0 90.3 L 200.0 94.9 L 192.0 98.2 L 184.0 90.8 L 176.0 97.0 L 168.0 102.4 L 160.0 106.9 L 152.0 100.4 L 144.0 105.2 L 136.0 108.5 L 128.0 110.3 L 120.0 102.6 L 112.0 111.2 L 104.0 113.0 L 96.0 115.3 L 88.0 109.0 L 80.0 120.8 L 72.0 121.6 L 64.0 126.1 L 56.0 117.8 L 48.0 125.9 L 40.0 126.8 L 32.0 130.8 L 24.0 122.2 L 16.0 133.5 L 8.0 133.5 L 0.0 136.0 Z" fill="#FF5436" />
+      </svg>
+    </div>
+
+    <!-- Underlying White Stage with Giant Self-Drawing Cursive Wordmark in Signature Red -->
     <div class="tpf-wordmark-stage">
       <button type="button" class="tpf-wm-btn" id="btn-replay-wordmark" aria-label="Replay Tally wordmark signature animation">
         <!-- Exact Cursive Geometry from StickerSlapFooter Glyph Engine for 'tally' -->
@@ -3209,7 +2947,7 @@
         </svg>
       </button>
 
-      <!-- Legal / Meta Bottom Bar -->
+      <!-- Legal / Meta Bottom Bar on White Background -->
       <div class="tpf-legal-bar mono">
         <div>© 2026 Tally · Built for the financially feral.</div>
         <div>Zero cloud servers · Zero tracking cookies · 100% on-device.</div>
