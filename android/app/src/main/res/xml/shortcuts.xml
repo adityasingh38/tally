@@ -5,7 +5,7 @@
   <shortcut
     android:shortcutId="log_spend"
     android:enabled="true"
-    android:icon="@drawable/ic_launcher"
+    android:icon="@mipmap/ic_launcher"
     android:shortcutShortLabel="@string/shortcut_log_spend_short"
     android:shortcutLongLabel="@string/shortcut_log_spend_long"
     android:shortcutDisabledMessage="@string/shortcut_disabled">
@@ -21,7 +21,7 @@
   <shortcut
     android:shortcutId="open_insights"
     android:enabled="true"
-    android:icon="@drawable/ic_launcher"
+    android:icon="@mipmap/ic_launcher"
     android:shortcutShortLabel="@string/shortcut_insights_short"
     android:shortcutLongLabel="@string/shortcut_insights_long"
     android:shortcutDisabledMessage="@string/shortcut_disabled">
