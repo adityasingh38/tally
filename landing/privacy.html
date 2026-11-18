@@ -6,6 +6,7 @@
   <title>Privacy Policy · tally</title>
   <meta name="description" content="Tally privacy policy. How we collect, handle, and protect your data with bank-grade isolation." />
   
+  <link rel="icon" type="image/svg+xml" href="./assets/tally-mascot-logo.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
@@ -60,6 +61,13 @@
     .nav-bar { max-width: 780px; margin: 0 auto; background: var(--frost); backdrop-filter: blur(24px) saturate(1.6); -webkit-backdrop-filter: blur(24px) saturate(1.6); border: 1px solid var(--frost-border); border-radius: var(--r-pill); padding: 8px 18px; display: flex; align-items: center; justify-content: space-between; }
     .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); }
     .nav-brand-text { font-family: var(--font-display); font-size: 24px; font-weight: 800; letter-spacing: -0.04em; }
+    .nav-brand .mascot { position: relative; display: block; width: 38px; aspect-ratio: 1; flex-shrink: 0; pointer-events: none; }
+    .mascot img { display: block; width: 100%; height: 100%; }
+    .mascot-pupil { position: absolute; top: 58%; width: 16.5%; height: 23.5%; border-radius: 50%; background: #130F0D; transform: translate(-50%, -50%); transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1); }
+    .mascot-pupil::before { content: ""; position: absolute; top: -2%; left: -7%; width: 45%; aspect-ratio: 1; border-radius: 50%; background: #FFF9F0; }
+    .mascot-pupil.left { left: 32%; }
+    .mascot-pupil.right { left: 67%; }
+    @media (prefers-reduced-motion: reduce) { .mascot-pupil { transition: none; } }
     .back-btn { font-family: var(--font-mono); font-size: 11px; color: var(--red); text-decoration: none; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; }
     .back-btn:hover { text-decoration: underline; }
 
@@ -92,13 +100,10 @@
   <div class="nav-wrap">
     <nav class="nav-bar">
       <a href="./index.html" class="nav-brand">
-        <svg style="width:24px; height:26px;" viewBox="0 0 100 116" fill="none">
-          <rect x="14" y="22" width="11" height="72" rx="4" fill="var(--logo-bar)" />
-          <rect x="36" y="22" width="11" height="72" rx="4" fill="var(--logo-bar)" />
-          <rect x="58" y="22" width="11" height="72" rx="4" fill="var(--logo-bar)" />
-          <rect x="80" y="22" width="11" height="72" rx="4" fill="var(--logo-bar)" />
-          <rect x="47" y="9" width="11" height="98" rx="4" transform="rotate(56 52.5 58)" fill="var(--red)" />
-        </svg>
+        <span class="mascot" aria-hidden="true">
+          <img src="./assets/tally-mascot-base.svg?v=2" alt="" />
+          <span class="mascot-pupil left"></span><span class="mascot-pupil right"></span>
+        </span>
         <span class="nav-brand-text">tally</span>
       </a>
       <a href="./index.html" class="back-btn">← Back to App</a>
@@ -204,5 +209,6 @@
     const savedTheme = localStorage.getItem('tally-theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
   </script>
+  <script src="./mascot-eyes.js"></script>
 </body>
 </html>

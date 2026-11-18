@@ -1,9 +1,9 @@
 // src/tally/screens/Paywall.js — modal sheet (Tally Pro)
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Pressable, Modal, Alert, ActivityIndicator, Linking } from 'react-native';
+import { View, Text, ScrollView, Pressable, Modal, Alert, Linking } from 'react-native';
 import { useTally } from '../TallyContext';
 import { FONTS } from '../theme';
-import { MonoLabel, Btn, Tag, Brand } from '../ui';
+import { MonoLabel, Btn, Tag, Brand, PlasmaVeilLoader } from '../ui';
 import { FREEMIUM } from '../../constants';
 
 const PERKS = [
@@ -127,7 +127,7 @@ export default function Paywall({ visible, onClose }) {
 
             <View style={{ marginTop: 18 }}>
               <Btn T={T} accent={accent} accentInk={accentInk} onPress={handlePurchase} disabled={busy || rcLoading}>
-                {busy ? <ActivityIndicator color={accentInk} size="small" /> : 'start · first 7 days free'}
+                {busy ? <PlasmaVeilLoader color={accentInk} size="small" accessibilityLabel="Processing purchase" /> : 'start · first 7 days free'}
               </Btn>
             </View>
 

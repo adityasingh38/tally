@@ -1,6 +1,6 @@
 // src/tally/screens/OnboardingScreen.js
 import React, { useState } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, PermissionsAndroid, Alert, Linking, TextInput } from 'react-native';
+import { View, Text, ScrollView, PermissionsAndroid, Alert, Linking, TextInput } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { useAuth } from '../../hooks/useAuth';
@@ -8,7 +8,7 @@ import { syncHistoricalSMS } from '../../services/smsSync';
 import { notifAccessAvailable, isNotifAccessEnabled, openNotifAccessSettings } from '../../services/notificationAccess';
 import { scheduleWeeklyDigest, scheduleMonthEndSummary, sendWeeklyDigestWithRealData } from '../../services/weeklyDigest';
 import { FONTS } from '../theme';
-import { MonoLabel, Btn, Brand } from '../ui';
+import { MonoLabel, Btn, Brand, PlasmaVeilLoader } from '../ui';
 
 const FEATURES = [
   ['AUTO', 'reads supported bank and UPI alerts to log transactions for you.'],
@@ -139,7 +139,7 @@ export default function OnboardingScreen({ onDone }) {
       <View style={{ gap: 10, marginTop: 22 }}>
         {syncing ? (
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, paddingVertical: 16 }}>
-            <ActivityIndicator color={accent} />
+            <PlasmaVeilLoader color={accent} accessibilityLabel="Importing transactions" />
             <MonoLabel T={T} color={T.dim} size={11}>
               {progress ? `importing ${progress.inserted || 0} spends…` : 'reading SMS history…'}
             </MonoLabel>

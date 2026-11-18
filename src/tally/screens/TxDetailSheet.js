@@ -1,10 +1,10 @@
 // src/tally/screens/TxDetailSheet.js — transaction detail with delete + recategorize.
 import React, { useState } from 'react';
-import { View, Text, Modal, Pressable, Alert, ActivityIndicator, ScrollView, TextInput } from 'react-native';
+import { View, Text, Modal, Pressable, Alert, ScrollView, TextInput } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useTally } from '../TallyContext';
 import { FONTS, fmtINR } from '../theme';
-import { MonoLabel, Rule, Leader } from '../ui';
+import { MonoLabel, Rule, Leader, PlasmaVeilLoader } from '../ui';
 import { catMeta, REACTIONS, CAT_META } from '../data';
 
 const RECATEGORIZE_IDS = ['food', 'transport', 'shopping', 'entertainment', 'health', 'rent', 'utilities', 'investment', 'transfer', 'other'];
@@ -115,7 +115,7 @@ export default function TxDetailSheet({ visible, tx, onClose }) {
                   borderBottomWidth: 2, borderBottomColor: accent, paddingBottom: 2 }} />
               <Pressable onPress={saveEdit} disabled={saving}
                 style={{ backgroundColor: accent, borderRadius: 6, paddingHorizontal: 14, paddingVertical: 8 }}>
-                {saving ? <ActivityIndicator color={accentInk} size="small" />
+                {saving ? <PlasmaVeilLoader color={accentInk} size="small" accessibilityLabel="Saving transaction" />
                   : <Text style={{ fontFamily: FONTS.monoBold, fontSize: 12, color: accentInk }}>SAVE</Text>}
               </Pressable>
             </View>
@@ -134,7 +134,7 @@ export default function TxDetailSheet({ visible, tx, onClose }) {
                   borderBottomWidth: 2, borderBottomColor: accent, paddingBottom: 2 }} />
               <Pressable onPress={saveEdit} disabled={saving}
                 style={{ backgroundColor: accent, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 7 }}>
-                {saving ? <ActivityIndicator color={accentInk} size="small" />
+                {saving ? <PlasmaVeilLoader color={accentInk} size="small" accessibilityLabel="Saving transaction" />
                   : <Text style={{ fontFamily: FONTS.monoBold, fontSize: 11, color: accentInk }}>OK</Text>}
               </Pressable>
             </View>
@@ -151,7 +151,7 @@ export default function TxDetailSheet({ visible, tx, onClose }) {
                   borderBottomWidth: 2, borderBottomColor: accent, paddingBottom: 2 }} />
               <Pressable onPress={saveEdit} disabled={saving}
                 style={{ backgroundColor: accent, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 7 }}>
-                {saving ? <ActivityIndicator color={accentInk} size="small" />
+                {saving ? <PlasmaVeilLoader color={accentInk} size="small" accessibilityLabel="Saving transaction" />
                   : <Text style={{ fontFamily: FONTS.monoBold, fontSize: 11, color: accentInk }}>OK</Text>}
               </Pressable>
             </View>
@@ -181,7 +181,7 @@ export default function TxDetailSheet({ visible, tx, onClose }) {
                 <Leader T={T} label="category" value={saving ? '…' : m.label} />
               </View>
               {saving
-                ? <ActivityIndicator size="small" color={accent} style={{ marginLeft: 8 }} />
+                ? <PlasmaVeilLoader size="small" color={accent} style={{ marginLeft: 8 }} accessibilityLabel="Preparing receipt" />
                 : <MonoLabel T={T} color={accent} size={9} style={{ marginLeft: 8 }}>
                     {editingCat ? 'done' : 'fix →'}
                   </MonoLabel>}

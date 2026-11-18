@@ -12,6 +12,7 @@ import notifee from '@notifee/react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { TallyProvider, useTally } from './TallyContext';
 import TallyTabBar from './TallyTabBar';
+import PlasmaVeilLoader from './PlasmaVeilLoader';
 import { flushPendingTransactions } from '../services/offlineQueue';
 import { retryPendingCategories } from '../services/categoryRetry';
 
@@ -153,7 +154,7 @@ function Inner() {
   // Your real auth gate (kept intact). If you don't have AuthScreen wired yet,
   // you can temporarily replace this with `const user = true, hasOnboarded = true;`
   const { user, loading, hasOnboarded, completeOnboarding } = useAuth();
-  const { refreshTxs } = useTally();
+  const { refreshTxs, accent } = useTally();
 
   React.useEffect(() => {
     const sub = Linking.addEventListener('url', ({ url }) => handleDeepLink(url));
@@ -175,7 +176,10 @@ function Inner() {
     return () => { unsubscribe(); clearInterval(timer); };
   }, [user?.id, refreshTxs]);
 
-  if (loading) return <View style={{ flex: 1, backgroundColor: '#0E0F0C' }} />;
+  if (loading) return <View style={{ flex: 1, backgroundColor: '#0E0F0C',
+    alignItems: 'center', justifyContent: 'center' }}>
+    <PlasmaVeilLoader size="large" color={accent} accessibilityLabel="Opening Tally" />
+  </View>;
 
   return (
     <NavigationContainer ref={navigationRef} onReady={() => {

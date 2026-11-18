@@ -1,13 +1,13 @@
 // src/tally/screens/BudgetScreen.js  → your "Budget" tab ("delusions")
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable, TextInput, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Pressable, TextInput, Alert } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
 import { useAuth } from '../../hooks/useAuth';
 import { getBudgets, upsertBudget, deleteBudget } from '../../services/supabase';
 import { FONTS, fmtINR } from '../theme';
-import { MonoLabel, ScreenHeader, Tag } from '../ui';
+import { MonoLabel, ScreenHeader, Tag, PlasmaVeilLoader } from '../ui';
 import { groupByCat, CAT_META } from '../data';
 import { createPurchasePlan } from '../../services/aiAdvice';
 
@@ -145,7 +145,7 @@ export default function BudgetScreen() {
         <Pressable onPress={makePlan} disabled={planning}
           style={{ marginTop: 14, padding: 12, borderRadius: 8, backgroundColor: accent,
             alignItems: 'center', opacity: planning ? 0.6 : 1 }}>
-          {planning ? <ActivityIndicator color={accentInk} size="small" />
+          {planning ? <PlasmaVeilLoader color={accentInk} size="small" accessibilityLabel="Creating purchase plan" />
             : <Text style={{ color: accentInk, fontFamily: FONTS.monoBold, fontSize: 12 }}>
                 {isPremium ? 'MAKE MY PLAN' : 'UNLOCK PLAN WITH PRO ↗'}
               </Text>}
@@ -265,7 +265,7 @@ export default function BudgetScreen() {
                   />
                   <Pressable onPress={() => save(id)} disabled={saving}
                     style={{ backgroundColor: accent, borderRadius: 4, paddingHorizontal: 18, paddingVertical: 12 }}>
-                    {saving ? <ActivityIndicator color={accentInk} size="small" />
+                    {saving ? <PlasmaVeilLoader color={accentInk} size="small" accessibilityLabel="Saving budget" />
                       : <Text style={{ color: accentInk, fontFamily: FONTS.monoBold, fontSize: 13, letterSpacing: 1 }}>SAVE</Text>}
                   </Pressable>
                 </View>

@@ -8,7 +8,7 @@ import Svg, { Path } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { useTally } from '../TallyContext';
 import { FONTS } from '../theme';
-import { Btn, MonoLabel } from '../ui';
+import { Btn, MonoLabel, PlasmaVeilLoader } from '../ui';
 import TallyMark from '../TallyMark';
 import { supabase } from '../../services/supabase';
 
@@ -220,7 +220,8 @@ export default function AuthScreen() {
             />
 
             <Btn T={T} accent={accent} accentInk={accentInk} onPress={handleSubmit} disabled={loading} style={{ marginTop: 4 }}>
-              {loading ? '…' : isSignUp ? 'create account' : 'sign in'}
+              {loading ? <PlasmaVeilLoader color={accentInk} accessibilityLabel={isSignUp ? 'Creating account' : 'Signing in'} />
+                : isSignUp ? 'create account' : 'sign in'}
             </Btn>
 
             <Pressable

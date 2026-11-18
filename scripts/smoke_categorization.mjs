@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 
 if (!process.argv.includes('--live')) {
-  console.error('Pass --live to create a disposable test user and call Anthropic.');
+  console.error('Pass --live to create a disposable test user and call the deployed AI function.');
   process.exit(2);
 }
 
@@ -38,17 +38,34 @@ try {
   token = signup.body.access_token;
   if (!token) throw new Error(`Signup returned ${signup.status} without a session; cleanup required for ${email}`);
 
+  const cases = [
+    { merchant: 'Kaveri Kitchen', sms: 'Rs.420 paid for dinner at Kaveri Kitchen', expected: 'food' },
+    { merchant: 'Greenline Cab', sms: 'Rs.280 paid for a cab ride', expected: 'transport' },
+    { merchant: 'Stationery Corner', sms: 'Rs.350 paid for notebooks and pens', expected: 'shopping' },
+    { merchant: 'Silver Screen', sms: 'Rs.600 paid for movie tickets', expected: 'entertainment' },
+    { merchant: 'Medico Pharmacy', sms: 'Rs.220 paid for medicine', expected: 'health' },
+    { merchant: 'City Power', sms: 'Rs.1200 paid for electricity bill', expected: 'utilities' },
+    { merchant: 'Maple Residency', sms: 'Rs.18000 paid for monthly apartment rent', expected: 'rent' },
+    { merchant: 'Riya Sharma', sms: 'Rs.800 transferred via UPI to a friend', expected: 'transfer' },
+    { merchant: 'Index Fund House', sms: 'Rs.2000 paid for mutual fund SIP investment', expected: 'investment' },
+  ];
   const result = await request('/functions/v1/anthropic-proxy', {
     kind: 'categorization',
-    transactions: [{ merchant: 'Mystery Shop', sms: 'Rs.200 debited at Mystery Shop' }],
+    transactions: cases.map(({ merchant, sms }) => ({ merchant, sms })),
   }, token);
   if (result.status !== 200) throw new Error(`Categorisation returned HTTP ${result.status}: ${JSON.stringify(result.body)}`);
   const categories = JSON.parse(result.body.text);
   const allowed = new Set(['food', 'transport', 'shopping', 'entertainment', 'health', 'utilities', 'rent', 'transfer', 'investment', 'other']);
-  if (!Array.isArray(categories) || categories[0]?.index !== 0 || !allowed.has(categories[0]?.category)) {
+  if (!Array.isArray(categories) || categories.length !== cases.length ||
+      categories.some((row, index) => row?.index !== index ||
+        !allowed.has(row.category) || !Number.isFinite(row.confidence))) {
     throw new Error(`Unexpected category response: ${JSON.stringify(categories)}`);
   }
-  console.log(`Live categorisation succeeded: ${categories[0].category}`);
+  const mismatches = categories.flatMap((row, index) =>
+    row.category === cases[index].expected ? [] :
+      [`${index + 1}: expected ${cases[index].expected}, received ${row.category}`]);
+  console.log(`Live categorisation: ${cases.length - mismatches.length}/${cases.length} expected categories`);
+  if (mismatches.length) throw new Error(`Category mismatches: ${mismatches.join('; ')}`);
 } finally {
   if (token) {
     const deleted = await request('/functions/v1/delete-account', {}, token);

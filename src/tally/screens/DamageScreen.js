@@ -1,12 +1,12 @@
 // src/tally/screens/DamageScreen.js  → "Insights" tab
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, ScrollView, Modal, Pressable, RefreshControl, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, Modal, Pressable, RefreshControl, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import { useTally } from '../TallyContext';
 import { FONTS, fmtINR } from '../theme';
-import { MonoLabel, Rule, Leader, ReceiptShell, Btn, Tag, Brand, MonthPicker, TxRow } from '../ui';
+import { MonoLabel, Rule, Leader, ReceiptShell, Btn, Tag, Brand, MonthPicker, TxRow, PlasmaVeilLoader } from '../ui';
 import { totalSpent, groupByCat, copeZone, fmtMonthLabel } from '../data';
 import { getAIVerdict, askAI } from '../../services/aiAdvice';
 import { getBudgets } from '../../services/supabase';
@@ -280,7 +280,7 @@ export default function DamageScreen() {
                   style={{ backgroundColor: accent, borderRadius: 6, paddingHorizontal: 14,
                     justifyContent: 'center', opacity: askLoading || !askQuestion.trim() ? 0.5 : 1 }}>
                   {askLoading
-                    ? <ActivityIndicator color={accentInk} size="small" />
+                    ? <PlasmaVeilLoader color={accentInk} size="small" accessibilityLabel="Generating answer" />
                     : <Text style={{ fontFamily: FONTS.monoBold, fontSize: 12, color: accentInk }}>ASK</Text>}
                 </Pressable>
               </View>

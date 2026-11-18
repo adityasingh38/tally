@@ -1,6 +1,6 @@
 // src/tally/screens/SettingsScreen.js  → your "Settings" tab
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable, Alert, PermissionsAndroid, ActivityIndicator, TextInput, Linking, AppState } from 'react-native';
+import { View, Text, ScrollView, Pressable, Alert, PermissionsAndroid, TextInput, Linking, AppState } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTally } from '../TallyContext';
@@ -12,7 +12,7 @@ import { getAllTransactions, deleteAccount } from '../../services/supabase';
 import { exportToCSV } from '../../services/export';
 import { requestNotificationPermission } from '../../services/budgetAlerts';
 import { FONTS, fmtINR } from '../theme';
-import { MonoLabel, Rule, ScreenHeader, Brand } from '../ui';
+import { MonoLabel, Rule, ScreenHeader, Brand, PlasmaVeilLoader } from '../ui';
 import AccountsSheet from './AccountsSheet';
 
 function Toggle({ T, accent, on, onChange }) {
@@ -267,7 +267,7 @@ export default function SettingsScreen() {
       <Rule T={T} />
       <Row T={T} label={syncing ? 'Syncing…' : 'Sync SMS history'} sub="re-scan bank texts for missed spends"
         onPress={syncing ? undefined : handleSync}
-        control={syncing ? <ActivityIndicator color={accent} /> : <MonoLabel T={T} color={accent} size={11}>sync →</MonoLabel>} />
+        control={syncing ? <PlasmaVeilLoader color={accent} accessibilityLabel="Syncing transactions" /> : <MonoLabel T={T} color={accent} size={11}>sync →</MonoLabel>} />
       {notifAccessAvailable() && (
         <>
           <Rule T={T} />
@@ -281,7 +281,7 @@ export default function SettingsScreen() {
       <Rule T={T} />
       <Row T={T} label={exporting ? 'Exporting…' : 'Export the damage'} sub="csv of every transaction"
         onPress={exporting ? undefined : handleExport}
-        control={exporting ? <ActivityIndicator color={accent} /> : <MonoLabel T={T} color={T.dim} size={11}>↗</MonoLabel>} />
+        control={exporting ? <PlasmaVeilLoader color={accent} accessibilityLabel="Exporting transactions" /> : <MonoLabel T={T} color={T.dim} size={11}>↗</MonoLabel>} />
 
       {/* account */}
       <MonoLabel T={T} color={T.faint} style={{ marginTop: 28, marginBottom: 4 }}>account</MonoLabel>
@@ -292,7 +292,7 @@ export default function SettingsScreen() {
           <Rule T={T} />
           <Row T={T} label={restoring ? 'Restoring…' : 'Restore purchase'} sub="already subscribed? get your Pro back"
             onPress={restoring ? undefined : handleRestore}
-            control={restoring ? <ActivityIndicator color={accent} /> : <MonoLabel T={T} color={accent} size={11}>restore →</MonoLabel>} />
+            control={restoring ? <PlasmaVeilLoader color={accent} accessibilityLabel="Restoring purchases" /> : <MonoLabel T={T} color={accent} size={11}>restore →</MonoLabel>} />
         </>
       )}
       <Rule T={T} />

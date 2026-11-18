@@ -4,6 +4,7 @@ import React from 'react';
 import { View, Text, Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import TallyMark from './TallyMark';
+export { default as PlasmaVeilLoader } from './PlasmaVeilLoader';
 import { FONTS, fmtINR } from './theme';
 import { catMeta } from './data';
 
@@ -46,8 +47,10 @@ export function Btn({ T, accent, accentInk, children, onPress, variant = 'solid'
     <Pressable onPress={onPress ? (e) => { tap(); onPress(e); } : undefined} disabled={disabled}
       style={({ pressed }) => [{ width: '100%', borderRadius: 4, paddingVertical: 16, alignItems: 'center',
         opacity: disabled ? 0.45 : pressed ? 0.82 : 1 }, v, style]}>
-      <Text style={{ fontFamily: FONTS.monoBold, fontSize: 13, letterSpacing: 1.2,
-        textTransform: 'uppercase', color: txtColor }}>{children}</Text>
+      {React.isValidElement(children) ? children : (
+        <Text style={{ fontFamily: FONTS.monoBold, fontSize: 13, letterSpacing: 1.2,
+          textTransform: 'uppercase', color: txtColor }}>{children}</Text>
+      )}
     </Pressable>
   );
 }

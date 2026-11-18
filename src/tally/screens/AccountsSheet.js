@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useAuth } from '../../hooks/useAuth';
 import { useTally } from '../TallyContext';
 import { BANKS, canAddAccount } from '../../services/accounts';
 import { deleteAccountProfile, getAccountProfiles, insertAccountProfile } from '../../services/supabase';
 import { FONTS } from '../theme';
-import { Btn, MonoLabel } from '../ui';
+import { Btn, MonoLabel, PlasmaVeilLoader } from '../ui';
 
 export default function AccountsSheet({ visible, onClose }) {
   const { user } = useAuth();
@@ -76,7 +76,7 @@ export default function AccountsSheet({ visible, onClose }) {
             </Text>
 
             <MonoLabel T={T} color={T.dim} size={10} style={{ marginTop: 24, marginBottom: 8 }}>saved labels</MonoLabel>
-            {loading ? <ActivityIndicator color={accent} /> : accounts.length === 0
+            {loading ? <PlasmaVeilLoader color={accent} /> : accounts.length === 0
               ? <Text style={{ color: T.faint, fontFamily: FONTS.sans, fontSize: 13 }}>no accounts labeled yet.</Text>
               : accounts.map(account => (
                 <View key={account.id} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
